@@ -26,16 +26,6 @@ public class GettingStartedApplication {
         return "index";
     }
     
-//    @GetMapping("/edit-booking/{id}")
-//    public String edit() {
-//        return "edit-booking";
-//    }
-    
-    @GetMapping("/list-appointments")
-    public String edit() {
-        return "list-appointments";
-    }
-
     @GetMapping("/database")
     String database(Map<String, Object> model) {
         try (Connection connection = dataSource.getConnection()) {

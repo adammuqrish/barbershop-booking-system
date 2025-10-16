@@ -31,7 +31,7 @@
           <td class="px-4 py-2" th:text="${appt.appointmentTime}"></td>
           <td class="px-4 py-2" th:text="${appt.serviceStatus}"></td>
           <td class="px-4 py-2 text-center">
-            <a th:href="@{'/edit-bookings/' + ${appt.appointmentId}}" 
+            <a th:href="@{'/edit-booking/' + ${appt.appointmentId}}" 
                class="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600">Edit</a>
           </td>
         </tr>
