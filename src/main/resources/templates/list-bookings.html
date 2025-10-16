@@ -1,10 +1,43 @@
 <!DOCTYPE html>
-<html>
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
-<meta charset="UTF-8">
-<title>Insert title here</title>
+  <meta charset="UTF-8">
+  <title>Senarai Tempahan</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
+<body class="bg-gray-100 text-gray-900">
+
+  <div class="container mx-auto p-6">
+    <h1 class="text-3xl font-bold mb-6 text-center">💈 Sistem Tempahan Barbershop</h1>
+
+    <div class="text-right mb-4">
+      <a href="/add" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">+ Tambah Tempahan</a>
+    </div>
+
+    <div class="bg-white shadow-md rounded-lg overflow-hidden">
+      <table class="min-w-full border-collapse">
+        <thead class="bg-gray-200 text-left">
+          <tr>
+            <th class="py-3 px-4 border-b">Nama Pelanggan</th>
+            <th class="py-3 px-4 border-b">Perkhidmatan</th>
+            <th class="py-3 px-4 border-b">Masa Temu Janji</th>
+            <th class="py-3 px-4 border-b text-center">Tindakan</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr th:each="b : ${bookings}" class="hover:bg-gray-100">
+            <td class="py-3 px-4 border-b" th:text="${b.customerName}"></td>
+            <td class="py-3 px-4 border-b" th:text="${b.serviceType}"></td>
+            <td class="py-3 px-4 border-b" th:text="${b.appointmentTime}"></td>
+            <td class="py-3 px-4 border-b text-center space-x-2">
+              <a th:href="@{'/edit/' + ${b.id}}" class="bg-yellow-400 px-3 py-1 rounded text-white hover:bg-yellow-500">Edit</a>
+              <a th:href="@{'/delete/' + ${b.id}}" class="bg-red-500 px-3 py-1 rounded text-white hover:bg-red-600">Padam</a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
 
 </body>
 </html>
