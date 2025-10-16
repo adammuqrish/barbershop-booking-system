@@ -1,37 +1,12 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html>
 <head>
   <meta charset="UTF-8">
-  <title>Kemaskini Tempahan</title>
+  <title>Sistem Tempahan Barbershop</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100">
 
-  <div class="max-w-lg mx-auto mt-10 bg-white shadow-lg p-8 rounded-lg">
-    <h1 class="text-2xl font-bold mb-6 text-center">Kemaskini Tempahan</h1>
-
-    <form th:action="@{'/update/' + ${booking.id}}" th:object="${booking}" method="post" class="space-y-4">
-      <div>
-        <label class="block font-medium">Nama Pelanggan</label>
-        <input type="text" th:field="*{customerName}" class="w-full border rounded px-3 py-2 focus:outline-blue-500" />
-      </div>
-
-      <div>
-        <label class="block font-medium">Jenis Perkhidmatan</label>
-        <input type="text" th:field="*{serviceType}" class="w-full border rounded px-3 py-2 focus:outline-blue-500" />
-      </div>
-
-      <div>
-        <label class="block font-medium">Masa Temu Janji</label>
-        <input type="text" th:field="*{appointmentTime}" class="w-full border rounded px-3 py-2 focus:outline-blue-500" />
-      </div>
-
-      <div class="flex justify-between mt-6">
-        <a href="/" class="text-gray-600 hover:text-gray-800">← Kembali</a>
-        <button type="submit" class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600">Kemaskini</button>
-      </div>
-    </form>
-  </div>
+<body>
 
 </body>
 </html>

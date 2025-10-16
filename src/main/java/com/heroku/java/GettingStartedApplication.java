@@ -25,6 +25,16 @@ public class GettingStartedApplication {
     public String index() {
         return "index";
     }
+    
+//    @GetMapping("/edit-booking/{id}")
+//    public String edit() {
+//        return "edit-booking";
+//    }
+    
+    @GetMapping("/list-appointments")
+    public String edit() {
+        return "list-appointments";
+    }
 
     @GetMapping("/database")
     String database(Map<String, Object> model) {
