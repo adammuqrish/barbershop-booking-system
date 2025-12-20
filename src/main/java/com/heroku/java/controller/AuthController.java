@@ -58,8 +58,7 @@ public class AuthController {
                 Customer customer = customerOpt.get();
                 session.setAttribute("customer", customer);
                 session.setAttribute("custId", customer.getCustId());
-                model.addAttribute("justLoggedIn", true);
-                return "customer/register";
+                return "redirect:/index";
             } else {
                 model.addAttribute("error", "Invalid email or password");
                 return "customer/register";
