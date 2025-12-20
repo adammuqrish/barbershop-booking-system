@@ -1,0 +1,51 @@
+<div th:fragment="sidebar" id="sidebar" class="nk-sidebar nk-sidebar-fixed is-theme">
+    <div class="nk-sidebar-element nk-sidebar-head">
+        <div class="nk-sidebar-brand">
+            <a th:href="@{/adminIndex}" class="logo-link">
+                <div class="logo-wrap" style="width: 150px; height: 100px;">
+                    <img class="logo-img logo-light" th:src="@{/resources/uploads/hugiBarber1.png}"
+                        style="width: 150px; height: 100px;">
+                </div>
+            </a>
+        </div>
+    </div>
+    <div class="nk-sidebar-element nk-sidebar-body">
+        <div class="nk-sidebar-content">
+            <div class="nk-sidebar-menu">
+                <ul class="nk-menu">
+                    <li class="nk-menu-heading">
+                        <h6 class="overline-title">Hugi Barbershop</h6>
+                    </li>
+                    <li class="nk-menu-item"><a th:href="@{/listCustomer}" class="nk-menu-link">Customer</a></li>
+                    <li class="nk-menu-item"><a th:href="@{/listBarber}" class="nk-menu-link">Barber</a></li>
+                    <li class="nk-menu-item"><a th:href="@{/listAppointment}" class="nk-menu-link">Appointment</a></li>
+                    <li th:if="${session.staffRole == 'Admin'}" class="nk-menu-item"><a th:href="@{/listTransaction}"
+                            class="nk-menu-link">Transaction</a></li>
+                    <li class="nk-menu-item"><a th:href="@{/listFeedback}" class="nk-menu-link">Feedback</a></li>
+                    <li class="nk-menu-item"><a th:href="@{/logout}" class="nk-menu-link">Logout</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:fragment="header" class="nk-header nk-header-fixed">
+    <div class="container-fluid">
+        <div class="nk-header-wrap">
+            <div class="nk-header-brand d-xl-none">
+                <a th:href="@{/adminIndex}" class="logo-link">Hugi Barbershop</a>
+            </div>
+            <div class="nk-header-tools">
+                <ul class="nk-quick-nav">
+                    <li class="dropdown user-dropdown">
+                        <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown">
+                            <div class="user-toggle">
+                                <span th:text="${session.loggedInStaff.staffName}">Staff Name</span>
+                            </div>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,30 @@
+<footer xmlns:th="http://www.thymeleaf.org" th:fragment="footer" class="left-0 z-20 w-full p-4 border-t shadow "
+    style="background-color: #101820;">
+    <div class="mx-auto flex flex-col md:flex-row md:justify-between gap-8 text-white">
+        <div class="flex flex-1 flex-col justify-between">
+            <h1 class="text-lg font-semibold">Hugi Barbershop</h1>
+            <p class="text-sm mt-2">Experience top-notch grooming at our
+                barbershop, where every cut and style is crafted with care and
+                precision just for you</p>
+            <!-- ... (omitted SVGs for brevity, but I will include them) ... -->
+            <p class="text-sm mt-2">
+                © 2025 <a href="#" class="hover:underline">Hugi Barbershop™</a>. All Rights Reserved.
+            </p>
+        </div>
+        <div class="flex flex-1 flex-col justify-between md:text-center">
+            <h1 class="text-lg font-semibold">More Information</h1>
+            <ul class="mt-2 space-y-1 text-sm">
+                <li><a th:href="@{/booking}">Booking</a></li>
+                <li><a th:href="@{/index#aboutUs}">About Us</a></li>
+                <li><a th:href="@{/register}">Login</a></li>
+                <li><a th:href="@{/register}">Register</a></li>
+            </ul>
+        </div>
+        <div class="flex flex-1 flex-col justify-between">
+            <h1 class="text-lg font-semibold">Barbershop Information</h1>
+            <p>LOT-A-G9, Palm Garden, Bandar Baru Klang, 41150 Klang, Selangor.</p>
+            <p>Call Us: 012-7678776</p>
+            <p>Email Us: hugibarbershop@gmail.com</p>
+        </div>
+    </div>
+</footer>

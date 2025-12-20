@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <div th:replace="~{fragments/header :: head}"></div>
+</head>
+
+<body class="flex flex-col h-screen justify-between bg-yellow-100">
+    <main class="flex flex-col items-center mx-3 my-4 flex-grow justify-center">
+        <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-2xl">
+            <h1 class="text-2xl font-bold mb-4">Payment for Your Appointment</h1>
+
+            <div class="bg-gray-100 rounded-md p-6 mb-6">
+                <h2 class="text-lg font-semibold mb-2">Appointment Details:</h2>
+                <p class="text-sm mb-1"><span class="font-semibold">Book For:</span> <span
+                        th:text="${appointment.custBookFor}"></span></p>
+                <p class="text-sm mb-1"><span class="font-semibold">Date:</span> <span
+                        th:text="${appointment.appointmentDate}"></span></p>
+                <p class="text-sm mb-1"><span class="font-semibold">Time:</span> <span
+                        th:text="${appointment.appointmentTime}"></span></p>
+                <p class="text-sm"><span class="font-semibold">Amount:</span> RM <span
+                        th:text="${#numbers.formatDecimal(price, 1, 2)}"></span></p>
+            </div>
+
+            <form th:action="@{/processPayment}" method="post" id="paymentForm">
+                <div class="bg-gray-100 rounded-md p-6 mb-6">
+                    <h2 class="text-lg font-semibold mb-2">Payment Information:</h2>
+                    <div class="flex items-center mb-2">
+                        <input type="radio" id="cash" name="paymentMethod" value="cash" class="h-4 w-4"
+                            onchange="togglePaymentDetails()" />
+                        <label for="cash" class="ml-2 text-sm">Cash</label>
+                    </div>
+                    <div class="flex items-center mb-4">
+                        <input type="radio" id="online" name="paymentMethod" value="online" checked class="h-4 w-4"
+                            onchange="togglePaymentDetails()" />
+                        <label for="online" class="ml-2 text-sm">Online Banking</label>
+                    </div>
+
+                    <div id="online-details" class="mt-2 text-sm">
+                        <p>Secure online payment.</p>
+                    </div>
+                    <div id="cash-details" class="mt-2 text-sm hidden">
+                        <p>Pay in cash upon arrival.</p>
+                    </div>
+                </div>
+                <button type="submit" id="payButton"
+                    class="bg-blue-500 text-white px-4 py-2 rounded w-full hover:bg-blue-600">Pay Now</button>
+
+                <!-- Mock bank fields for Online Payment -->
+                <input type="hidden" name="bankName" id="hiddenBankName" value="Maybank" />
+                <input type="hidden" name="bankHolderName" id="hiddenBankHolder"
+                    th:value="${session.customer.custName}" />
+            </form>
+        </div>
+    </main>
+
+    <!-- Mock Bank Modal -->
+    <div id="bankModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center hidden z-50">
+        <div class="bg-white p-6 rounded-lg shadow-xl max-w-md w-full">
+            <h3 class="text-lg font-medium mb-4">Select Bank</h3>
+            <select id="bankSelect" class="w-full border p-2 rounded mb-4">
+                <option>Maybank</option>
+                <option>CIMB Bank</option>
+                <option>Public Bank</option>
+            </select>
+            <button id="confirmBank" class="w-full bg-green-600 text-white p-2 rounded">Confirm Payment</button>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        function togglePaymentDetails() {
+            const isCash = document.getElementById('cash').checked;
+            document.getElementById('cash-details').classList.toggle('hidden', !isCash);
+            document.getElementById('online-details').classList.toggle('hidden', isCash);
+            document.getElementById('payButton').innerText = isCash ? 'Confirm Cash Payment' : 'Pay Now';
+        }
+
+        document.getElementById('paymentForm').addEventListener('submit', function (e) {
+            if (document.getElementById('online').checked) {
+                e.preventDefault();
+                document.getElementById('bankModal').classList.remove('hidden');
+            }
+        });
+
+        document.getElementById('confirmBank').addEventListener('click', function () {
+            document.getElementById('hiddenBankName').value = document.getElementById('bankSelect').value;
+            document.getElementById('paymentForm').submit();
+        });
+    </script>
+</body>
+
+</html>

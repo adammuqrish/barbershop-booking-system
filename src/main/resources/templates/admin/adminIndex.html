@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Hugi Barbershop System - Admin Dashboard</title>
+    <link rel="stylesheet" th:href="@{/resources/assetsAdmin/css/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .nk-wrap {
+            padding-top: 60px;
+        }
+
+        .first-row {
+            margin-top: 30px;
+        }
+    </style>
+</head>
+
+<body class="nk-body" data-sidebar-collapse="lg" data-navbar-collapse="lg">
+    <div class="nk-app-root">
+        <div class="nk-main">
+            <div th:replace="~{fragments/adminFragments :: sidebar}"></div>
+            <div class="nk-wrap">
+                <div th:replace="~{fragments/adminFragments :: header}"></div>
+                <div class="nk-content">
+                    <div class="container-fluid">
+                        <div class="row g-gs first-row">
+                            <div class="col-xl-4">
+                                <div class="card h-100">
+                                    <div class="card-body text-center">
+                                        <h4 class="title mb-3">Total Sales</h4>
+                                        <div class="amount h2 fw-bold text-primary">RM <span
+                                                th:text="${#numbers.formatDecimal(totalSales, 1, 2)}"></span></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-xl-4">
+                                <div class="card h-100">
+                                    <div class="card-body text-center">
+                                        <h4 class="title mb-3">Total Customers</h4>
+                                        <div class="amount h2 fw-bold text-primary"><span
+                                                th:text="${customerCount}"></span> People</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-xl-4">
+                                <div class="card h-100">
+                                    <div class="card-body text-center">
+                                        <h4 class="title mb-3">Total Appointments</h4>
+                                        <div class="amount h2 fw-bold text-primary"><span
+                                                th:text="${totalAppointments}"></span> Appointments</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h4 class="title mb-3">List of Customers</h4>
+                                        <div class="table-responsive">
+                                            <table class="table table-striped">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Name</th>
+                                                        <th>Email</th>
+                                                        <th>Phone</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr th:each="cust : ${customerList}">
+                                                        <td th:text="${cust.custName}"></td>
+                                                        <td th:text="${cust.custEmail}"></td>
+                                                        <td th:text="${cust.custPhoneNumber}"></td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h4 class="title mb-3">Weekly Sales</h4>
+                                        <canvas id="salesChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script th:inline="javascript">
+        const salesByDay = /*[[${salesByDay}]]*/ {};
+        const dayLabels = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+        const salesData = [
+            salesByDay.SUNDAY || 0,
+            salesByDay.MONDAY || 0,
+            salesByDay.TUESDAY || 0,
+            salesByDay.WEDNESDAY || 0,
+            salesByDay.THURSDAY || 0,
+            salesByDay.FRIDAY || 0,
+            salesByDay.SATURDAY || 0
+        ];
+
+        new Chart(document.getElementById('salesChart').getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: dayLabels,
+                datasets: [{
+                    label: 'Sales (RM)',
+                    data: salesData,
+                    backgroundColor: 'rgba(54, 162, 235, 0.6)'
+                }]
+            }
+        });
+    </script>
+</body>
+
+</html>

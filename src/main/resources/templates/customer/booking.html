@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <div th:replace="~{fragments/header :: head}"></div>
+</head>
+
+<body class="flex flex-col h-screen justify-between bg-yellow-100">
+    <nav th:replace="~{fragments/nav :: nav}"></nav>
+    <main class="flex flex-col items-center mx-3 my-12 flex-grow">
+        <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-5xl mx-auto">
+            <h1 class="text-3xl font-bold mb-6">Book Appointment</h1>
+            <form th:action="@{/booking}" method="post">
+                <div class="mb-6">
+                    <label class="block mb-1 font-semibold" for="booking-for">Booking For:</label>
+                    <input id="booking-for" name="booking-for" type="text"
+                        class="w-full border rounded px-3 py-2 shadow" required />
+                </div>
+                <div class="mb-6">
+                    <label class="block font-semibold mb-2">Select Date:</label>
+                    <input id="date" name="date" type="date" class="w-full border rounded px-3 py-2 shadow"
+                        th:value="${selectedDate}" th:min="${selectedDate}" required />
+                </div>
+                <div class="mb-6">
+                    <label class="block mb-1 font-semibold">Booking Time:</label>
+                    <input id="selected-time" name="selected-time" type="text"
+                        class="w-full border rounded px-3 py-2 shadow mb-2 bg-gray-100" value="--:-- --" readonly />
+                    <div class="grid grid-cols-6 gap-2">
+                        <th:block th:each="slot : ${slots}">
+                            <label class="flex items-center space-x-1">
+                                <input type="radio" name="slot" th:value="${slot}" class="slot-radio"
+                                    th:disabled="${unavailableBarbersBySlot[slot] != null && unavailableBarbersBySlot[slot].size() == barbers.size()}"
+                                    required />
+                                <span th:text="${slot}"></span>
+                            </label>
+                        </th:block>
+                    </div>
+                </div>
+                <div class="mb-6">
+                    <label class="block mb-1 font-semibold" for="category">Customer Category:</label>
+                    <select id="category" name="category" class="w-full border rounded px-3 py-2 shadow">
+                        <option>Child</option>
+                        <option>Teen</option>
+                        <option>Adult</option>
+                        <option>Senior</option>
+                    </select>
+                </div>
+                <div class="mb-6">
+                    <label class="block mb-1 font-semibold" for="barber">Select Barber:</label>
+                    <select id="barber" name="barber" class="w-full border rounded px-3 py-2 shadow" required>
+                        <option value="" selected disabled>-- Select Barber --</option>
+                        <th:block th:each="barber : ${barbers}">
+                            <option th:value="${barber.staffId}" th:text="${barber.staffName}"
+                                th:style="${unavailableBarbersBySlot[slots[0]] != null && unavailableBarbersBySlot[slots[0]].contains(barber.staffId) ? 'display:none' : ''}">
+                            </option>
+                        </th:block>
+                    </select>
+                </div>
+                <div class="flex">
+                    <button type="submit"
+                        class="bg-blue-500 text-white px-5 py-2 rounded shadow hover:bg-blue-600 transition">Book
+                        Appointment</button>
+                </div>
+            </form>
+        </div>
+    </main>
+    <footer th:replace="~{fragments/footer :: footer}"></footer>
+
+    <script th:inline="javascript">
+        const barbersList = /*[[${barbers}]]*/[];
+        let unavailableBarbersBySlot = /*[[${unavailableBarbersBySlot}]]*/ {};
+
+        document.getElementById('date').addEventListener('change', function () {
+            const selectedDate = this.value;
+            fetch('/booking/unavailable?date=' + selectedDate)
+                .then(r => r.json())
+                .then(data => {
+                    unavailableBarbersBySlot = data.unavailableBarbersBySlot;
+                    const radios = document.querySelectorAll('.slot-radio');
+                    radios.forEach(radio => {
+                        radio.checked = false;
+                        const unavailableCount = (unavailableBarbersBySlot[radio.value] || []).length;
+                        radio.disabled = (unavailableCount >= data.totalBarbers);
+                    });
+                    document.getElementById('selected-time').value = '--:-- --';
+                    document.getElementById('barber').selectedIndex = 0;
+                });
+        });
+
+        document.querySelectorAll('.slot-radio').forEach(radio => {
+            radio.addEventListener('change', function () {
+                const slot = this.value;
+                document.getElementById('selected-time').value = slot;
+                const barberSelect = document.getElementById('barber');
+                const unavailableForSlot = unavailableBarbersBySlot[slot] || [];
+
+                Array.from(barberSelect.options).forEach(opt => {
+                    if (opt.value === "") return;
+                    const isUnavailable = unavailableForSlot.some(id => id.toString() === opt.value.toString());
+                    opt.style.display = isUnavailable ? "none" : "";
+                    opt.disabled = isUnavailable;
+                });
+                barberSelect.selectedIndex = 0;
+            });
+        });
+    </script>
+</body>
+
+</html>

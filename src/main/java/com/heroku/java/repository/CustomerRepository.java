@@ -1,0 +1,9 @@
+package com.heroku.java.repository;
+
+import com.heroku.java.model.Customer;
+import org.springframework.data.repository.CrudRepository;
+import java.util.Optional;
+
+public interface CustomerRepository extends CrudRepository<Customer, Long> {
+    Optional<Customer> findByCustEmail(String custEmail);
+}

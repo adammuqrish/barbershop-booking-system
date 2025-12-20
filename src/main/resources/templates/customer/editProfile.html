@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <div th:replace="~{fragments/header :: head}"></div>
+</head>
+
+<body class="flex flex-col h-screen justify-between bg-yellow-100">
+    <nav th:replace="~{fragments/nav :: nav}"></nav>
+    <main class="flex flex-col items-center mx-3 my-20 flex-grow">
+        <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-5xl mx-auto">
+            <h1 class="text-2xl font-bold mb-4">Profile Management</h1>
+            <form th:action="@{/update-profile}" method="post">
+                <div class="mb-4">
+                    <label class="block text-sm font-semibold mb-1" for="name">Name:</label>
+                    <input type="text" id="name" name="name" th:value="${customer.custName}"
+                        class="w-full p-2 border rounded" required />
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-semibold mb-1" for="phone">Phone Number:</label>
+                    <input type="text" id="phone" name="phone" th:value="${customer.custPhoneNumber}"
+                        class="w-full p-2 border rounded" required />
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-semibold mb-1" for="password">New Password (leave blank to keep
+                        current):</label>
+                    <input type="password" id="password" name="password" class="w-full p-2 border rounded" />
+                </div>
+                <div class="flex space-x-2">
+                    <button type="submit"
+                        class="bg-green-500 text-white rounded py-2 px-4 flex-1 hover:bg-green-600 transition">Save
+                        Changes</button>
+                    <a th:href="@{/profile}"
+                        class="bg-gray-300 text-black text-center px-4 py-2 rounded flex-1 hover:bg-gray-400">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </main>
+    <footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+
+</html>

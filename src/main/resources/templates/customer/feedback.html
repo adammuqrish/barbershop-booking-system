@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <div th:replace="~{fragments/header :: head}"></div>
+</head>
+
+<body class="flex flex-col h-screen justify-between bg-yellow-100">
+    <nav th:replace="~{fragments/nav :: nav}"></nav>
+    <main class="flex flex-col items-center mx-3 my-4 flex-grow">
+        <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-5xl mx-auto">
+            <h1 class="text-2xl font-semibold mb-4">Feedback</h1>
+            <form th:action="@{/feedback}" method="post">
+                <input type="hidden" name="appointmentId" th:value="${appointmentId}" />
+                <div class="mb-4">
+                    <label class="block text-lg font-semibold mb-2">Your Rating:</label>
+                    <div class="flex space-x-1" id="star-rating">
+                        <span th:each="i : ${#numbers.sequence(1, 5)}" th:attr="data-value=${i}"
+                            class="star text-gray-400 text-2xl cursor-pointer">&#9733;</span>
+                    </div>
+                    <input type="hidden" name="rating" id="rating-input" th:value="${existingFeedback?.rating ?: 0}"
+                        required />
+                </div>
+                <div class="mb-6">
+                    <label class="block text-sm font-medium mb-2">Your Feedback:</label>
+                    <textarea name="feedback" class="w-full h-32 p-3 border rounded shadow-sm resize-none"
+                        th:text="${existingFeedback?.comments}" required></textarea>
+                </div>
+                <div class="flex space-x-4">
+                    <button type="submit"
+                        class="bg-blue-500 text-white font-semibold py-2 px-6 rounded-full hover:bg-blue-600">
+                        Submit Feedback
+                    </button>
+                    <button type="button" th:if="${existingFeedback != null}"
+                        onclick="document.getElementById('deleteForm').submit()"
+                        class="bg-red-500 text-white font-semibold py-2 px-6 rounded-full hover:bg-red-600">
+                        Delete Feedback
+                    </button>
+                </div>
+            </form>
+            <form id="deleteForm" th:action="@{/delete-feedback}" method="post" style="display:none">
+                <input type="hidden" name="appointmentId" th:value="${appointmentId}" />
+            </form>
+        </div>
+    </main>
+    <footer th:replace="~{fragments/footer :: footer}"></footer>
+
+    <script th:inline="javascript">
+        const stars = document.querySelectorAll('.star');
+        const ratingInput = document.getElementById('rating-input');
+        let currentRating = parseInt(ratingInput.value) || 0;
+
+        function updateStars(val) {
+            stars.forEach((s, idx) => {
+                s.classList.toggle('text-yellow-400', idx < val);
+                s.classList.toggle('text-gray-400', idx >= val);
+            });
+        }
+
+        stars.forEach((s, idx) => {
+            s.addEventListener('click', () => {
+                currentRating = idx + 1;
+                ratingInput.value = currentRating;
+                updateStars(currentRating);
+            });
+            s.addEventListener('mouseover', () => updateStars(idx + 1));
+            s.addEventListener('mouseout', () => updateStars(currentRating));
+        });
+
+        updateStars(currentRating);
+    </script>
+</body>
+
+</html>

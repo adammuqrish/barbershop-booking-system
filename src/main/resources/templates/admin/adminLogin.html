@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Hugi Barbershop System - Staff Login</title>
+    <link rel="stylesheet" th:href="@{/resources/assetsAdmin/css/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+
+<body class="nk-body" style="background-color: #f4f7f6;">
+    <div class="nk-app-root">
+        <div class="nk-main">
+            <div class="nk-wrap align-items-center justify-content-center" style="min-height: 100vh; display: flex;">
+                <div class="container p-2 p-sm-4">
+                    <div class="wide-xs mx-auto">
+                        <div class="card card-gutter-lg rounded-4 shadow-sm">
+                            <div class="card-body">
+                                <div class="nk-block-head text-center">
+                                    <div class="nk-block-head-content">
+                                        <h3 class="nk-block-title mb-1">Staff Login</h3>
+                                        <p class="small text-muted">Please sign-in to your account.</p>
+                                    </div>
+                                </div>
+                                <form th:action="@{/staffAuth}" method="post">
+                                    <div class="row gy-3">
+                                        <div th:if="${loginError}" class="col-12">
+                                            <div class="alert alert-danger" th:text="${loginError}"></div>
+                                        </div>
+                                        <div class="col-12">
+                                            <div class="form-group">
+                                                <label class="form-label">Email</label>
+                                                <div class="form-control-wrap">
+                                                    <input type="email" class="form-control" name="email"
+                                                        placeholder="Enter your email" required>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-12">
+                                            <div class="form-group">
+                                                <label class="form-label">Password</label>
+                                                <div class="form-control-wrap">
+                                                    <input type="password" class="form-control" name="password"
+                                                        placeholder="Enter your password" required>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 mt-4">
+                                            <div class="d-grid">
+                                                <button type="submit" class="btn btn-primary">Login</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Hugi Barbershop System - Barbers</title>
+    <link rel="stylesheet" th:href="@{/resources/assetsAdmin/css/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+
+<body class="nk-body" data-sidebar-collapse="lg" data-navbar-collapse="lg">
+    <div class="nk-app-root">
+        <div class="nk-main">
+            <div th:replace="~{fragments/adminFragments :: sidebar}"></div>
+            <div class="nk-wrap">
+                <div th:replace="~{fragments/adminFragments :: header}"></div>
+                <div class="nk-content">
+                    <div class="container text-left">
+                        <div class="nk-block-head">
+                            <div class="nk-block-head-between flex-wrap gap-2">
+                                <div class="nk-block-head-content">
+                                    <h2 class="nk-block-title">Barber List</h2>
+                                </div>
+                                <div class="nk-block-head-content" th:if="${session.staffRole == 'Admin'}">
+                                    <button class="btn btn-primary" data-bs-toggle="modal"
+                                        data-bs-target="#addUserModal">Register New Staff</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="nk-block">
+                            <div class="card">
+                                <table class="table">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Phone Number</th>
+                                            <th>Role</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="barber : ${barberList}">
+                                            <td th:text="${barber.staffName}"></td>
+                                            <td th:text="${barber.staffPhoneNumber}"></td>
+                                            <td th:text="${barber.staffRole}"></td>
+                                            <td>
+                                                <a th:href="@{/ViewBarberDetails(staffId=${barber.staffId})}"
+                                                    class="btn btn-sm btn-icon btn-zoom me-n1">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Register Staff Modal -->
+    <div class="modal fade" id="addUserModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form th:action="@{/registerStaff}" method="post">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Register New Staff</h4>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label class="form-label">Email</label>
+                                <input type="email" name="email" class="form-control" required>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label">Password</label>
+                                <input type="password" name="password" class="form-control" required>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label">Confirm Password</label>
+                                <input type="password" name="confirmPassword" class="form-control" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Role</label>
+                                <select name="role" class="form-select" required>
+                                    <option value="Admin">Administrator</option>
+                                    <option value="Barber">Barber</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">Register</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
