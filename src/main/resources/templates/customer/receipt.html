@@ -1,9 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 
-<head>
-    <div th:replace="~{fragments/header :: head}"></div>
-</head>
+<head th:replace="~{fragments/header :: head}"></head>
 
 <body class="flex flex-col h-screen justify-between bg-yellow-100">
     <nav th:replace="~{fragments/nav :: nav}"></nav>
@@ -21,7 +19,7 @@
                 <p>Amount Paid: RM <span
                         th:text="${payment != null ? #numbers.formatDecimal(payment.amount, 1, 2) : '0.00'}"></span></p>
                 <p>Date of Payment: <span
-                        th:text="${payment != null ? #dates.format(payment.paymentDate, 'yyyy-MM-dd') : 'N/A'}"></span>
+                        th:text="${payment != null ? #temporals.format(payment.paymentDate, 'yyyy-MM-dd') : 'N/A'}"></span>
                 </p>
             </div>
 

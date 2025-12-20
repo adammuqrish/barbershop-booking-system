@@ -27,8 +27,30 @@ public class CustomerService {
         Optional<Customer> customerOpt = customerRepository.findByCustEmail(email);
         if (customerOpt.isPresent()) {
             Customer customer = customerOpt.get();
-            if (BCrypt.checkpw(password, customer.getCustPassword())) {
-                return Optional.of(customer);
+            String storedPassword = customer.getCustPassword();
+            
+            try {
+                // BCrypt hashes normally start with $2a$, $2y$, or $2b$
+                if (storedPassword != null && (storedPassword.startsWith("$2a$") || storedPassword.startsWith("$2y$") || storedPassword.startsWith("$2b$"))) {
+                    if (BCrypt.checkpw(password, storedPassword)) {
+                        return Optional.of(customer);
+                    }
+                } else {
+                    // Legacy check: for plain text passwords from old system
+                    if (password.equals(storedPassword)) {
+                        // Upgrade to BCrypt automatically
+                        customer.setCustPassword(BCrypt.hashpw(password, BCrypt.gensalt()));
+                        customerRepository.save(customer);
+                        return Optional.of(customer);
+                    }
+                }
+            } catch (Exception e) {
+                // If anything goes wrong with BCrypt (like invalid salt version), fallback to plain text check
+                if (password.equals(storedPassword)) {
+                    customer.setCustPassword(BCrypt.hashpw(password, BCrypt.gensalt()));
+                    customerRepository.save(customer);
+                    return Optional.of(customer);
+                }
             }
         }
         return Optional.empty();

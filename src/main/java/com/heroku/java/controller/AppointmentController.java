@@ -63,7 +63,7 @@ public class AppointmentController {
         if (appointmentOpt.isPresent()) {
             Appointment appointment = appointmentOpt.get();
             if (appointment.getCustId().equals(custId)) {
-                appointment.setServiceStatus("Cancelled");
+                appointment.setServiceStatus("cancelled");
                 appointmentRepository.save(appointment);
             }
         }

@@ -99,8 +99,8 @@ public class BookingController {
         appointment.setAppointmentTime(slot);
         appointment.setCustType(category);
         appointment.setBarberId(barber);
-        appointment.setServiceStatus("Pending");
-        appointment.setPaymentStatus("Pending");
+        appointment.setServiceStatus("pending");
+        appointment.setPaymentStatus("pending");
 
         Appointment saved = bookingService.createAppointment(appointment);
         

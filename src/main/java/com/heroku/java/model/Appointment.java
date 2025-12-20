@@ -36,7 +36,7 @@ public class Appointment {
     private String custType;
 
     @Column(name = "service_status")
-    private String serviceStatus = "Pending";
+    private String serviceStatus = "pending";
 
     @Column(name = "cust_book_for")
     private String custBookFor;

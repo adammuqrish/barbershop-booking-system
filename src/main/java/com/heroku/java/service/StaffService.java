@@ -22,8 +22,26 @@ public class StaffService {
         Optional<Staff> staffOpt = staffRepository.findByStaffEmail(email);
         if (staffOpt.isPresent()) {
             Staff staff = staffOpt.get();
-            if (BCrypt.checkpw(password, staff.getStaffPassword())) {
-                return Optional.of(staff);
+            String storedPassword = staff.getStaffPassword();
+            
+            try {
+                if (storedPassword != null && (storedPassword.startsWith("$2a$") || storedPassword.startsWith("$2y$") || storedPassword.startsWith("$2b$"))) {
+                    if (BCrypt.checkpw(password, storedPassword)) {
+                        return Optional.of(staff);
+                    }
+                } else {
+                    if (password.equals(storedPassword)) {
+                        staff.setStaffPassword(BCrypt.hashpw(password, BCrypt.gensalt()));
+                        staffRepository.save(staff);
+                        return Optional.of(staff);
+                    }
+                }
+            } catch (Exception e) {
+                if (password.equals(storedPassword)) {
+                    staff.setStaffPassword(BCrypt.hashpw(password, BCrypt.gensalt()));
+                    staffRepository.save(staff);
+                    return Optional.of(staff);
+                }
             }
         }
         return Optional.empty();

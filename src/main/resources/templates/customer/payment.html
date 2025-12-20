@@ -1,9 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 
-<head>
-    <div th:replace="~{fragments/header :: head}"></div>
-</head>
+<head th:replace="~{fragments/header :: head}"></head>
 
 <body class="flex flex-col h-screen justify-between bg-yellow-100">
     <main class="flex flex-col items-center mx-3 my-4 flex-grow justify-center">
@@ -49,7 +47,7 @@
                 <!-- Mock bank fields for Online Payment -->
                 <input type="hidden" name="bankName" id="hiddenBankName" value="Maybank" />
                 <input type="hidden" name="bankHolderName" id="hiddenBankHolder"
-                    th:value="${session.customer.custName}" />
+                    th:value="${session.customer != null ? session.customer.custName : ''}" />
             </form>
         </div>
     </main>

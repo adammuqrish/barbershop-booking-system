@@ -68,22 +68,22 @@ public class PaymentController {
             op.setAmount(price);
             op.setPaymentDate(LocalDate.now());
             op.setAppointmentId(appointmentId);
-            op.setPaymentMethod("Online");
+            op.setPaymentMethod("online-banking");
             op.setBankName(bankName);
             op.setBankHolderName(bankHolderName);
             payment = paymentRepository.save(op);
             
-            appointment.setPaymentStatus("Completed");
+            appointment.setPaymentStatus("completed");
         } else {
             CashPayment cp = new CashPayment();
             cp.setAmount(price);
             cp.setPaymentDate(LocalDate.now());
             cp.setAppointmentId(appointmentId);
-            cp.setPaymentMethod("Cash");
+            cp.setPaymentMethod("cash");
             cp.setCashReceive(0.0); // Will be updated by staff
             payment = paymentRepository.save(cp);
             
-            appointment.setPaymentStatus("Pending");
+            appointment.setPaymentStatus("pending");
         }
 
         appointmentRepository.save(appointment);

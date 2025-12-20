@@ -85,9 +85,15 @@ document.addEventListener("DOMContentLoaded", function() {
 document.addEventListener('DOMContentLoaded', function() {
 	const trigger = document.getElementById('appointment-desktop-trigger');
 	const menu = document.getElementById('appointment-dropdown-menu');
+	const loginMenu = document.getElementById('loginDropdown'); // Reference to login menu
+
 	if (trigger && menu) {
 		trigger.addEventListener('click', function(e) {
 			e.stopPropagation();
+			// Close login menu if open
+			if (loginMenu && !loginMenu.classList.contains('hidden')) {
+				loginMenu.classList.add('hidden');
+			}
 			menu.classList.toggle('hidden');
 		});
 		// Hide dropdown when clicking outside
@@ -103,15 +109,45 @@ document.addEventListener('DOMContentLoaded', function() {
 document.addEventListener('DOMContentLoaded', function() {
 	const mobileBtn = document.querySelector('.dropdown-toggle.md\\:hidden, .dropdown-toggle.md\\:block.md\\:hidden');
 	const dropdownMenu = document.getElementById('appointment-dropdown-menu');
+	const loginMenu = document.getElementById('loginDropdown'); // Reference to login menu
+
 	if (mobileBtn && dropdownMenu) {
 		mobileBtn.addEventListener('click', function(e) {
 			e.stopPropagation();
+			// Close login menu if open
+			if (loginMenu && !loginMenu.classList.contains('hidden')) {
+				loginMenu.classList.add('hidden');
+			}
 			dropdownMenu.classList.toggle('hidden');
 		});
 		// Hide dropdown when clicking outside (mobile)
 		document.addEventListener('click', function(e) {
 			if (!mobileBtn.contains(e.target) && !dropdownMenu.contains(e.target)) {
 				dropdownMenu.classList.add('hidden');
+			}
+		});
+	}
+});
+
+// Login Dropdown Toggle
+document.addEventListener('DOMContentLoaded', function() {
+	const loginBtn = document.getElementById('loginToggleBtn');
+	const loginMenu = document.getElementById('loginDropdown');
+	const apptMenu = document.getElementById('appointment-dropdown-menu'); // Reference to appointment menu
+
+	if (loginBtn && loginMenu) {
+		loginBtn.addEventListener('click', function(e) {
+			e.stopPropagation();
+			// Close appointment menu if open
+			if (apptMenu && !apptMenu.classList.contains('hidden')) {
+				apptMenu.classList.add('hidden');
+			}
+			loginMenu.classList.toggle('hidden');
+		});
+		// Hide dropdown when clicking outside
+		document.addEventListener('click', function(e) {
+			if (!loginBtn.contains(e.target) && !loginMenu.contains(e.target)) {
+				loginMenu.classList.add('hidden');
 			}
 		});
 	}

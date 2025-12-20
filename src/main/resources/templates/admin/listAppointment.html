@@ -38,17 +38,21 @@
                                             <td th:text="${a.appointmentDate + ' ' + a.appointmentTime}"></td>
                                             <td th:text="${a.custType}"></td>
                                             <td>
-                                                <span th:if="${a.paymentStatus == 'Completed'}"
+                                                <span
+                                                    th:if="${a.paymentStatus == 'completed' or a.paymentStatus == 'Completed'}"
                                                     class="badge bg-success">Completed</span>
-                                                <button th:if="${a.paymentStatus == 'Pending'}"
+                                                <button
+                                                    th:if="${a.paymentStatus == 'pending' or a.paymentStatus == 'Pending'}"
                                                     class="btn btn-warning btn-sm">Pending</button>
                                             </td>
                                             <td>
-                                                <span th:if="${a.serviceStatus == 'Done'}"
+                                                <span th:if="${a.serviceStatus == 'done' or a.serviceStatus == 'Done'}"
                                                     class="badge bg-success">Done</span>
-                                                <span th:if="${a.serviceStatus == 'Cancelled'}"
+                                                <span
+                                                    th:if="${a.serviceStatus == 'cancelled' or a.serviceStatus == 'Cancelled'}"
                                                     class="badge bg-danger">Cancelled</span>
-                                                <button th:if="${a.serviceStatus == 'Pending'}"
+                                                <button
+                                                    th:if="${a.serviceStatus == 'pending' or a.serviceStatus == 'Pending'}"
                                                     class="btn btn-warning btn-sm">Pending</button>
                                             </td>
                                             <td>
