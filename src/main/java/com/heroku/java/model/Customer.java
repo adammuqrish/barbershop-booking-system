@@ -1,11 +1,9 @@
 package com.heroku.java.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
 
 @Entity
 @Table(name = "customers")
-@Data
 public class Customer {
 
     @Id
@@ -30,4 +28,26 @@ public class Customer {
 
     @Column(name = "cust_loyalty_points")
     private Integer custLoyaltyPoints = 0;
+
+    // Getters and Setters
+    public Long getCustId() { return custId; }
+    public void setCustId(Long custId) { this.custId = custId; }
+
+    public String getCustName() { return custName; }
+    public void setCustName(String custName) { this.custName = custName; }
+
+    public String getCustEmail() { return custEmail; }
+    public void setCustEmail(String custEmail) { this.custEmail = custEmail; }
+
+    public String getCustPassword() { return custPassword; }
+    public void setCustPassword(String custPassword) { this.custPassword = custPassword; }
+
+    public String getCustPhoneNumber() { return custPhoneNumber; }
+    public void setCustPhoneNumber(String custPhoneNumber) { this.custPhoneNumber = custPhoneNumber; }
+
+    public String getCustPicture() { return custPicture; }
+    public void setCustPicture(String custPicture) { this.custPicture = custPicture; }
+
+    public Integer getCustLoyaltyPoints() { return custLoyaltyPoints; }
+    public void setCustLoyaltyPoints(Integer custLoyaltyPoints) { this.custLoyaltyPoints = custLoyaltyPoints; }
 }

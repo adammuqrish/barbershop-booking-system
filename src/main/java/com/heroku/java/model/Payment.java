@@ -1,13 +1,11 @@
 package com.heroku.java.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
 import java.time.LocalDate;
 
 @Entity
 @Table(name = "payments")
 @Inheritance(strategy = InheritanceType.JOINED)
-@Data
 public class Payment {
 
     @Id
@@ -19,8 +17,27 @@ public class Payment {
     private LocalDate paymentDate = LocalDate.now();
 
     @Column(name = "payment_amount")
-    private Double paymentAmount;
+    private Double amount;
+
+    @Column(name = "payment_method")
+    private String paymentMethod;
 
     @Column(name = "appointment_id")
     private Long appointmentId;
+
+    // Getters and Setters
+    public Long getPaymentId() { return paymentId; }
+    public void setPaymentId(Long paymentId) { this.paymentId = paymentId; }
+
+    public LocalDate getPaymentDate() { return paymentDate; }
+    public void setPaymentDate(LocalDate paymentDate) { this.paymentDate = paymentDate; }
+
+    public Double getAmount() { return amount; }
+    public void setAmount(Double amount) { this.amount = amount; }
+
+    public String getPaymentMethod() { return paymentMethod; }
+    public void setPaymentMethod(String paymentMethod) { this.paymentMethod = paymentMethod; }
+
+    public Long getAppointmentId() { return appointmentId; }
+    public void setAppointmentId(Long appointmentId) { this.appointmentId = appointmentId; }
 }

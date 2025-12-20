@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.Optional;
 
 @Controller
@@ -66,7 +66,7 @@ public class PaymentController {
         if ("online".equals(paymentMethod)) {
             OnlinePayment op = new OnlinePayment();
             op.setAmount(price);
-            op.setPaymentDate(new Date());
+            op.setPaymentDate(LocalDate.now());
             op.setAppointmentId(appointmentId);
             op.setPaymentMethod("Online");
             op.setBankName(bankName);
@@ -77,7 +77,7 @@ public class PaymentController {
         } else {
             CashPayment cp = new CashPayment();
             cp.setAmount(price);
-            cp.setPaymentDate(new Date());
+            cp.setPaymentDate(LocalDate.now());
             cp.setAppointmentId(appointmentId);
             cp.setPaymentMethod("Cash");
             cp.setCashReceive(0.0); // Will be updated by staff
