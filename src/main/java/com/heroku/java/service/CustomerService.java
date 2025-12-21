@@ -28,10 +28,11 @@ public class CustomerService {
         if (customerOpt.isPresent()) {
             Customer customer = customerOpt.get();
             String storedPassword = customer.getCustPassword();
-            
+
             try {
                 // BCrypt hashes normally start with $2a$, $2y$, or $2b$
-                if (storedPassword != null && (storedPassword.startsWith("$2a$") || storedPassword.startsWith("$2y$") || storedPassword.startsWith("$2b$"))) {
+                if (storedPassword != null && (storedPassword.startsWith("$2a$") || storedPassword.startsWith("$2y$")
+                        || storedPassword.startsWith("$2b$"))) {
                     if (BCrypt.checkpw(password, storedPassword)) {
                         return Optional.of(customer);
                     }
@@ -45,7 +46,8 @@ public class CustomerService {
                     }
                 }
             } catch (Exception e) {
-                // If anything goes wrong with BCrypt (like invalid salt version), fallback to plain text check
+                // If anything goes wrong with BCrypt (like invalid salt version), fallback to
+                // plain text check
                 if (password.equals(storedPassword)) {
                     customer.setCustPassword(BCrypt.hashpw(password, BCrypt.gensalt()));
                     customerRepository.save(customer);
@@ -63,7 +65,8 @@ public class CustomerService {
     public void updateLoyaltyPoints(Long custId, int points) {
         customerRepository.findById(custId).ifPresent(customer -> {
             int newPoints = customer.getCustLoyaltyPoints() + points;
-            if (newPoints > 10) newPoints = 0;
+            if (newPoints > 10)
+                newPoints = 0;
             customer.setCustLoyaltyPoints(newPoints);
             customerRepository.save(customer);
         });

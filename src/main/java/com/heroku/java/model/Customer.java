@@ -2,9 +2,12 @@ package com.heroku.java.model;
 
 import jakarta.persistence.*;
 
+import java.io.Serializable;
+
 @Entity
 @Table(name = "customers")
-public class Customer {
+public class Customer implements Serializable {
+    private static final long serialVersionUID = 1L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,24 +33,59 @@ public class Customer {
     private Integer custLoyaltyPoints = 0;
 
     // Getters and Setters
-    public Long getCustId() { return custId; }
-    public void setCustId(Long custId) { this.custId = custId; }
+    public Long getCustId() {
+        return custId;
+    }
 
-    public String getCustName() { return custName; }
-    public void setCustName(String custName) { this.custName = custName; }
+    public void setCustId(Long custId) {
+        this.custId = custId;
+    }
 
-    public String getCustEmail() { return custEmail; }
-    public void setCustEmail(String custEmail) { this.custEmail = custEmail; }
+    public String getCustName() {
+        return custName;
+    }
 
-    public String getCustPassword() { return custPassword; }
-    public void setCustPassword(String custPassword) { this.custPassword = custPassword; }
+    public void setCustName(String custName) {
+        this.custName = custName;
+    }
 
-    public String getCustPhoneNumber() { return custPhoneNumber; }
-    public void setCustPhoneNumber(String custPhoneNumber) { this.custPhoneNumber = custPhoneNumber; }
+    public String getCustEmail() {
+        return custEmail;
+    }
 
-    public String getCustPicture() { return custPicture; }
-    public void setCustPicture(String custPicture) { this.custPicture = custPicture; }
+    public void setCustEmail(String custEmail) {
+        this.custEmail = custEmail;
+    }
 
-    public Integer getCustLoyaltyPoints() { return custLoyaltyPoints; }
-    public void setCustLoyaltyPoints(Integer custLoyaltyPoints) { this.custLoyaltyPoints = custLoyaltyPoints; }
+    public String getCustPassword() {
+        return custPassword;
+    }
+
+    public void setCustPassword(String custPassword) {
+        this.custPassword = custPassword;
+    }
+
+    public String getCustPhoneNumber() {
+        return custPhoneNumber;
+    }
+
+    public void setCustPhoneNumber(String custPhoneNumber) {
+        this.custPhoneNumber = custPhoneNumber;
+    }
+
+    public String getCustPicture() {
+        return custPicture;
+    }
+
+    public void setCustPicture(String custPicture) {
+        this.custPicture = custPicture;
+    }
+
+    public Integer getCustLoyaltyPoints() {
+        return custLoyaltyPoints;
+    }
+
+    public void setCustLoyaltyPoints(Integer custLoyaltyPoints) {
+        this.custLoyaltyPoints = custLoyaltyPoints;
+    }
 }

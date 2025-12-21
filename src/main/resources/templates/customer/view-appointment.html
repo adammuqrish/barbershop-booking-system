@@ -10,17 +10,24 @@
             <h1 class="text-2xl font-bold mb-6">Your Current Appointments:</h1>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <th:block th:each="appt : ${appointments}">
+                    <!-- Appointment Card -->
                     <div class="bg-white p-6 rounded-lg shadow-md border flex flex-col justify-between">
                         <div>
                             <p><strong>Book For:</strong> <span th:text="${appt.custBookFor}"></span></p>
                             <p><strong>Date:</strong> <span th:text="${appt.appointmentDate}"></span></p>
                             <p><strong>Time:</strong> <span th:text="${appt.appointmentTime}"></span></p>
                             <p><strong>Barber:</strong> <span th:text="${appt.appointmentBarber}"></span></p>
-                            <p><strong>Status:</strong> <span th:text="${appt.paymentStatus}"></span></p>
+                            <p><strong>Payment:</strong> <span th:text="${appt.paymentStatus}"></span></p>
+                            <p><strong>Status:</strong> <span th:text="${appt.serviceStatus}"></span></p>
                         </div>
                         <div class="flex gap-2 mt-4 justify-end">
                             <a th:href="@{/receipt(appointmentId=${appt.appointmentId}, source='view-appointment')}"
                                 class="bg-blue-200 text-blue-800 px-3 py-1 rounded text-sm">View Receipt</a>
+                            <a th:if="${#strings.toLowerCase(appt.serviceStatus) == 'pending'}"
+                                th:href="@{/edit-appointment(appointmentId=${appt.appointmentId})}"
+                                class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 text-sm">
+                                Edit
+                            </a>
                             <button class="bg-red-500 text-white px-3 py-1 rounded text-sm"
                                 th:onclick="'showCancelModal(' + ${appt.appointmentId} + ')'">Cancel</button>
                             <form th:id="'cancelForm-' + ${appt.appointmentId}" th:action="@{/cancel-appointment}"
@@ -30,11 +37,31 @@
                         </div>
                     </div>
                 </th:block>
-                <p th:if="${#lists.isEmpty(appointments)}">No appointments found.</p>
+                <!-- Pagination -->
+                <div class="col-span-1 md:col-span-2 flex justify-end mt-6" th:if="${totalPages > 1}">
+                    <nav class="inline-flex rounded-md shadow-sm">
+                        <a th:href="@{/view-appointment(page=${currentPage - 1})}"
+                            th:classappend="${currentPage == 0} ? 'pointer-events-none opacity-50'"
+                            class="px-4 py-2 border border-gray-300 rounded-l-md bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
+                            Previous
+                        </a>
+                        <span
+                            class="px-4 py-2 border-t border-b border-gray-300 bg-white text-sm font-medium text-gray-700">
+                            Page <span th:text="${currentPage + 1}"></span> of <span th:text="${totalPages}"></span>
+                        </span>
+                        <a th:href="@{/view-appointment(page=${currentPage + 1})}"
+                            th:classappend="${currentPage + 1 >= totalPages} ? 'pointer-events-none opacity-50'"
+                            class="px-4 py-2 border border-gray-300 rounded-r-md bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
+                            Next
+                        </a>
+                    </nav>
+                </div>
+                <p th:if="${#lists.isEmpty(appointments.content)}">No appointments found.</p>
             </div>
         </div>
     </main>
 
+    <!-- Cancel Modal -->
     <div id="cancelModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50 hidden">
         <div class="bg-white rounded-lg shadow-lg p-6 w-80">
             <h2 class="text-lg font-semibold mb-4">Cancel Appointment</h2>
@@ -47,6 +74,7 @@
     </div>
 
     <footer th:replace="~{fragments/footer :: footer}"></footer>
+    <!-- Cancel Modal Script -->
     <script>
         let cancelId = null;
         function showCancelModal(id) {

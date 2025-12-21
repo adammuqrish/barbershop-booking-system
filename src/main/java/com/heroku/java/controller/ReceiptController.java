@@ -26,9 +26,9 @@ public class ReceiptController {
 
     @Autowired
     public ReceiptController(AppointmentRepository appointmentRepository,
-                             CustomerRepository customerRepository,
-                             PaymentRepository paymentRepository,
-                             StaffRepository staffRepository) {
+            CustomerRepository customerRepository,
+            PaymentRepository paymentRepository,
+            StaffRepository staffRepository) {
         this.appointmentRepository = appointmentRepository;
         this.customerRepository = customerRepository;
         this.paymentRepository = paymentRepository;
@@ -36,12 +36,16 @@ public class ReceiptController {
     }
 
     @GetMapping("/receipt")
-    public String receiptPage(@RequestParam Long appointmentId, Model model) {
+    public String receiptPage(@RequestParam Long appointmentId,
+            @RequestParam(defaultValue = "view-appointment") String source,
+            Model model) {
         Optional<Appointment> appointmentOpt = appointmentRepository.findById(appointmentId);
-        if (appointmentOpt.isEmpty()) return "redirect:/index";
+        if (appointmentOpt.isEmpty())
+            return "redirect:/index";
 
         Appointment appointment = appointmentOpt.get();
         model.addAttribute("appointment", appointment);
+        model.addAttribute("source", source);
 
         customerRepository.findById(appointment.getCustId()).ifPresent(c -> model.addAttribute("customer", c));
         staffRepository.findById(appointment.getBarberId()).ifPresent(s -> model.addAttribute("barber", s));

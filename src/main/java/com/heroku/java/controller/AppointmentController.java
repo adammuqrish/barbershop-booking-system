@@ -5,12 +5,18 @@ import com.heroku.java.repository.AppointmentRepository;
 import com.heroku.java.repository.StaffRepository;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.heroku.java.service.BookingService;
+import java.util.Map;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,25 +25,41 @@ public class AppointmentController {
 
     private final AppointmentRepository appointmentRepository;
     private final StaffRepository staffRepository;
+    private final BookingService bookingService;
 
     @Autowired
-    public AppointmentController(AppointmentRepository appointmentRepository, StaffRepository staffRepository) {
+    public AppointmentController(AppointmentRepository appointmentRepository, StaffRepository staffRepository,
+            BookingService bookingService) {
         this.appointmentRepository = appointmentRepository;
         this.staffRepository = staffRepository;
+        this.bookingService = bookingService;
     }
 
     @GetMapping("/view-appointment")
-    public String viewAppointments(HttpSession session, Model model) {
+    public String viewAppointments(@RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "6") int size,
+            HttpSession session, Model model) {
         Long custId = (Long) session.getAttribute("custId");
-        if (custId == null) return "redirect:/register";
+        if (custId == null)
+            return "redirect:/register";
 
-        List<Appointment> appointments = appointmentRepository.findByCustId(custId);
-        model.addAttribute("appointments", appointments);
-        
-        // Populate barber name for each appointment (could be optimized with Join in repo)
-        for (Appointment appt : appointments) {
-             staffRepository.findById(appt.getBarberId()).ifPresent(s -> appt.setAppointmentBarber(s.getStaffName()));
+        // Get paginated appointments for the customer
+        List<String> currentStatuses = java.util.Arrays.asList("pending");
+
+        // Pageable for pagination
+        Pageable pageable = PageRequest.of(page, size, Sort.by("appointmentId").descending());
+        Page<Appointment> appointmentPage = appointmentRepository.findByCustIdAndServiceStatusIn(custId,
+                currentStatuses, pageable);
+
+        // Populate barber name for each appointment
+        for (Appointment appt : appointmentPage.getContent()) {
+            staffRepository.findById(appt.getBarberId()).ifPresent(s -> appt.setAppointmentBarber(s.getStaffName()));
         }
+
+        model.addAttribute("appointments", appointmentPage);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", appointmentPage.getTotalPages());
+        model.addAttribute("totalItems", appointmentPage.getTotalElements());
 
         return "customer/view-appointment";
     }
@@ -45,10 +67,17 @@ public class AppointmentController {
     @GetMapping("/appointment-history")
     public String appointmentHistory(HttpSession session, Model model) {
         Long custId = (Long) session.getAttribute("custId");
-        if (custId == null) return "redirect:/register";
+        if (custId == null)
+            return "redirect:/register";
 
-        // For now, same as view-appointment but could filter by status
-        List<Appointment> appointments = appointmentRepository.findByCustId(custId);
+        List<String> historyStatuses = java.util.Arrays.asList("cancelled", "done");
+        List<Appointment> appointments = appointmentRepository.findByCustIdAndServiceStatusIn(custId, historyStatuses);
+
+        // Populate barber names if needed (assuming history view might need it)
+        for (Appointment appt : appointments) {
+            staffRepository.findById(appt.getBarberId()).ifPresent(s -> appt.setAppointmentBarber(s.getStaffName()));
+        }
+
         model.addAttribute("appointments", appointments);
 
         return "customer/appointment-history";
@@ -57,7 +86,8 @@ public class AppointmentController {
     @PostMapping("/cancel-appointment")
     public String cancelAppointment(@RequestParam Long appointmentId, HttpSession session) {
         Long custId = (Long) session.getAttribute("custId");
-        if (custId == null) return "redirect:/register";
+        if (custId == null)
+            return "redirect:/register";
 
         Optional<Appointment> appointmentOpt = appointmentRepository.findById(appointmentId);
         if (appointmentOpt.isPresent()) {
@@ -67,6 +97,82 @@ public class AppointmentController {
                 appointmentRepository.save(appointment);
             }
         }
+
+        return "redirect:/view-appointment";
+    }
+
+    private final String[] SLOTS = {
+            "10:00 am", "10:30 am", "11:00 am", "11:30 am",
+            "12:00 pm", "12:30 pm", "1:00 pm", "1:30 pm",
+            "2:00 pm", "2:30 pm", "3:00 pm", "3:30 pm",
+            "4:00 pm", "4:30 pm", "5:00 pm", "5:30 pm",
+            "6:00 pm", "6:30 pm", "7:00 pm", "7:30 pm",
+            "8:00 pm", "8:30 pm", "9:00 pm", "9:30 pm"
+    };
+
+    @GetMapping("/edit-appointment")
+    public String editAppointment(@RequestParam Long appointmentId, HttpSession session, Model model) {
+        Long custId = (Long) session.getAttribute("custId");
+        if (custId == null)
+            return "redirect:/register";
+
+        Optional<Appointment> apptOpt = appointmentRepository.findById(appointmentId);
+        if (apptOpt.isEmpty() || !apptOpt.get().getCustId().equals(custId)) {
+            return "redirect:/view-appointment";
+        }
+        Appointment appt = apptOpt.get();
+
+        List<com.heroku.java.model.Staff> barbers = bookingService.getAllBarbers();
+        Map<String, List<Long>> unavailableBarbersBySlot = bookingService
+                .getUnavailableBarbersBySlot(appt.getAppointmentDate(), SLOTS);
+
+        model.addAttribute("appointment", appt);
+        model.addAttribute("barbers", barbers);
+        model.addAttribute("unavailableBarbersBySlot", unavailableBarbersBySlot);
+        model.addAttribute("slots", SLOTS);
+
+        return "customer/edit-appointment";
+    }
+
+    @PostMapping("/update-appointment")
+    public String updateAppointment(@RequestParam Long appointmentId,
+            @RequestParam("booking-for") String bookingFor,
+            @RequestParam String date,
+            @RequestParam String slot,
+            @RequestParam String category,
+            @RequestParam Long barber,
+            HttpSession session,
+            Model model) {
+        Long custId = (Long) session.getAttribute("custId");
+        if (custId == null)
+            return "redirect:/register";
+
+        Optional<Appointment> apptOpt = appointmentRepository.findById(appointmentId);
+        if (apptOpt.isEmpty() || !apptOpt.get().getCustId().equals(custId)) {
+            return "redirect:/view-appointment";
+        }
+        Appointment appt = apptOpt.get();
+
+        if (!bookingService.isBarberAvailableForUpdate(barber, date, slot, appointmentId)) {
+            List<com.heroku.java.model.Staff> barbers = bookingService.getAllBarbers();
+            Map<String, List<Long>> unavailableBarbersBySlot = bookingService.getUnavailableBarbersBySlot(date, SLOTS);
+
+            model.addAttribute("error", "Selected barber is already booked for this slot.");
+            model.addAttribute("appointment", appt);
+            appt.setAppointmentDate(date);
+            model.addAttribute("barbers", barbers);
+            model.addAttribute("unavailableBarbersBySlot", unavailableBarbersBySlot);
+            model.addAttribute("slots", SLOTS);
+            return "customer/edit-appointment";
+        }
+
+        appt.setCustBookFor(bookingFor);
+        appt.setAppointmentDate(date);
+        appt.setAppointmentTime(slot);
+        appt.setCustType(category);
+        appt.setBarberId(barber);
+
+        appointmentRepository.save(appt);
 
         return "redirect:/view-appointment";
     }

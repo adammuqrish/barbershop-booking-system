@@ -14,7 +14,25 @@
                         <p><strong>Book For:</strong> <span th:text="${appt.custBookFor}"></span></p>
                         <p><strong>Date:</strong> <span th:text="${appt.appointmentDate}"></span></p>
                         <p><strong>Time:</strong> <span th:text="${appt.appointmentTime}"></span></p>
+                        <p><strong>Payment:</strong> <span th:text="${appt.paymentStatus}"></span></p>
                         <p><strong>Status:</strong> <span th:text="${appt.serviceStatus}"></span></p>
+
+                        <div class="flex gap-2 mt-4 justify-end"
+                            th:if="${#strings.toLowerCase(appt.serviceStatus) == 'done'}">
+                            <a th:href="@{/feedback(appointmentId=${appt.appointmentId})}"
+                                class="inline-block bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition">
+                                Give Feedback
+                            </a>
+                            <a th:href="@{/receipt(appointmentId=${appt.appointmentId}, source='appointment-history')}"
+                                class="inline-block bg-blue-200 text-blue-800 px-4 py-2 rounded hover:bg-blue-300 transition">View
+                                Receipt</a>
+                        </div>
+                        <div class="flex gap-2 mt-4 justify-end"
+                            th:if="${#strings.toLowerCase(appt.serviceStatus) == 'cancelled'}">
+                            <a th:href="@{/receipt(appointmentId=${appt.appointmentId}, source='appointment-history')}"
+                                class="inline-block bg-blue-200 text-blue-800 px-4 py-2 rounded hover:bg-blue-300 transition">View
+                                Receipt</a>
+                        </div>
                     </div>
                 </th:block>
             </div>

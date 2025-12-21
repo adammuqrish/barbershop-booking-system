@@ -29,17 +29,21 @@ public class BookingService {
 
     public Map<String, List<Long>> getUnavailableBarbersBySlot(String date, String[] slots) {
         return List.of(slots).stream().collect(Collectors.toMap(
-            slot -> slot,
-            slot -> appointmentRepository.findByAppointmentDateAndAppointmentTime(date, slot)
-                .stream()
-                .map(Appointment::getBarberId)
-                .distinct()
-                .collect(Collectors.toList())
-        ));
+                slot -> slot,
+                slot -> appointmentRepository.findByAppointmentDateAndAppointmentTime(date, slot)
+                        .stream()
+                        .map(Appointment::getBarberId)
+                        .distinct()
+                        .collect(Collectors.toList())));
     }
 
     public boolean isBarberAvailable(Long barberId, String date, String time) {
         return appointmentRepository.findByBarberIdAndAppointmentDateAndAppointmentTime(barberId, date, time).isEmpty();
+    }
+
+    public boolean isBarberAvailableForUpdate(Long barberId, String date, String time, Long excludeAppointmentId) {
+        return appointmentRepository.findByBarberIdAndAppointmentDateAndAppointmentTimeAndAppointmentIdNot(barberId,
+                date, time, excludeAppointmentId).isEmpty();
     }
 
     public Appointment createAppointment(Appointment appointment) {

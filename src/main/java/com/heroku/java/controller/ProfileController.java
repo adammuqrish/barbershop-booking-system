@@ -28,10 +28,12 @@ public class ProfileController {
     @GetMapping("/profile")
     public String profilePage(HttpSession session, Model model) {
         Long custId = (Long) session.getAttribute("custId");
-        if (custId == null) return "redirect:/register";
+        if (custId == null)
+            return "redirect:/register";
 
         Optional<Customer> customerOpt = customerRepository.findById(custId);
-        if (customerOpt.isEmpty()) return "redirect:/index";
+        if (customerOpt.isEmpty())
+            return "redirect:/index";
 
         model.addAttribute("customer", customerOpt.get());
         return "customer/profile";
@@ -40,10 +42,12 @@ public class ProfileController {
     @GetMapping("/edit-profile")
     public String editProfilePage(HttpSession session, Model model) {
         Long custId = (Long) session.getAttribute("custId");
-        if (custId == null) return "redirect:/register";
+        if (custId == null)
+            return "redirect:/register";
 
         Optional<Customer> customerOpt = customerRepository.findById(custId);
-        if (customerOpt.isEmpty()) return "redirect:/index";
+        if (customerOpt.isEmpty())
+            return "redirect:/index";
 
         model.addAttribute("customer", customerOpt.get());
         return "customer/editProfile";
@@ -51,17 +55,43 @@ public class ProfileController {
 
     @PostMapping("/update-profile")
     public String updateProfile(@RequestParam String name,
-                                @RequestParam String phone,
-                                @RequestParam(required = false) String password,
-                                HttpSession session) {
+            @RequestParam String email,
+            @RequestParam String phone,
+            @RequestParam(required = false) String password,
+            @RequestParam("image") org.springframework.web.multipart.MultipartFile image,
+            HttpSession session) {
         Long custId = (Long) session.getAttribute("custId");
-        if (custId == null) return "redirect:/register";
+        if (custId == null)
+            return "redirect:/register";
 
         Optional<Customer> customerOpt = customerRepository.findById(custId);
         if (customerOpt.isPresent()) {
             Customer customer = customerOpt.get();
             customer.setCustName(name);
+            customer.setCustEmail(email);
             customer.setCustPhoneNumber(phone);
+
+            // Handle Image Upload
+            if (image != null && !image.isEmpty()) {
+                try {
+                    String fileName = java.util.UUID.randomUUID().toString() + "_" + image.getOriginalFilename();
+                    java.nio.file.Path uploadPath = java.nio.file.Paths
+                            .get("src/main/resources/static/resources/uploads");
+
+                    if (!java.nio.file.Files.exists(uploadPath)) {
+                        java.nio.file.Files.createDirectories(uploadPath);
+                    }
+
+                    java.nio.file.Path filePath = uploadPath.resolve(fileName);
+                    java.nio.file.Files.copy(image.getInputStream(), filePath,
+                            java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+
+                    customer.setCustPicture(fileName);
+                } catch (java.io.IOException e) {
+                    e.printStackTrace(); // In prod, handle error properly
+                }
+            }
+
             if (password != null && !password.isEmpty()) {
                 customer.setCustPassword(password);
                 customerService.registerCustomer(customer); // This hashes the password
