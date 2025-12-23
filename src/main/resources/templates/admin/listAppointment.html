@@ -20,50 +20,216 @@
                             <h2 class="nk-block-title">Appointment List</h2>
                         </div>
                         <div class="nk-block">
-                            <div class="card">
-                                <table class="table">
-                                    <thead class="table-light">
-                                        <tr>
-                                            <th>Customer Name</th>
-                                            <th>Day/Time</th>
-                                            <th>Type</th>
-                                            <th>Payment</th>
-                                            <th>Service</th>
-                                            <th>Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr th:each="a : ${appointmentList}">
-                                            <td th:text="${a.customerName}"></td>
-                                            <td th:text="${a.appointmentDate + ' ' + a.appointmentTime}"></td>
-                                            <td th:text="${a.custType}"></td>
-                                            <td>
-                                                <span
-                                                    th:if="${a.paymentStatus == 'completed' or a.paymentStatus == 'Completed'}"
-                                                    class="badge bg-success">Completed</span>
-                                                <button
-                                                    th:if="${a.paymentStatus == 'pending' or a.paymentStatus == 'Pending'}"
-                                                    class="btn btn-warning btn-sm">Pending</button>
-                                            </td>
-                                            <td>
-                                                <span th:if="${a.serviceStatus == 'done' or a.serviceStatus == 'Done'}"
-                                                    class="badge bg-success">Done</span>
-                                                <span
-                                                    th:if="${a.serviceStatus == 'cancelled' or a.serviceStatus == 'Cancelled'}"
-                                                    class="badge bg-danger">Cancelled</span>
-                                                <button
-                                                    th:if="${a.serviceStatus == 'pending' or a.serviceStatus == 'Pending'}"
-                                                    class="btn btn-warning btn-sm">Pending</button>
-                                            </td>
-                                            <td>
-                                                <a th:href="@{/editAppointment(appointmentId=${a.appointmentId})}"
-                                                    class="btn btn-sm btn-icon">
-                                                    <i class="fas fa-edit"></i>
-                                                </a>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                            <div style="display:flex; gap:20px; align-items:flex-start;">
+
+                                <!-- ================= TABLE ================= -->
+                                <div style="flex:2;">
+                                    <div class="card">
+                                        <table class="table">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>Customer Name</th>
+                                                    <th>Day/Time</th>
+                                                    <th>CustomerType</th>
+                                                    <th>Payment Method</th>
+                                                    <th>Payment</th>
+                                                    <th>Service</th>
+                                                    <th>Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr th:each="a : ${appointmentList}">
+                                                    <td th:text="${a.customerName}"></td>
+                                                    <td th:text="${a.appointmentDate + ' ' + a.appointmentTime}"></td>
+                                                    <td th:text="${a.custType}"></td>
+                                                    <td th:text="${a.paymentMethod}"></td>
+                                                    <td>
+
+                                                        <!-- ONLINE -->
+                                                        <span th:if="${a.paymentMethod == 'ONLINE'}"
+                                                            class="badge bg-success">
+                                                            Completed
+                                                        </span>
+
+                                                        <!-- CASH - COMPLETED -->
+                                                        <form th:if="${a.paymentMethod == 'CASH' and a.paymentStatus == 'completed'}"
+                                                            th:action="@{/admin/update-payment-status}"
+                                                            method="post"
+                                                            class="d-inline">
+
+                                                            <input type="hidden" name="appointmentId"
+                                                                th:value="${a.appointmentId}" />
+                                                            <input type="hidden" name="status" value="pending"/>
+
+                                                            <button type="submit" class="btn btn-success btn-sm">
+                                                                Completed
+                                                            </button>
+                                                        </form>
+
+                                                        <!-- CASH - PENDING -->
+                                                        <form th:if="${a.paymentMethod == 'CASH' and a.paymentStatus == 'pending'}"
+                                                            th:action="@{/admin/update-payment-status}"
+                                                            method="post"
+                                                            class="d-inline">
+
+                                                            <input type="hidden" name="appointmentId"
+                                                                th:value="${a.appointmentId}" />
+                                                            <input type="hidden" name="status" value="completed"/>
+
+                                                            <button type="submit" class="btn btn-warning btn-sm">
+                                                                Pending
+                                                            </button>
+                                                        </form>
+
+                                                        <!-- ✅ FALLBACK -->
+                                                        <span th:if="${a.paymentMethod == null}"
+                                                            class="badge bg-secondary">
+                                                            No Payment
+                                                        </span>
+
+                                                    </td>
+                                                    
+                                                    <td>
+                                                    <!-- DONE -->
+                                                    <form th:if="${a.serviceStatus == 'done'}"
+                                                        th:action="@{/admin/update-service-status}"
+                                                        method="post"
+                                                        class="d-inline">
+
+                                                        <input type="hidden" name="appointmentId"
+                                                            th:value="${a.appointmentId}" />
+                                                        <input type="hidden" name="status" value="cancelled"/>
+
+                                                        <button type="submit"
+                                                                class="btn btn-success btn-sm">
+                                                            Done
+                                                        </button>
+                                                    </form>
+
+                                                    <!-- PENDING -->
+                                                    <form th:if="${a.serviceStatus == 'pending'}"
+                                                        th:action="@{/admin/update-service-status}"
+                                                        method="post"
+                                                        class="d-inline">
+
+                                                        <input type="hidden" name="appointmentId"
+                                                            th:value="${a.appointmentId}" />
+                                                        <input type="hidden" name="status" value="done"/>
+
+                                                        <button type="submit"
+                                                                class="btn btn-warning btn-sm">
+                                                            Pending
+                                                        </button>
+                                                    </form>
+
+                                                    <!-- CANCELLED -->
+                                                    <form th:if="${a.serviceStatus == 'cancelled'}"
+                                                        th:action="@{/admin/update-service-status}"
+                                                        method="post"
+                                                        class="d-inline">
+
+                                                        <input type="hidden" name="appointmentId"
+                                                            th:value="${a.appointmentId}" />
+                                                        <input type="hidden" name="status" value="pending"/>
+
+                                                        <button type="submit"
+                                                                class="btn btn-danger btn-sm">
+                                                            Cancelled
+                                                        </button>
+                                                    </form>
+                                                </td>
+                                                    <td>
+                                                        <a th:href="@{/listAppointment(appointmentId=${a.appointmentId})}"
+                                                        class="btn btn-sm btn-icon">
+                                                            <i class="fas fa-edit"></i>
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <!-- ================= EDIT PANEL ================= -->
+                                <div style="flex:1; min-width:350px;">
+                                    <div th:if="${appointment}" class="card" style="padding:30px;">
+
+                                        <h5 class="mb-3">
+                                            <i class="fas fa-edit me-2"></i>
+                                            Edit Appointment
+                                        </h5>
+
+                                        <form th:action="@{/admin/update-appointment}" method="post">
+
+                                            <input type="hidden" name="appointmentId"
+                                                th:value="${appointment.appointmentId}" />
+
+                                            <div class="mb-3">
+                                                <label class="form-label">Booking For</label>
+                                                <input type="text" class="form-control"
+                                                    th:value="${appointment.customerName}" readonly>
+                                            </div>
+
+                                            <div class="mb-3">
+                                                <label class="form-label">Customer Category</label>
+                                                <select name="custType" class="form-select">
+                                                    <option value="Child"
+                                                        th:selected="${appointment.custType == 'Child'}">Child</option>
+                                                    <option value="Teen"
+                                                        th:selected="${appointment.custType == 'Teen'}">Teen</option>
+                                                    <option value="Senior"
+                                                        th:selected="${appointment.custType == 'Senior'}">Senior</option>
+                                                    <option value="Adult"
+                                                        th:selected="${appointment.custType == 'Adult'}">Adult</option>
+                                                </select>
+                                            </div>
+
+                                            <div class="mb-3">
+                                                <label class="form-label">Appointment Date</label>
+                                                <input type="date" name="appointmentDate"
+                                                    class="form-control"
+                                                    th:value="${appointment.appointmentDate}">
+                                            </div>
+
+                                            <div class="mb-3">
+                                                <label class="form-label">Appointment Time</label>
+                                                <input type="time" name="appointmentTime"
+                                                    class="form-control"
+                                                    th:value="${appointment.appointmentTime}">
+                                            </div>
+
+                                            <div class="mb-3">
+                                                <label class="form-label">Barber</label>
+                                                <select name="staffId" class="form-select">
+                                                    <option th:each="b : ${barberList}"
+                                                            th:value="${b.staffId}"
+                                                            th:text="${b.staffName}"
+                                                            th:selected="${b.staffId == appointment.barberId}">
+                                                    </option>
+                                                </select>
+                                            </div>
+                                        </form>
+                                        <div class="d-flex justify-content-end mt-3">
+                                            <!-- CANCEL + SAVE -->
+                                            <div class="d-flex gap-2">
+                                                <a th:href="@{/listAppointment}"
+                                                class="btn btn-light btn-sm">Cancel</a>
+
+                                                <button type="submit"
+                                                        class="btn btn-primary btn-sm">
+                                                    <i class="fas fa-save me-1"></i>Save
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- NOT FOUND -->
+                                    <div th:if="${param.appointmentId != null and appointment == null}"
+                                        class="alert alert-danger mt-3">
+                                        Appointment not found.
+                                    </div>
+                                </div>
+
                             </div>
                         </div>
                     </div>

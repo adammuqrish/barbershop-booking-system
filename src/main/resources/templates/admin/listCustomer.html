@@ -24,29 +24,61 @@
                         <div class="nk-block-head">
                             <h2 class="nk-block-title">Customers List</h2>
                         </div>
-                        <div class="nk-block">
-                            <div class="card">
-                                <table class="table">
-                                    <thead class="table-light">
-                                        <tr>
-                                            <th>Name</th>
-                                            <th>Phone Number</th>
-                                            <th>Loyalty Points</th>
-                                            <th>Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr th:each="cust : ${customerList}">
-                                            <td th:text="${cust.custName}"></td>
-                                            <td th:text="${cust.custPhoneNumber}"></td>
-                                            <td th:text="${cust.custLoyaltyPoints}"></td>
-                                            <td>
-                                                <a th:href="@{/viewCustomerDetails(custId=${cust.custId})}"
-                                                    class="btn btn-sm btn-primary">View</a>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                        <div style="display: flex; gap: 30px;">
+                            <!-- Customer Table -->
+                            <div class="nk-block" style="flex:2;">
+                                <div class="card">
+                                    <table class="table">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Name</th>
+                                                <th>Phone Number</th>
+                                                <th>Loyalty Points</th>
+                                                <th>Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr th:each="cust : ${customerList}">
+                                                <td th:text="${cust.custName}"></td>
+                                                <td th:text="${cust.custPhoneNumber}"></td>
+                                                <td th:text="${cust.custLoyaltyPoints}"></td>
+                                                <td>
+                                                    <a th:href="@{/listCustomer(custId=${cust.custId})}"
+                                                        class="btn btn-sm btn-primary">View</a>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <!-- Customer Details Panel -->
+                            <div style="flex:1;">
+                                <div th:if="${customer}" class="card" style="padding: 30px; min-width: 350px;">
+                                    <div style="display: flex; flex-direction: column; align-items: center;">
+                                        <img th:if="${customer.custPicture != null}"
+                                            th:src="@{'/resources/uploads/' + ${customer.custPicture}}"
+                                            alt="Profile Picture"
+                                            style="width:100px;height:100px;border-radius:50%;object-fit:cover;background:#f2f2f2;margin-bottom:20px;" />
+                                        <div th:if="${customer.custPicture == null}"
+                                            style="width:100px;height:100px;border-radius:50%;background:#f2f2f2;display:flex;align-items:center;justify-content:center;font-size:20px;color:#888;margin-bottom:20px;">
+                                            <span>No<br>Picture</span>
+                                        </div>
+                                        <h5>Details</h5>
+                                        <div style="width:100%;">
+                                            <div class="mb-2"><strong>Full Name:</strong> <span th:text="${customer.custName}"></span>
+                                            </div>
+                                            <div class="mb-2"><strong>Email:</strong> <span th:text="${customer.custEmail}"></span>
+                                            </div>
+                                            <div class="mb-2"><strong>Phone Number:</strong> <span th:text="${customer.custPhoneNumber}"></span>
+                                            </div>
+                                            <div class="mb-2"><strong>Loyalty Points:</strong> <span th:text="${customer.custLoyaltyPoints}"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div th:if="${param.custId != null and customer == null}" class="alert alert-danger mt-3">
+                                    Customer not found.
+                                </div>
                             </div>
                         </div>
                     </div>

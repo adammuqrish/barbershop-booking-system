@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Staff</title>
+
+    <!-- Main Admin CSS -->
+    <link rel="stylesheet" th:href="@{/resources/assetsAdmin/css/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+
+<body class="nk-body" data-sidebar-collapse="lg" data-navbar-collapse="lg">
+
+<div class="nk-app-root">
+    <div class="nk-main">
+
+        <!-- Sidebar -->
+        <div th:replace="~{fragments/adminFragments :: sidebar}"></div>
+
+        <div class="nk-wrap">
+
+            <!-- Header -->
+            <div th:replace="~{fragments/adminFragments :: header}"></div>
+
+            <!-- Content -->
+            <div class="nk-content">
+                <div class="container">
+
+                    <!-- Page Header -->
+                    <div class="nk-block-head">
+                        <div class="nk-block-head-content">
+                            <h3 class="nk-block-title">
+                                <i class="fas fa-user-edit me-2"></i>Edit Staff
+                            </h3>
+                            <p class="nk-block-subtitle">
+                                Update barber or admin information
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Form Card -->
+                    <div class="nk-block">
+                        <div class="card">
+                            <div class="card-inner">
+
+                                <form th:action="@{/admin/update-staff}" method="post">
+
+                                    <input type="hidden" name="staffId"
+                                           th:value="${staff.staffId}" />
+
+                                    <div class="row g-4">
+
+                                        <!-- Name -->
+                                        <div class="col-md-6">
+                                            <label class="form-label">Full Name</label>
+                                            <input type="text" name="name"
+                                                   class="form-control"
+                                                   th:value="${staff.staffName}" required>
+                                        </div>
+
+                                        <!-- Email -->
+                                        <div class="col-md-6">
+                                            <label class="form-label">Email Address</label>
+                                            <input type="email" name="email"
+                                                   class="form-control"
+                                                   th:value="${staff.staffEmail}" required>
+                                        </div>
+
+                                        <!-- Phone -->
+                                        <div class="col-md-6">
+                                            <label class="form-label">Phone Number</label>
+                                            <input type="text" name="phone"
+                                                   class="form-control"
+                                                   th:value="${staff.staffPhoneNumber}" required>
+                                        </div>
+
+                                        <!-- Role -->
+                                        <div class="col-md-6">
+                                            <label class="form-label">Role</label>
+                                            <select name="role" class="form-select" required>
+                                                <option value="ADMIN"
+                                                    th:selected="${staff.staffRole == 'ADMIN'}">
+                                                    Administrator
+                                                </option>
+                                                <option value="BARBER"
+                                                    th:selected="${staff.staffRole == 'BARBER'}">
+                                                    Barber
+                                                </option>
+                                            </select>
+                                        </div>
+
+                                        <!-- Description -->
+                                        <div class="col-12">
+                                            <label class="form-label">Description</label>
+                                            <textarea name="description"
+                                                      class="form-control"
+                                                      rows="3"
+                                                      th:text="${staff.description}">
+                                            </textarea>
+                                        </div>
+
+                                    </div>
+
+                                    <!-- Buttons -->
+                                    <div class="mt-4 d-flex justify-content-end gap-2">
+                                        <a th:href="@{/listBarber(staffId=${staff.staffId})}"
+                                           class="btn btn-light">
+                                            Cancel
+                                        </a>
+
+                                        <button type="submit"
+                                            class="btn btn-primary"
+                                            onclick="return confirm('Save changes?')">
+                                            Save Changes
+                                        </button>
+                                    </div>
+
+                                </form>
+
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

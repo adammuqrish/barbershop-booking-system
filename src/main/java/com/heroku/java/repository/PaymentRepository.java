@@ -11,6 +11,8 @@ import java.util.Optional;
 public interface PaymentRepository extends CrudRepository<Payment, Long> {
     Optional<Payment> findByAppointmentId(Long appointmentId);
 
+    boolean existsByAppointmentId(Long appointmentId);
+
     @Query("SELECT SUM(p.amount) FROM Payment p")
-    Double getTotalSales();
+    java.math.BigDecimal getTotalSales();
 }

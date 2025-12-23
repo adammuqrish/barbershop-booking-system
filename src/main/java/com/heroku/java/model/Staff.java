@@ -29,7 +29,7 @@ public class Staff implements Serializable {
     @Column(name = "staff_picture")
     private String staffPicture;
 
-    @Column(name = "description")
+    @Column(name = "staff_description")
     private String description;
 
     @Column(name = "staff_role")

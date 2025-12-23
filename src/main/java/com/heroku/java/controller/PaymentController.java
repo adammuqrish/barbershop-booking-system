@@ -98,7 +98,7 @@ public class PaymentController {
         Payment payment;
         if ("online".equals(paymentMethod)) {
             OnlinePayment op = new OnlinePayment();
-            op.setAmount(price);
+            op.setAmount(java.math.BigDecimal.valueOf(price));
             op.setPaymentDate(LocalDate.now());
             op.setAppointmentId(appointmentId);
             op.setPaymentMethod("online-banking");
@@ -126,7 +126,7 @@ public class PaymentController {
 
         } else {
             CashPayment cp = new CashPayment();
-            cp.setAmount(price);
+            cp.setAmount(java.math.BigDecimal.valueOf(price));
             cp.setPaymentDate(LocalDate.now());
             cp.setAppointmentId(appointmentId);
             cp.setPaymentMethod("cash");

@@ -21,37 +21,114 @@
                                 <div class="nk-block-head-content">
                                     <h2 class="nk-block-title">Barber List</h2>
                                 </div>
-                                <div class="nk-block-head-content" th:if="${session.staffRole == 'Admin'}">
+                                <div class="nk-block-head-content" th:if="${staffRole == 'Admin'}">
                                     <button class="btn btn-primary" data-bs-toggle="modal"
-                                        data-bs-target="#addUserModal">Register New Staff</button>
+                                        data-bs-target="#addBarberModal">Register New Barber</button>
                                 </div>
                             </div>
                         </div>
                         <div class="nk-block">
-                            <div class="card">
-                                <table class="table">
-                                    <thead class="table-light">
-                                        <tr>
-                                            <th>Name</th>
-                                            <th>Phone Number</th>
-                                            <th>Role</th>
-                                            <th>Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr th:each="barber : ${barberList}">
-                                            <td th:text="${barber.staffName}"></td>
-                                            <td th:text="${barber.staffPhoneNumber}"></td>
-                                            <td th:text="${barber.staffRole}"></td>
-                                            <td>
-                                                <a th:href="@{/ViewBarberDetails(staffId=${barber.staffId})}"
-                                                    class="btn btn-sm btn-icon btn-zoom me-n1">
-                                                    <i class="fas fa-eye"></i>
-                                                </a>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                            <div style="display:flex; gap:20px; align-items:flex-start;">
+                                <div style="flex:2;">
+                                    <div class="card">
+                                        <table class="table">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>Name</th>
+                                                    <th>Phone Number</th>
+                                                    <th>Role</th>
+                                                    <th>Admin</th>
+                                                    <th>Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr th:each="barber : ${barberList}">
+                                                    <td th:text="${barber.staffName}"></td>
+                                                    <td th:text="${barber.staffPhoneNumber}"></td>
+                                                    <td th:text="${barber.staffRole}"></td>
+                                                    <td th:text="${adminNameMap[barber.staffId]} ?: '—'"></td>
+                                                    <td>
+                                                        <a th:href="@{/listBarber(staffId=${barber.staffId})}"
+                                                        class="btn btn-sm btn-icon btn-zoom">
+                                                            <i class="fas fa-eye"></i>
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <div style="flex:1; min-width:300px;">
+                                    <div th:if="${barber}" class="card" style="padding:30px;">
+                                        <div style="display:flex; flex-direction:column; align-items:center;">
+                                            <img th:if="${barber.staffPicture != null}"
+                                                th:src="@{'/resources/uploads/' + ${barber.staffPicture}}"
+                                                style="width:100px;height:100px;border-radius:50%;object-fit:cover;margin-bottom:20px;" />
+
+                                            <div th:if="${barber.staffPicture == null}"
+                                                style="width:100px;height:100px;border-radius:50%;background:#f2f2f2;
+                                                        display:flex;align-items:center;justify-content:center;
+                                                        font-size:14px;color:#888;margin-bottom:20px;">
+                                                No<br>Picture
+                                            </div>
+
+                                            <h5 class="mb-3">Barber Details</h5>
+
+                                            <div style="width:100%;">
+                                                <div class="mb-2">
+                                                    <strong>Full Name:</strong>
+                                                    <span th:text="${barber.staffName}"></span>
+                                                </div>
+                                                <div class="mb-2">
+                                                    <strong>Email:</strong>
+                                                    <span th:text="${barber.staffEmail}"></span>
+                                                </div>
+                                                <div class="mb-2">
+                                                    <strong>Phone:</strong>
+                                                    <span th:text="${barber.staffPhoneNumber}"></span>
+                                                </div>
+                                                <div class="mb-2">
+                                                    <strong>Role:</strong>
+                                                    <span th:text="${barber.staffRole}"></span>
+                                                </div>
+                                                <div class="mb-2">
+                                                    <strong>Description:</strong>
+                                                    <span th:text="${barber.description}"></span>
+                                                </div>
+                                                <div class="mt-4 d-flex justify-content-center gap-2"
+                                                    th:if="${#strings.equalsIgnoreCase(staffRole, 'ADMIN')}">
+
+                                                    <!-- EDIT -->
+                                                    <a th:href="@{/admin/edit-staff(staffId=${barber.staffId})}"
+                                                    class="btn btn-warning btn-sm">
+                                                        <i class="fas fa-edit"></i> Edit
+                                                    </a>
+
+                                                    <!-- DELETE -->
+                                                    <form th:action="@{/admin/delete-staff}"
+                                                        method="post"
+                                                        onsubmit="return confirm('Are you sure you want to delete this staff?');">
+
+                                                        <input type="hidden" name="staffId"
+                                                            th:value="${barber.staffId}" />
+
+                                                        <button type="submit" class="btn btn-danger btn-sm">
+                                                            <i class="fas fa-trash"></i> Delete
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Not found -->
+                                    <div th:if="${param.staffId != null and barber == null}"
+                                        class="alert alert-danger mt-3">
+                                        Barber not found.
+                                    </div>
+                                </div>
+
                             </div>
                         </div>
                     </div>
@@ -60,17 +137,22 @@
         </div>
     </div>
 
-    <!-- Register Staff Modal -->
-    <div class="modal fade" id="addUserModal" tabindex="-1">
+    <!-- Register Barber Modal -->
+    <div class="modal fade" id="addBarberModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
-                <form th:action="@{/registerStaff}" method="post">
+                <form th:action="@{/admin/register-staff}" method="post">
+                    <input type="hidden" name="admin_id" th:value="${adminId}" value="Admin">
                     <div class="modal-header">
-                        <h4 class="modal-title">Register New Staff</h4>
+                        <h4 class="modal-title">Register New Barber</h4>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body">
                         <div class="row g-3">
+                            <div class="col-12">
+                                <label class="form-label">Name</label>
+                                <input type="text" name="name" class="form-control" required>
+                            </div>
                             <div class="col-12">
                                 <label class="form-label">Email</label>
                                 <input type="email" name="email" class="form-control" required>
@@ -84,11 +166,19 @@
                                 <input type="password" name="confirmPassword" class="form-control" required>
                             </div>
                             <div class="col-12">
+                                <label class="form-label">Phone Number</label>
+                                <input type="text" name="phone" class="form-control" required>
+                            </div>
+                            <div class="col-12">
                                 <label class="form-label">Role</label>
                                 <select name="role" class="form-select" required>
                                     <option value="Admin">Administrator</option>
                                     <option value="Barber">Barber</option>
                                 </select>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Description</label>
+                                <textarea name="description" class="form-control" rows="2"></textarea>
                             </div>
                         </div>
                     </div>

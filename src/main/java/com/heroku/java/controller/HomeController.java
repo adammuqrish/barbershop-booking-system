@@ -10,6 +10,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
+
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 @Controller
 public class HomeController {
@@ -17,28 +21,55 @@ public class HomeController {
     private final PaymentRepository paymentRepository;
     private final CustomerRepository customerRepository;
     private final AppointmentRepository appointmentRepository;
+    private final com.heroku.java.repository.StaffRepository staffRepository;
 
     @Autowired
-    public HomeController(PaymentRepository paymentRepository, 
-                          CustomerRepository customerRepository, 
-                          AppointmentRepository appointmentRepository) {
+    public HomeController(PaymentRepository paymentRepository,
+            CustomerRepository customerRepository,
+            AppointmentRepository appointmentRepository,
+            com.heroku.java.repository.StaffRepository staffRepository) {
         this.paymentRepository = paymentRepository;
         this.customerRepository = customerRepository;
         this.appointmentRepository = appointmentRepository;
+        this.staffRepository = staffRepository;
     }
 
-    @GetMapping({"/", "/index"})
+    @GetMapping({ "/", "/index" })
     public String index() {
         return "index";
     }
 
     @GetMapping("/adminIndex")
     public String adminIndex(Model model) {
-        model.addAttribute("totalSales", paymentRepository.getTotalSales() != null ? paymentRepository.getTotalSales() : 0.0);
+        // Load staff from authentication
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && !auth.getName().equals("anonymousUser")) {
+            String email = auth.getName();
+            Optional<com.heroku.java.model.Staff> staffOpt = staffRepository.findByStaffEmail(email);
+            if (staffOpt.isPresent()) {
+                com.heroku.java.model.Staff staff = staffOpt.get();
+                model.addAttribute("staffName", staff.getStaffName());
+                model.addAttribute("staffRole", staff.getStaffRole());
+                model.addAttribute("staff", staff);
+            } else {
+                model.addAttribute("staffName", "Staff");
+                model.addAttribute("staffRole", null);
+            }
+        } else {
+            model.addAttribute("staffName", "Staff");
+            model.addAttribute("staffRole", null);
+        }
+
+        // Get total sales as BigDecimal
+        java.math.BigDecimal totalSales = paymentRepository.getTotalSales();
+        if (totalSales == null) {
+            totalSales = java.math.BigDecimal.ZERO;
+        }
+        model.addAttribute("totalSales", totalSales);
         model.addAttribute("customerCount", customerRepository.count());
         model.addAttribute("totalAppointments", appointmentRepository.count());
         model.addAttribute("customerList", customerRepository.findAll());
-        
+
         // Mock sales by day for now
         Map<String, Double> salesByDay = new HashMap<>();
         salesByDay.put("SUNDAY", 0.0);

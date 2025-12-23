@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Hugi Barbershop System - Feedback</title>
+    <link rel="stylesheet" th:href="@{/resources/assetsAdmin/css/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        .nk-wrap {
+            padding-top: 60px;
+        }
+    </style>
+</head>
+
+<body class="nk-body" data-sidebar-collapse="lg" data-navbar-collapse="lg">
+    <div class="nk-app-root">
+        <div class="nk-main">
+            <div th:replace="~{fragments/adminFragments :: sidebar}"></div>
+            <div class="nk-wrap">
+                <div th:replace="~{fragments/adminFragments :: header}"></div>
+                <div class="nk-content">
+                    <div class="container">
+                        <div class="nk-block-head">
+                            <h2 class="nk-block-title">Feedback List</h2>
+                        </div>
+                        <div class="nk-block">
+                            <div class="card">
+                                <table class="table">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Customer Name</th>
+                                            <th>Rating</th>
+                                            <th>Comments</th>
+                                            <th>Appointment ID</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="feedback : ${feedbackList}">
+                                            <td th:text="${feedback.customerName}"></td>
+                                            <td th:text="${feedback.rating}"></td>
+                                            <td th:text="${feedback.comments}"></td>
+                                            <td th:text="${feedback.appointmentId}"></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

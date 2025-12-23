@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Hugi Barbershop System - Customer Details</title>
+    <link rel="stylesheet" th:href="@{/resources/assetsAdmin/css/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        .nk-wrap {
+            padding-top: 60px;
+        }
+        .detail-card {
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+        .detail-label {
+            font-weight: 600;
+            color: #333;
+            min-width: 150px;
+        }
+        .detail-value {
+            color: #666;
+        }
+        .btn-group {
+            margin-top: 30px;
+            display: flex;
+            gap: 10px;
+        }
+    </style>
+</head>
+
+<body class="nk-body" data-sidebar-collapse="lg" data-navbar-collapse="lg">
+    <div class="nk-app-root">
+        <div class="nk-main">
+            <div th:replace="~{fragments/adminFragments :: sidebar}"></div>
+            <div class="nk-wrap">
+                <div th:replace="~{fragments/adminFragments :: header}"></div>
+                <div class="nk-content">
+                    <div class="container">
+                        <div class="nk-block-head">
+                            <h2 class="nk-block-title">Customer Details</h2>
+                        </div>
+                        <div class="nk-block">
+                            <div class="detail-card">
+                                <div class="detail-row">
+                                    <span class="detail-label">Customer ID:</span>
+                                    <span class="detail-value" th:text="${customer.custId}"></span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Name:</span>
+                                    <span class="detail-value" th:text="${customer.custName}"></span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Email:</span>
+                                    <span class="detail-value" th:text="${customer.custEmail}"></span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Phone Number:</span>
+                                    <span class="detail-value" th:text="${customer.custPhoneNumber}"></span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Loyalty Points:</span>
+                                    <span class="detail-value" th:text="${customer.custLoyaltyPoints}"></span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Registered Date:</span>
+                                    <span class="detail-value" th:text="${customer.createdAt}"></span>
+                                </div>
+                                <div class="btn-group">
+                                    <a href="/listCustomer" class="btn btn-secondary">Back to List</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -16,8 +16,8 @@ public class Payment {
     @Column(name = "payment_date")
     private LocalDate paymentDate = LocalDate.now();
 
-    @Column(name = "payment_amount")
-    private Double amount;
+    @Column(name = "payment_amount", precision = 10, scale = 2)
+    private java.math.BigDecimal amount;
 
     @Column(name = "payment_method")
     private String paymentMethod;
@@ -26,18 +26,43 @@ public class Payment {
     private Long appointmentId;
 
     // Getters and Setters
-    public Long getPaymentId() { return paymentId; }
-    public void setPaymentId(Long paymentId) { this.paymentId = paymentId; }
+    public Long getPaymentId() {
+        return paymentId;
+    }
 
-    public LocalDate getPaymentDate() { return paymentDate; }
-    public void setPaymentDate(LocalDate paymentDate) { this.paymentDate = paymentDate; }
+    public void setPaymentId(Long paymentId) {
+        this.paymentId = paymentId;
+    }
 
-    public Double getAmount() { return amount; }
-    public void setAmount(Double amount) { this.amount = amount; }
+    public LocalDate getPaymentDate() {
+        return paymentDate;
+    }
 
-    public String getPaymentMethod() { return paymentMethod; }
-    public void setPaymentMethod(String paymentMethod) { this.paymentMethod = paymentMethod; }
+    public void setPaymentDate(LocalDate paymentDate) {
+        this.paymentDate = paymentDate;
+    }
 
-    public Long getAppointmentId() { return appointmentId; }
-    public void setAppointmentId(Long appointmentId) { this.appointmentId = appointmentId; }
+    public java.math.BigDecimal getAmount() {
+        return amount;
+    }
+
+    public void setAmount(java.math.BigDecimal amount) {
+        this.amount = amount;
+    }
+
+    public String getPaymentMethod() {
+        return paymentMethod;
+    }
+
+    public void setPaymentMethod(String paymentMethod) {
+        this.paymentMethod = paymentMethod;
+    }
+
+    public Long getAppointmentId() {
+        return appointmentId;
+    }
+
+    public void setAppointmentId(Long appointmentId) {
+        this.appointmentId = appointmentId;
+    }
 }

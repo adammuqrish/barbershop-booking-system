@@ -3,7 +3,8 @@ package com.heroku.java.model;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "appointments")
+@Table(name = "appointments", uniqueConstraints = @UniqueConstraint(name = "unique_barber_slot", columnNames = {
+        "barber_id", "appointment_date", "appointment_time" }))
 public class Appointment {
 
     @Id
@@ -43,6 +44,15 @@ public class Appointment {
 
     @Transient
     private String appointmentBarber;
+
+    @Transient
+    private String paymentMethod;
+
+    @Column(name = "updated_by")
+    private Long updatedBy;
+
+    @Column(name = "updated_at")
+    private java.time.LocalDateTime updatedAt;
 
     // Getters and Setters
     public Long getAppointmentId() {
@@ -93,6 +103,14 @@ public class Appointment {
         this.paymentStatus = paymentStatus;
     }
 
+    public String getPaymentMethod() {
+        return paymentMethod;
+    }
+
+    public void setPaymentMethod(String paymentMethod) {
+        this.paymentMethod = paymentMethod;
+    }
+
     public Integer getValueLoyalty() {
         return valueLoyalty;
     }
@@ -139,5 +157,21 @@ public class Appointment {
 
     public void setAppointmentBarber(String appointmentBarber) {
         this.appointmentBarber = appointmentBarber;
+    }
+
+    public Long getUpdatedBy() {
+        return updatedBy;
+    }
+
+    public void setUpdatedBy(Long updatedBy) {
+        this.updatedBy = updatedBy;
+    }
+
+    public java.time.LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(java.time.LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
     }
 }
