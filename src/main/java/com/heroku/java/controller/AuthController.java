@@ -103,7 +103,6 @@ public class AuthController {
             session.setAttribute("staff", staff);
             session.setAttribute("staffId", staff.getStaffId());
             session.setAttribute("staffRole", staff.getStaffRole());
-
             model.addAttribute("staffName", staff.getStaffName());
             model.addAttribute("staffRole", staff.getStaffRole());
             model.addAttribute("staff", staff);
@@ -127,7 +126,7 @@ public class AuthController {
     @GetMapping("/logout")
     public String logout(HttpSession session) {
         session.invalidate();
-        SecurityContextHolder.getContext().setAuthentication(null);
+        SecurityContextHolder.clearContext();
         return "redirect:/index";
     }
 }

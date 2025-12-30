@@ -46,11 +46,19 @@ public class BookingController {
                               HttpSession session,
                               Model model) {
         
+        // ✅ SAFETY: clear any leftover booking state
+        session.removeAttribute("lastAppointmentId");
+        
         Long custId = (Long) session.getAttribute("custId");
         if (custId == null) return "redirect:/register";
 
         String selectedDate = (date == null || date.isEmpty()) 
             ? LocalDate.now().format(DateTimeFormatter.ISO_DATE) : date;
+
+        LocalDate selected = LocalDate.parse(selectedDate);
+        if (selected.isBefore(LocalDate.now())) {
+            selectedDate = LocalDate.now().format(DateTimeFormatter.ISO_DATE);
+        }
         
         List<Staff> barbers = bookingService.getAllBarbers();
         Map<String, List<Long>> unavailableBarbersBySlot = bookingService.getUnavailableBarbersBySlot(selectedDate, SLOTS);
@@ -106,6 +114,6 @@ public class BookingController {
         
         session.setAttribute("lastAppointmentId", saved.getAppointmentId());
         
-        return "redirect:/payment";
+        return "redirect:/payment?appointmentId=" + saved.getAppointmentId();
     }
 }

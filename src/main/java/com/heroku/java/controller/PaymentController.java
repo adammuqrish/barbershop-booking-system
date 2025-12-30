@@ -39,10 +39,12 @@ public class PaymentController {
     private static final int MAX_LOYALTY_POINTS = 2;
 
     @GetMapping("/payment")
-    public String paymentPage(HttpSession session, Model model) {
-        Long appointmentId = (Long) session.getAttribute("lastAppointmentId");
-        if (appointmentId == null)
-            return "redirect:/view-appointment";
+    public String paymentPage(@RequestParam(required=false) Long appointmentId,
+                            HttpSession session,
+                            Model model) {
+        if (appointmentId == null) {
+            appointmentId = (Long) session.getAttribute("lastAppointmentId");
+        }
 
         Optional<Appointment> appointmentOpt = appointmentRepository.findById(appointmentId);
         if (appointmentOpt.isEmpty())
@@ -50,6 +52,11 @@ public class PaymentController {
 
         Appointment appointment = appointmentOpt.get();
         model.addAttribute("appointment", appointment);
+
+        // If already paid, redirect to receipt
+        if ("completed".equalsIgnoreCase(appointment.getPaymentStatus())) {
+            return "redirect:/receipt?appointmentId=" + appointmentId;
+        }
 
         // Check Loyalty Points
         double price = 15.0; // Default price
@@ -78,6 +85,11 @@ public class PaymentController {
         Long appointmentId = (Long) session.getAttribute("lastAppointmentId");
         if (appointmentId == null)
             return "redirect:/view-appointment";
+        
+        // ✅ BLOCK DOUBLE PAYMENT
+        if (paymentRepository.existsByAppointmentId(appointmentId)) {
+            return "redirect:/receipt?appointmentId=" + appointmentId;
+        }
 
         Optional<Appointment> appointmentOpt = appointmentRepository.findById(appointmentId);
         if (appointmentOpt.isEmpty())
@@ -137,6 +149,9 @@ public class PaymentController {
         }
 
         appointmentRepository.save(appointment);
+
+        // ✅ CLEAR BOOKING FLOW STATE
+        session.removeAttribute("lastAppointmentId");
 
         return "redirect:/receipt?appointmentId=" + appointmentId + "&source=view-appointment";
     }

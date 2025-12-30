@@ -8,6 +8,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 @Configuration
 @EnableWebSecurity
@@ -15,52 +16,44 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
-                        // Admin-only endpoints
-                        .requestMatchers("/admin/**", "/listCustomer", "/listBarber", "/listAppointment")
-                        .hasRole("ADMIN")
 
-                        // Barber and Admin can access
-                        .requestMatchers("/barber/**").hasAnyRole("ADMIN", "BARBER")
+                // Admin only
+                .requestMatchers("/admin/**", "/listCustomer", "/listBarber", "/listAppointment")
+                .hasRole("ADMIN")
 
-                        // Public endpoints
-                        .requestMatchers("/", "/index", "/register", "/adminLogin", "/auth",
-                                "/css/**", "/js/**", "/images/**", "/resources/**")
-                        .permitAll()
+                // Barber + Admin
+                .requestMatchers("/barber/**")
+                .hasAnyRole("ADMIN", "BARBER")
 
-                        // Customer endpoints (authenticated customers only)
-                        .requestMatchers("/profile", "/edit-profile", "/update-profile",
-                                "/view-appointment", "/appointment-history", "/booking/**",
-                                "/payment", "/processPayment", "/receipt", "/feedback")
-                        .authenticated()
+                // Public
+                .requestMatchers("/", "/index", "/register", "/adminLogin", "/auth",
+                        "/css/**", "/js/**", "/images/**", "/resources/**")
+                .permitAll()
 
-                        // All other requests require authentication
-                        .anyRequest().authenticated())
-                .formLogin(form -> form
-                        .loginPage("/adminLogin")
-                        .loginProcessingUrl("/staffAuth")
-                        .usernameParameter("email")
-                        .passwordParameter("password")
-                        .defaultSuccessUrl("/adminIndex", true)
-                        .failureUrl("/adminLogin?error=true")
-                        .permitAll())
+                // Customer pages (handled by session)
+                .requestMatchers("/profile", "/edit-profile", "/update-profile",
+                        "/view-appointment", "/appointment-history", "/booking/**",
+                        "/payment", "/processPayment", "/receipt", "/feedback")
+                .permitAll()   // ✅ BIARKAN SESSION HANDLE
+
+                .anyRequest().authenticated()
+                )
                 .logout(logout -> logout
-                        .logoutUrl("/logout")
-                        .logoutSuccessUrl("/index")
-                        .invalidateHttpSession(true)
-                        .deleteCookies("JSESSIONID")
-                        .permitAll())
-                .sessionManagement(session -> session
-                        .maximumSessions(1)
-                        .maxSessionsPreventsLogin(false))
+                .logoutRequestMatcher(new AntPathRequestMatcher("/logout", "GET"))
+                .logoutSuccessUrl("/index")
+                .invalidateHttpSession(true)
+                .deleteCookies("JSESSIONID")
+                .permitAll()
+                )
                 .csrf(csrf -> csrf
-                        .ignoringRequestMatchers("/staffAuth", "/auth") // Allow form submissions
+                .ignoringRequestMatchers("/staffAuth", "/auth")
                 );
 
         return http.build();
-    }
+        }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
