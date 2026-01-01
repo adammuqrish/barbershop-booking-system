@@ -93,33 +93,43 @@ public class AuthController {
     }
 
     @PostMapping("/staffAuth")
-    public String handleStaffAuth(@RequestParam String staffEmail,
-                                  @RequestParam String staffPassword,
-                                  HttpSession session,
-                                  Model model) {
+    public String handleStaffAuth(
+            @RequestParam("email") String staffEmail,
+            @RequestParam("password") String staffPassword,
+            HttpSession session,
+            Model model) {
+
         Optional<Staff> staffOpt = staffService.login(staffEmail, staffPassword);
         if (staffOpt.isPresent()) {
+
             Staff staff = staffOpt.get();
-            session.setAttribute("staff", staff);
-            session.setAttribute("staffId", staff.getStaffId());
-            session.setAttribute("staffRole", staff.getStaffRole());
-            model.addAttribute("staffName", staff.getStaffName());
-            model.addAttribute("staffRole", staff.getStaffRole());
-            model.addAttribute("staff", staff);
 
             List<SimpleGrantedAuthority> authorities = new ArrayList<>();
-            String role = staff.getStaffRole();
-            if (role != null) {
-                authorities.add(new SimpleGrantedAuthority("ROLE_" + role.toUpperCase()));
-            }
-            Authentication auth = new UsernamePasswordAuthenticationToken(staffEmail, null, authorities);
+            authorities.add(new SimpleGrantedAuthority("ROLE_" + staff.getStaffRole()));
+
+            UsernamePasswordAuthenticationToken auth =
+                    new UsernamePasswordAuthenticationToken(
+                            staffEmail,
+                            null,
+                            authorities
+                    );
+
+            // ✅ SET AUTH
             SecurityContextHolder.getContext().setAuthentication(auth);
 
+            // ✅ 🔥 CRITICAL FIX: SAVE CONTEXT TO SESSION
+            session.setAttribute(
+                "SPRING_SECURITY_CONTEXT",
+                SecurityContextHolder.getContext()
+            );
+
+            System.out.println("STAFF AUTH HIT");
+
             return "redirect:/adminIndex";
-        } else {
-            model.addAttribute("loginError", "Invalid email or password");
-            return "admin/adminLogin";
         }
+
+        model.addAttribute("loginError", "Invalid email or password");
+        return "admin/adminLogin";
     }
 
 

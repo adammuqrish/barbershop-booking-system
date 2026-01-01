@@ -12,7 +12,7 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity
+// @EnableMethodSecurity
 public class SecurityConfig {
 
     @Bean
@@ -20,26 +20,35 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(auth -> auth
 
-                // Admin only
-                .requestMatchers("/admin/**", "/listCustomer", "/listBarber", "/listAppointment")
-                .hasRole("ADMIN")
+                    // ✅ ADMIN ONLY (dashboard & admin pages)
+                    .requestMatchers("/admin/**", "/adminIndex", "/listCustomer", "/listBarber", "/listAppointment")
+                    .hasRole("ADMIN")
 
-                // Barber + Admin
-                .requestMatchers("/barber/**")
-                .hasAnyRole("ADMIN", "BARBER")
+                    // ✅ BARBER + ADMIN
+                    .requestMatchers("/barber/**")
+                    .hasAnyRole("ADMIN", "BARBER")
 
-                // Public
-                .requestMatchers("/", "/index", "/register", "/adminLogin", "/auth",
-                        "/css/**", "/js/**", "/images/**", "/resources/**")
-                .permitAll()
+                    // ✅ PUBLIC (LOGIN ENDPOINT MESTI DI SINI)
+                    .requestMatchers(
+                        "/", "/index",
+                        "/register",
+                        "/adminLogin",
+                        "/auth",
+                        "/staffAuth",
+                        "/css/**", "/js/**",
+                        "/images/**", "/resources/**"
+                    )
+                    .permitAll()
 
-                // Customer pages (handled by session)
-                .requestMatchers("/profile", "/edit-profile", "/update-profile",
+                    // ✅ CUSTOMER (SESSION BASED)
+                    .requestMatchers(
+                        "/profile", "/edit-profile", "/update-profile",
                         "/view-appointment", "/appointment-history", "/booking/**",
-                        "/payment", "/processPayment", "/receipt", "/feedback")
-                .permitAll()   // ✅ BIARKAN SESSION HANDLE
+                        "/payment", "/processPayment", "/receipt", "/feedback"
+                    )
+                    .permitAll()
 
-                .anyRequest().authenticated()
+                    .anyRequest().authenticated()   
                 )
                 .logout(logout -> logout
                 .logoutRequestMatcher(new AntPathRequestMatcher("/logout", "GET"))
