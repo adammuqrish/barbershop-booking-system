@@ -665,7 +665,7 @@ public class AdminController {
                         java.nio.file.Files.createDirectories(uploadPath);
                         java.nio.file.Path path = uploadPath.resolve(fileName);
                         java.nio.file.Files.write(path, staffPicture.getBytes());
-                        staff.setStaffPicture("/resources/uploads/" + fileName);
+                        staff.setStaffPicture(fileName);
                     } catch (Exception e) {
                         e.printStackTrace();
                         redirectAttributes.addFlashAttribute("error", "Failed to upload picture: " + e.getMessage());

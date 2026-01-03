@@ -67,7 +67,7 @@
           </a>
           <div class="user-avatar sm">
             <a th:href="@{/admin/profile}">
-              <img th:if="${staff != null && staff.staffPicture != null}" th:src="@{${staff.staffPicture}}" alt="Admin Avatar" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+              <img th:if="${staff != null && staff.staffPicture != null}" th:src="@{'/resources/uploads/' + ${staff.staffPicture}}" alt="Admin Avatar" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
               <em th:unless="${staff != null && staff.staffPicture != null}" class="icon ni ni-user-alt"></em>
             </a>
           </div>
