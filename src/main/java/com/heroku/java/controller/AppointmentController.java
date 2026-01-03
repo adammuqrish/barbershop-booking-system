@@ -136,10 +136,8 @@ public class AppointmentController {
 
     @PostMapping("/update-appointment")
     public String updateAppointment(@RequestParam Long appointmentId,
-            @RequestParam("booking-for") String bookingFor,
             @RequestParam String date,
             @RequestParam String slot,
-            @RequestParam String category,
             @RequestParam Long barber,
             HttpSession session,
             Model model) {
@@ -166,10 +164,8 @@ public class AppointmentController {
             return "customer/edit-appointment";
         }
 
-        appt.setCustBookFor(bookingFor);
         appt.setAppointmentDate(date);
         appt.setAppointmentTime(slot);
-        appt.setCustType(category);
         appt.setBarberId(barber);
 
         appointmentRepository.save(appt);

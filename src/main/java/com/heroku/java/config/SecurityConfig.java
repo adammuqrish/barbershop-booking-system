@@ -16,53 +16,48 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 public class SecurityConfig {
 
     @Bean
-        public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
 
-                    // ✅ ADMIN ONLY (dashboard & admin pages)
-                    .requestMatchers("/admin/**", "/adminIndex", "/listCustomer", "/listBarber", "/listAppointment")
-                    .hasRole("ADMIN")
+                        // ✅ ADMIN ONLY (dashboard & admin pages)
+                        .requestMatchers("/admin/**", "/adminIndex", "/listCustomer", "/listBarber", "/listAppointment")
+                        .hasRole("ADMIN")
 
-                    // ✅ BARBER + ADMIN
-                    .requestMatchers("/barber/**")
-                    .hasAnyRole("ADMIN", "BARBER")
+                        // ✅ BARBER + ADMIN
+                        .requestMatchers("/barber/**")
+                        .hasAnyRole("ADMIN", "BARBER")
 
-                    // ✅ PUBLIC (LOGIN ENDPOINT MESTI DI SINI)
-                    .requestMatchers(
-                        "/", "/index",
-                        "/register",
-                        "/adminLogin",
-                        "/auth",
-                        "/staffAuth",
-                        "/css/**", "/js/**",
-                        "/images/**", "/resources/**"
-                    )
-                    .permitAll()
+                        // ✅ PUBLIC (LOGIN ENDPOINT MESTI DI SINI)
+                        .requestMatchers(
+                                "/", "/index",
+                                "/register",
+                                "/adminLogin",
+                                "/auth",
+                                "/staffAuth",
+                                "/css/**", "/js/**",
+                                "/images/**", "/resources/**")
+                        .permitAll()
 
-                    // ✅ CUSTOMER (SESSION BASED)
-                    .requestMatchers(
-                        "/profile", "/edit-profile", "/update-profile",
-                        "/view-appointment", "/appointment-history", "/booking/**",
-                        "/payment", "/processPayment", "/receipt", "/feedback"
-                    )
-                    .permitAll()
+                        // ✅ CUSTOMER (SESSION BASED)
+                        .requestMatchers(
+                                "/profile", "/edit-profile", "/update-profile",
+                                "/view-appointment", "/appointment-history", "/booking/**",
+                                "/payment", "/processPayment", "/receipt", "/feedback")
+                        .permitAll()
 
-                    .anyRequest().authenticated()   
-                )
+                        .anyRequest().authenticated())
                 .logout(logout -> logout
-                .logoutRequestMatcher(new AntPathRequestMatcher("/logout", "GET"))
-                .logoutSuccessUrl("/index")
-                .invalidateHttpSession(true)
-                .deleteCookies("JSESSIONID")
-                .permitAll()
-                )
+                        .logoutRequestMatcher(new AntPathRequestMatcher("/logout", "GET"))
+                        .logoutSuccessUrl("/index")
+                        .invalidateHttpSession(true)
+                        .deleteCookies("JSESSIONID")
+                        .permitAll())
                 .csrf(csrf -> csrf
-                .ignoringRequestMatchers("/staffAuth", "/auth")
-                );
+                        .ignoringRequestMatchers("/staffAuth", "/auth"));
 
         return http.build();
-        }
+    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {

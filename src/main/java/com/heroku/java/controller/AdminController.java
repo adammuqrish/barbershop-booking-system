@@ -19,6 +19,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.heroku.java.repository.PaymentRepository;
@@ -63,9 +64,9 @@ public class AdminController {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth != null && !auth.getName().equals("anonymousUser")) {
             String email = auth.getName();
-            Optional<com.heroku.java.model.Staff> staffOpt = staffRepository.findByStaffEmail(email);
+            Optional<Staff> staffOpt = staffRepository.findByStaffEmail(email);
             if (staffOpt.isPresent()) {
-                com.heroku.java.model.Staff staff = staffOpt.get();
+                Staff staff = staffOpt.get();
                 model.addAttribute("staffName", staff.getStaffName());
                 model.addAttribute("staffRole", staff.getStaffRole());
                 model.addAttribute("staff", staff);
@@ -78,18 +79,21 @@ public class AdminController {
             model.addAttribute("staffRole", null);
         }
 
-        // Get total sales as BigDecimal
+        // 1. Total Sales
         java.math.BigDecimal totalSales = paymentRepository.getTotalSales();
         if (totalSales == null) {
             totalSales = java.math.BigDecimal.ZERO;
         }
         model.addAttribute("totalSales", totalSales);
+
+        // 2. Total Counts
         model.addAttribute("customerCount", customerRepository.count());
         model.addAttribute("totalAppointments", appointmentRepository.count());
-        model.addAttribute("customerList", customerRepository.findAll());
 
-        // Mock sales by day for now
+        // 3. Sales by Day (KIRANAN DATA SEBENAR)
         Map<String, Double> salesByDay = new HashMap<>();
+
+        // Inisialisasi semua hari dengan 0.0 supaya tak null
         salesByDay.put("SUNDAY", 0.0);
         salesByDay.put("MONDAY", 0.0);
         salesByDay.put("TUESDAY", 0.0);
@@ -97,11 +101,33 @@ public class AdminController {
         salesByDay.put("THURSDAY", 0.0);
         salesByDay.put("FRIDAY", 0.0);
         salesByDay.put("SATURDAY", 0.0);
+
+        // Dapatkan SEMUA payment
+        Iterable<Payment> allPayments = paymentRepository.findAll();
+
+        // Loop setiap payment untuk kumpul ikut hari
+        for (Payment p : allPayments) {
+            if (p.getPaymentDate() != null) {
+                // Dapatkan hari dari date (Contoh: MONDAY)
+                String dayName = p.getPaymentDate().getDayOfWeek().toString();
+
+                // Tambah jumlah ke hari tersebut
+                Double currentAmount = salesByDay.get(dayName);
+                if (currentAmount == null)
+                    currentAmount = 0.0;
+
+                salesByDay.put(dayName, currentAmount + p.getAmount().doubleValue());
+            }
+        }
+
         model.addAttribute("salesByDay", salesByDay);
+
+        // Optional: Hantar list customer untuk jadual di bawah (jika ada)
+        model.addAttribute("customerList", customerRepository.findAll());
 
         return "admin/adminIndex";
     }
-    
+
     @GetMapping("/listCustomer")
     @PreAuthorize("hasRole('ADMIN')")
     public String listCustomers(
@@ -148,6 +174,7 @@ public class AdminController {
             staffRepository.findByStaffEmail(auth.getName()).ifPresent(admin -> {
                 model.addAttribute("staffName", admin.getStaffName());
                 model.addAttribute("staffRole", admin.getStaffRole()); // ✅ IMPORTANT
+                model.addAttribute("staff", admin);
                 model.addAttribute("loggedInStaff", admin);
             });
         }
@@ -158,7 +185,7 @@ public class AdminController {
         // ✅ Selected barber
         if (staffId != null) {
             staffRepository.findById(staffId)
-                .ifPresent(s -> model.addAttribute("barber", s));
+                    .ifPresent(s -> model.addAttribute("barber", s));
         }
 
         // ✅ Map adminId → adminName
@@ -166,8 +193,7 @@ public class AdminController {
         for (Staff s : staffRepository.findAll()) {
             if (s.getAdminId() != null) {
                 staffRepository.findById(s.getAdminId())
-                    .ifPresent(admin ->
-                        adminNameMap.put(s.getStaffId(), admin.getStaffName()));
+                        .ifPresent(admin -> adminNameMap.put(s.getStaffId(), admin.getStaffName()));
             }
         }
         model.addAttribute("adminNameMap", adminNameMap);
@@ -187,11 +213,12 @@ public class AdminController {
                 .ifPresent(admin -> {
                     model.addAttribute("staffName", admin.getStaffName());
                     model.addAttribute("staffRole", admin.getStaffRole());
+                    model.addAttribute("staff", admin);
                     model.addAttribute("loggedInStaff", admin);
                 });
 
         // ✅ appointment list
-       Iterable<Appointment> appointments = appointmentRepository.findAll();
+        Iterable<Appointment> appointments = appointmentRepository.findAllSortedByDateAndStatus();
 
         for (Appointment a : appointments) {
 
@@ -201,18 +228,18 @@ public class AdminController {
 
             // ✅ GET PAYMENT BY APPOINTMENT
             paymentRepository.findByAppointmentId(a.getAppointmentId())
-                .ifPresent(p -> {
+                    .ifPresent(p -> {
 
-                    String method = p.getPaymentMethod();
+                        String method = p.getPaymentMethod();
 
-                    if ("online-banking".equalsIgnoreCase(method)) {
-                        a.setPaymentMethod("ONLINE");
-                        a.setPaymentStatus("completed");
-                    } else if ("cash".equalsIgnoreCase(method)) {
-                        a.setPaymentMethod("CASH");
-                        a.setPaymentStatus(a.getPaymentStatus());
-                    }
-                });
+                        if ("online-banking".equalsIgnoreCase(method)) {
+                            a.setPaymentMethod("ONLINE");
+                            a.setPaymentStatus("completed");
+                        } else if ("cash".equalsIgnoreCase(method)) {
+                            a.setPaymentMethod("CASH");
+                            a.setPaymentStatus(a.getPaymentStatus());
+                        }
+                    });
         }
 
         model.addAttribute("appointmentList", appointments);
@@ -228,18 +255,112 @@ public class AdminController {
                     });
         }
 
-        // ✅ barber dropdown
-        model.addAttribute("barberList",
-                staffRepository.findByStaffRole("BARBER"));
+        // ✅ barber dropdown (PENYELESAIAN MASALAH)
+        // Kita tak guna findByStaffRole("BARBER") sebab ianya terlalu ketat.
+        // Kita guna findAll() dan filter sendiri.
+        List<Staff> allStaff = staffRepository.findAll();
+        List<Staff> barbers = new ArrayList<>();
+
+        for (Staff s : allStaff) {
+            // Kita masukkan sesiapa sahaja yang role dia ADMIN atau BARBER
+            // (Selagi dia staff, dia boleh jadi barber)
+            if ("ADMIN".equalsIgnoreCase(s.getStaffRole()) || "BARBER".equalsIgnoreCase(s.getStaffRole())) {
+                barbers.add(s);
+            }
+        }
+
+        model.addAttribute("barberList", barbers);
 
         return "admin/listAppointment";
+    }
+
+    @GetMapping("/api/available-times")
+    @ResponseBody
+    public List<String> getAvailableTimes(
+            @RequestParam String date,
+            @RequestParam(required = false) Long barberId, // Tambah required = false
+            @RequestParam(required = false) Long excludeAppointmentId) {
+
+        List<Appointment> bookedAppointments;
+
+        // LOGIK BARU:
+        // Jika barberId dihantar -> Hanya check availability barber tersebut
+        // Jika barberId NULL -> Ambil SEMUA booking untuk tarikh tu (lebih ketat)
+        // Atau -> Anda boleh return SEMUA masa jika barberId null (lebih bebas).
+
+        // Opsi A (Disarankan untuk Edit): Jika tak pilih barber, anggap semua masa
+        // free,
+        // KECUALI masa yang dah book untuk appointment sendiri (exclude logic handle
+        // ni).
+        // TAPI ini boleh menyebabkan conflict jika user pilih masa yang sama dengan
+        // barber lain.
+
+        // Opsi B (Selamat): Jika tak pilih barber, check semua barber lain.
+
+        if (barberId != null) {
+            bookedAppointments = appointmentRepository.findByBarberIdAndAppointmentDate(barberId, date);
+        } else {
+            // Jika barber belum dipilih, kita tak boleh check conflict barber lain sebab
+            // kita tak tahu siapa.
+            // Jadi kita return semua masa, tapi KENA pastikan excludeAppointmentId
+            // berjalan.
+            // Cara paling mudah: Return semua masa generateTimeSlots() terus,
+            // tapi excludeAppointmentId akan check masa sendiri.
+
+            // Namun, untuk mengelakkan conflict (double booking), kita boleh:
+            // Cari SEMUA appointment pada tarikh tersebut (tanpa mengira barber).
+            bookedAppointments = appointmentRepository.findByAppointmentDate(date);
+        }
+
+        List<String> allSlots = generateTimeSlots();
+        List<String> availableTimes = new ArrayList<>();
+
+        for (String slot : allSlots) {
+            boolean isTaken = false;
+            for (Appointment app : bookedAppointments) {
+
+                // Jika barberId ada, kita check STRICT ikut barber tu.
+                // Jika barberId NULL, kita check agak longgar atau strict ikut semua.
+                if (barberId != null && !app.getBarberId().equals(barberId)) {
+                    continue; // Skip, barber lain takpe
+                }
+
+                if (app.getAppointmentTime().equalsIgnoreCase(slot)) {
+                    // Exclude self
+                    if (excludeAppointmentId != null && app.getAppointmentId().equals(excludeAppointmentId)) {
+                        // Allow self
+                    } else {
+                        isTaken = true;
+                    }
+                }
+            }
+            if (!isTaken) {
+                availableTimes.add(slot);
+            }
+        }
+
+        return availableTimes;
+    }
+
+    // Helper method untuk generate masa (10:00 AM - 9:30 PM)
+    private List<String> generateTimeSlots() {
+        List<String> slots = new ArrayList<>();
+        String[] times = { "10:00 am", "10:30 am", "11:00 am", "11:30 am", "12:00 pm", "12:30 pm",
+                "01:00 pm", "01:30 pm", "02:00 pm", "02:30 pm", "03:00 pm", "03:30 pm",
+                "04:00 pm", "04:30 pm", "05:00 pm", "05:30 pm", "06:00 pm", "06:30 pm",
+                "07:00 pm", "07:30 pm", "08:00 pm", "08:30 pm", "09:00 pm", "09:30 pm" };
+
+        for (String time : times) {
+            slots.add(time);
+        }
+        return slots;
     }
 
     @PostMapping("/admin/update-service-status")
     @PreAuthorize("hasRole('ADMIN')")
     public String updateServiceStatus(@RequestParam Long appointmentId,
-                                    @RequestParam String status,
-                                    Authentication authentication) {
+            @RequestParam String status,
+            Authentication authentication) {
 
         appointmentRepository.findById(appointmentId).ifPresent(a -> {
 
@@ -263,7 +384,7 @@ public class AdminController {
     @PostMapping("/admin/update-payment-status")
     @PreAuthorize("hasRole('ADMIN')")
     public String updatePaymentStatus(@RequestParam Long appointmentId,
-                                    @RequestParam String status) {
+            @RequestParam String status) {
 
         paymentRepository.findByAppointmentId(appointmentId).ifPresent(p -> {
 
@@ -412,8 +533,7 @@ public class AdminController {
         staff.setAdminId(admin.getStaffId());
 
         // ✅ Save
-        com.heroku.java.service.StaffService staffService =
-                new com.heroku.java.service.StaffService(staffRepository);
+        com.heroku.java.service.StaffService staffService = new com.heroku.java.service.StaffService(staffRepository);
         staffService.saveStaff(staff);
 
         return "redirect:/listBarber";
@@ -568,8 +688,8 @@ public class AdminController {
     @PostMapping("/admin/delete-staff")
     @PreAuthorize("hasRole('ADMIN')")
     public String deleteStaff(@RequestParam Long staffId,
-                            Authentication authentication,
-                            RedirectAttributes redirectAttributes) {
+            Authentication authentication,
+            RedirectAttributes redirectAttributes) {
 
         // ✅ Prevent admin delete himself
         String email = authentication.getName();
@@ -671,27 +791,25 @@ public class AdminController {
             @RequestParam Long appointmentId,
             @RequestParam(required = false) String appointmentDate,
             @RequestParam(required = false) String appointmentTime,
-            @RequestParam String custType,
-            @RequestParam Long staffId,
+            @RequestParam(name = "barberId", required = false) Long staffId,
+            RedirectAttributes redirectAttributes,
             Authentication authentication) {
 
         Appointment a = appointmentRepository.findById(appointmentId)
                 .orElseThrow(() -> new RuntimeException("Appointment not found"));
 
-        // ✅ Date (same logic)
         if (appointmentDate != null && !appointmentDate.isEmpty()) {
             a.setAppointmentDate(appointmentDate);
         }
 
-        // ✅ Time (IMPORTANT FIX)
         if (appointmentTime != null && !appointmentTime.isEmpty()) {
             a.setAppointmentTime(appointmentTime);
         }
 
-        a.setCustType(custType);
-        a.setBarberId(staffId);
+        if (staffId != null) {
+            a.setBarberId(staffId);
+        }
 
-        // audit
         Staff admin = staffRepository.findByStaffEmail(authentication.getName()).orElse(null);
         if (admin != null) {
             a.setUpdatedBy(admin.getStaffId());
@@ -700,13 +818,14 @@ public class AdminController {
 
         appointmentRepository.save(a);
 
+        redirectAttributes.addFlashAttribute("success", "Appointment updated successfully.");
         return "redirect:/listAppointment?appointmentId=" + appointmentId;
     }
 
     @PostMapping("/admin/delete-appointment")
     @PreAuthorize("hasRole('ADMIN')")
     public String deleteAppointment(@RequestParam Long appointmentId,
-                                    Authentication authentication) {
+            Authentication authentication) {
 
         appointmentRepository.findById(appointmentId).ifPresent(a -> {
             Staff admin = staffRepository.findByStaffEmail(authentication.getName()).orElse(null);

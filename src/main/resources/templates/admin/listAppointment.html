@@ -29,8 +29,8 @@
                                             <thead class="table-light">
                                                 <tr>
                                                     <th>Customer Name</th>
-                                                    <th>Day/Time</th>
-                                                    <th>CustomerType</th>
+                                                    <th>Date/Time</th>
+                                                    <th>Customer Category</th>
                                                     <th>Payment Method</th>
                                                     <th>Payment</th>
                                                     <th>Service</th>
@@ -52,14 +52,14 @@
                                                         </span>
 
                                                         <!-- CASH - COMPLETED -->
-                                                        <form th:if="${a.paymentMethod == 'CASH' and a.paymentStatus == 'completed'}"
-                                                            th:action="@{/admin/update-payment-status}"
-                                                            method="post"
+                                                        <form
+                                                            th:if="${a.paymentMethod == 'CASH' and a.paymentStatus == 'completed'}"
+                                                            th:action="@{/admin/update-payment-status}" method="post"
                                                             class="d-inline">
 
                                                             <input type="hidden" name="appointmentId"
                                                                 th:value="${a.appointmentId}" />
-                                                            <input type="hidden" name="status" value="pending"/>
+                                                            <input type="hidden" name="status" value="pending" />
 
                                                             <button type="submit" class="btn btn-success btn-sm">
                                                                 Completed
@@ -67,14 +67,14 @@
                                                         </form>
 
                                                         <!-- CASH - PENDING -->
-                                                        <form th:if="${a.paymentMethod == 'CASH' and a.paymentStatus == 'pending'}"
-                                                            th:action="@{/admin/update-payment-status}"
-                                                            method="post"
+                                                        <form
+                                                            th:if="${a.paymentMethod == 'CASH' and a.paymentStatus == 'pending'}"
+                                                            th:action="@{/admin/update-payment-status}" method="post"
                                                             class="d-inline">
 
                                                             <input type="hidden" name="appointmentId"
                                                                 th:value="${a.appointmentId}" />
-                                                            <input type="hidden" name="status" value="completed"/>
+                                                            <input type="hidden" name="status" value="completed" />
 
                                                             <button type="submit" class="btn btn-warning btn-sm">
                                                                 Pending
@@ -88,59 +88,53 @@
                                                         </span>
 
                                                     </td>
-                                                    
+
                                                     <td>
-                                                    <!-- DONE -->
-                                                    <form th:if="${a.serviceStatus == 'done'}"
-                                                        th:action="@{/admin/update-service-status}"
-                                                        method="post"
-                                                        class="d-inline">
+                                                        <!-- DONE -->
+                                                        <form th:if="${a.serviceStatus == 'done'}"
+                                                            th:action="@{/admin/update-service-status}" method="post"
+                                                            class="d-inline">
 
-                                                        <input type="hidden" name="appointmentId"
-                                                            th:value="${a.appointmentId}" />
-                                                        <input type="hidden" name="status" value="cancelled"/>
+                                                            <input type="hidden" name="appointmentId"
+                                                                th:value="${a.appointmentId}" />
+                                                            <input type="hidden" name="status" value="cancelled" />
 
-                                                        <button type="submit"
-                                                                class="btn btn-success btn-sm">
-                                                            Done
-                                                        </button>
-                                                    </form>
+                                                            <button type="submit" class="btn btn-success btn-sm">
+                                                                Done
+                                                            </button>
+                                                        </form>
 
-                                                    <!-- PENDING -->
-                                                    <form th:if="${a.serviceStatus == 'pending'}"
-                                                        th:action="@{/admin/update-service-status}"
-                                                        method="post"
-                                                        class="d-inline">
+                                                        <!-- PENDING -->
+                                                        <form th:if="${a.serviceStatus == 'pending'}"
+                                                            th:action="@{/admin/update-service-status}" method="post"
+                                                            class="d-inline">
 
-                                                        <input type="hidden" name="appointmentId"
-                                                            th:value="${a.appointmentId}" />
-                                                        <input type="hidden" name="status" value="done"/>
+                                                            <input type="hidden" name="appointmentId"
+                                                                th:value="${a.appointmentId}" />
+                                                            <input type="hidden" name="status" value="done" />
 
-                                                        <button type="submit"
-                                                                class="btn btn-warning btn-sm">
-                                                            Pending
-                                                        </button>
-                                                    </form>
+                                                            <button type="submit" class="btn btn-warning btn-sm">
+                                                                Pending
+                                                            </button>
+                                                        </form>
 
-                                                    <!-- CANCELLED -->
-                                                    <form th:if="${a.serviceStatus == 'cancelled'}"
-                                                        th:action="@{/admin/update-service-status}"
-                                                        method="post"
-                                                        class="d-inline">
+                                                        <!-- CANCELLED -->
+                                                        <form th:if="${a.serviceStatus == 'cancelled'}"
+                                                            th:action="@{/admin/update-service-status}" method="post"
+                                                            class="d-inline">
 
-                                                        <input type="hidden" name="appointmentId"
-                                                            th:value="${a.appointmentId}" />
-                                                        <input type="hidden" name="status" value="pending"/>
+                                                            <input type="hidden" name="appointmentId"
+                                                                th:value="${a.appointmentId}" />
+                                                            <input type="hidden" name="status" value="pending" />
 
-                                                        <button type="submit"
-                                                                class="btn btn-danger btn-sm">
-                                                            Cancelled
-                                                        </button>
-                                                    </form>
-                                                </td>
+                                                            <button type="submit" class="btn btn-danger btn-sm">
+                                                                Cancelled
+                                                            </button>
+                                                        </form>
+                                                    </td>
                                                     <td>
                                                         <a th:href="@{/listAppointment(appointmentId=${a.appointmentId})}"
-                                                        class="btn btn-sm btn-icon">
+                                                            class="btn btn-sm btn-icon">
                                                             <i class="fas fa-edit"></i>
                                                         </a>
                                                     </td>
@@ -153,90 +147,156 @@
                                 <!-- ================= EDIT PANEL ================= -->
                                 <div style="flex:1; min-width:350px;">
                                     <div th:if="${appointment}" class="card" style="padding:30px;">
-
                                         <h5 class="mb-3">
                                             <i class="fas fa-edit me-2"></i>
                                             Edit Appointment
                                         </h5>
 
+                                        <div th:if="${success}" class="alert alert-success alert-dismissible fade show"
+                                            role="alert">
+                                            <span th:text="${success}"></span>
+                                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                        </div>
+
                                         <form th:action="@{/admin/update-appointment}" method="post">
 
+                                            <!-- HIDDEN ID -->
                                             <input type="hidden" name="appointmentId"
                                                 th:value="${appointment.appointmentId}" />
 
+                                            <!-- INFO SAHAJA (Readonly - Tak perlu hantar ke server sebab tak nak update) -->
                                             <div class="mb-3">
                                                 <label class="form-label">Booking For</label>
                                                 <input type="text" class="form-control"
-                                                    th:value="${appointment.customerName}" readonly>
+                                                    th:value="${appointment.custBookFor}" readonly>
                                             </div>
 
                                             <div class="mb-3">
                                                 <label class="form-label">Customer Category</label>
-                                                <select name="custType" class="form-select">
-                                                    <option value="Child"
-                                                        th:selected="${appointment.custType == 'Child'}">Child</option>
-                                                    <option value="Teen"
-                                                        th:selected="${appointment.custType == 'Teen'}">Teen</option>
-                                                    <option value="Senior"
-                                                        th:selected="${appointment.custType == 'Senior'}">Senior</option>
-                                                    <option value="Adult"
-                                                        th:selected="${appointment.custType == 'Adult'}">Adult</option>
+                                                <input type="text" class="form-control"
+                                                    th:value="${appointment.custType}" readonly>
+                                            </div>
+
+                                            <!-- YANG BOLEH DIUBAH -->
+
+                                            <!-- 1. Date -->
+                                            <div class="form-group mb-3">
+                                                <label class="form-label">Date</label>
+                                                <input type="date" class="form-control" id="editDate"
+                                                    name="appointmentDate" th:value="${appointment.appointmentDate}"
+                                                    onchange="updateAvailableTimes()">
+                                            </div>
+
+                                            <!-- 2. Time -->
+                                            <div class="form-group mb-3">
+                                                <label class="form-label">Time</label>
+                                                <select class="form-select" id="editTime" name="appointmentTime"
+                                                    required>
+                                                    <option value="">Select Time</option>
                                                 </select>
-                                            </div>
-
-                                            <div class="mb-3">
-                                                <label class="form-label">Appointment Date</label>
-                                                <input type="date" name="appointmentDate"
-                                                    class="form-control"
-                                                    th:value="${appointment.appointmentDate}">
-                                            </div>
-
-                                            <div class="mb-3">
-                                                <label class="form-label">Appointment Time</label>
-                                                <input type="time" name="appointmentTime"
-                                                    class="form-control"
+                                                <input type="hidden" id="originalTime"
                                                     th:value="${appointment.appointmentTime}">
                                             </div>
 
-                                            <div class="mb-3">
+                                            <!-- 3. Barber -->
+                                            <div class="form-group mb-3">
                                                 <label class="form-label">Barber</label>
-                                                <select name="staffId" class="form-select">
-                                                    <option th:each="b : ${barberList}"
-                                                            th:value="${b.staffId}"
-                                                            th:text="${b.staffName}"
-                                                            th:selected="${b.staffId == appointment.barberId}">
+                                                <select class="form-select" id="editBarber" name="barberId"
+                                                    onchange="updateAvailableTimes()">
+                                                    <option th:each="b : ${barberList}" th:value="${b.staffId}"
+                                                        th:text="${b.staffName}"
+                                                        th:selected="${appointment != null && appointment.barberId ==
+                                                        b.staffId}">
                                                     </option>
                                                 </select>
                                             </div>
-                                        </form>
-                                        <div class="d-flex justify-content-end mt-3">
-                                            <!-- CANCEL + SAVE -->
-                                            <div class="d-flex gap-2">
-                                                <a th:href="@{/listAppointment}"
-                                                class="btn btn-light btn-sm">Cancel</a>
 
-                                                <button type="submit"
-                                                        class="btn btn-primary btn-sm">
+                                            <!-- BUTTON -->
+                                            <div class="d-flex justify-content-end gap-2 mt-4">
+                                                <a th:href="@{/listAppointment}" class="btn btn-light btn-sm">Cancel</a>
+                                                <button type="submit" class="btn btn-primary btn-sm">
                                                     <i class="fas fa-save me-1"></i>Save
                                                 </button>
                                             </div>
-                                        </div>
+
+                                        </form>
                                     </div>
 
-                                    <!-- NOT FOUND -->
                                     <div th:if="${param.appointmentId != null and appointment == null}"
                                         class="alert alert-danger mt-3">
                                         Appointment not found.
                                     </div>
                                 </div>
-
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+        <script th:inline="javascript">
+            document.addEventListener('DOMContentLoaded', function () {
+                const today = new Date().toISOString().split('T')[0];
+                const dateInput = document.getElementById('editDate');
+                if (dateInput) {
+                    dateInput.setAttribute('min', today);
+                }
+
+                // ✅ PENTING: Panggil updateAvailableTimes() sekali pada load
+                // ini akan isi dropdown masa dengan data yang betul bila edit panel dibuka
+                updateAvailableTimes();
+            });
+
+            function updateAvailableTimes() {
+                const date = document.getElementById('editDate').value;
+                const barberId = document.getElementById('editBarber').value;
+                const timeSelect = document.getElementById('editTime');
+                const appointmentId = document.querySelector('input[name="appointmentId"]')?.value;
+                const currentlySelectedTime = timeSelect.value;
+
+                // Kosongkan dropdown dulu
+                timeSelect.innerHTML = '<option value="">Select Time</option>';
+
+                // SYARAT BARU: Tarikh mesti ada. Barber OPTIONAL (boleh null).
+                if (!date) {
+                    return;
+                }
+
+                // Bina URL
+                let url = `/api/available-times?date=${date}`;
+
+                // Hanya append barberId jika user memilih barber
+                if (barberId) {
+                    url += `&barberId=${barberId}`;
+                }
+
+                // Hantar exclude ID jika ada
+                if (appointmentId) {
+                    url += `&excludeAppointmentId=${appointmentId}`;
+                }
+
+                fetch(url)
+                    .then(response => response.json())
+                    .then(times => {
+                        times.forEach(time => {
+                            const option = document.createElement('option');
+                            option.value = time;
+                            option.textContent = time;
+                            timeSelect.appendChild(option);
+                        });
+
+                        // Auto-Select Logic (sama seperti sebelum ini)
+                        const originalTime = document.getElementById('originalTime')?.value;
+                        if (originalTime && Array.from(timeSelect.options).some(o => o.value === originalTime)) {
+                            timeSelect.value = originalTime;
+                        } else if (currentlySelectedTime && Array.from(timeSelect.options).some(o => o.value === currentlySelectedTime)) {
+                            timeSelect.value = currentlySelectedTime;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+            }
+        </script>
 </body>
 
 </html>
