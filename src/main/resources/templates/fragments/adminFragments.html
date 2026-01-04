@@ -1,17 +1,10 @@
-<div
-  th:fragment="sidebar"
-  id="sidebar"
-  class="nk-sidebar nk-sidebar-fixed is-theme"
->
+<div th:fragment="sidebar" id="sidebar" class="nk-sidebar nk-sidebar-fixed is-theme">
   <div class="nk-sidebar-element nk-sidebar-head">
     <div class="nk-sidebar-brand">
       <a th:href="@{/adminIndex}" class="logo-link">
         <div class="logo-wrap" style="width: 150px; height: 100px">
-          <img
-            class="logo-img logo-light"
-            th:src="@{/resources/uploads/hugiBarber1.png}"
-            style="width: 150px; height: 100px"
-          />
+          <img class="logo-img logo-light" th:src="@{/resources/uploads/hugiBarber1.png}"
+            style="width: 150px; height: 100px" />
         </div>
       </a>
     </div>
@@ -23,27 +16,53 @@
           <li class="nk-menu-heading">
             <h6 class="overline-title">Hugi Barbershop</h6>
           </li>
+
+          <!-- 1. CUSTOMER MENU -->
+          <!-- Admin: Lihat semua customer (/listCustomer) -->
+          <!-- Barber: Lihat customer sendiri sahaja (/barber/customers) -->
           <li class="nk-menu-item">
-            <a th:href="@{/listCustomer}" class="nk-menu-link">Customer</a>
+            <a th:href="${staffRole == 'ADMIN' ? '/listCustomer' : '/barber/customers'}" class="nk-menu-link">
+              Customer
+            </a>
           </li>
-          <li class="nk-menu-item">
+
+          <!-- 2. BARBER LIST (STAFF) -->
+          <!-- Admin sahaja boleh tengok senarai staff & register baru -->
+          <!-- Barber tak nampak menu ni -->
+          <li th:if="${staffRole == 'ADMIN'}" class="nk-menu-item">
             <a th:href="@{/listBarber}" class="nk-menu-link">Barber</a>
           </li>
+
+          <!-- 3. APPOINTMENT LIST -->
+          <!-- Admin: Lihat semua appointment (/listAppointment) -->
+          <!-- Barber: Lihat appointment sendiri (/barber/appointments) -->
           <li class="nk-menu-item">
-            <a th:href="@{/listAppointment}" class="nk-menu-link"
-              >Appointment</a
-            >
+            <a th:href="${staffRole == 'ADMIN' ? '/listAppointment' : '/barber/appointments'}" class="nk-menu-link">
+              Appointment
+            </a>
           </li>
-          <li th:if="${staffRole == 'ADMIN'}" class="nk-menu-item">
-            <a th:href="@{/admin/list-transactions}" class="nk-menu-link"
-              >Transaction</a
-            >
-          </li>
+
+          <!-- 4. TRANSACTION LIST -->
+          <!-- Admin: /admin/list-transactions -->
+          <!-- Barber: /barber/transactions -->
+          <!-- Note: Dah ada sekaran th:if="ADMIN", kita tukar supaya Barber juga boleh tengok -->
           <li class="nk-menu-item">
-            <a th:href="@{/admin/list-feedback}" class="nk-menu-link"
-              >Feedback</a
-            >
+            <a th:href="${staffRole == 'ADMIN' ? '/admin/list-transactions' : '/barber/transactions'}"
+              class="nk-menu-link">
+              Transaction
+            </a>
           </li>
+
+          <!-- 5. FEEDBACK LIST -->
+          <!-- Admin: /admin/list-feedback -->
+          <!-- Barber: /barber/feedbacks -->
+          <li class="nk-menu-item">
+            <a th:href="${staffRole == 'ADMIN' ? '/admin/list-feedback' : '/barber/feedbacks'}" class="nk-menu-link">
+              Feedback
+            </a>
+          </li>
+
+          <!-- 6. LOGOUT -->
           <li class="nk-menu-item">
             <a th:href="@{/logout}" class="nk-menu-link">Logout</a>
           </li>
@@ -56,23 +75,40 @@
 <div th:fragment="header" class="nk-header nk-header-fixed">
   <div class="container-fluid">
     <div class="nk-header-wrap" style="display: flex; justify-content: space-between; align-items: center;">
+
+      <!-- 1. LOGO LINK -->
+      <!-- Admin -> /adminIndex, Barber -> /barber/dashboard -->
       <div class="nk-header-brand d-xl-none">
-        <a th:href="@{/adminIndex}" class="logo-link">Hugi Barbershop</a>
+        <a th:href="${staffRole == 'ADMIN' ? '/adminIndex' : '/barber/dashboard'}" class="logo-link">
+          Hugi Barbershop
+        </a>
       </div>
+
       <div style="flex: 1;"></div>
+
       <div class="nk-header-tools">
         <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; gap: 20px;">
-          <a th:href="@{/admin/profile}" class="text-decoration-none">
+
+          <!-- 2. NAME & PROFILE LINK -->
+          <!-- Admin -> /admin/profile, Barber -> /barber/profile -->
+          <a th:href="${staffRole == 'ADMIN' ? '/admin/profile' : '/barber/profile'}" class="text-decoration-none">
             <span th:text="${staffName}" style="font-weight: 500; color: #333; font-size: 14px;"></span>
           </a>
+
+          <!-- 3. AVATAR / GAMBAR PROFILE -->
           <div class="user-avatar sm">
-            <a th:href="@{/admin/profile}">
-              <img th:if="${staff != null && staff.staffPicture != null}" th:src="@{'/resources/uploads/' + ${staff.staffPicture}}" alt="Admin Avatar" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+            <!-- Link gambar juga perlu ikut role supaya tak redirect salah -->
+            <a th:href="${staffRole == 'ADMIN' ? '/admin/profile' : '/barber/profile'}">
+              <img th:if="${staff != null && staff.staffPicture != null}"
+                th:src="@{'/resources/uploads/' + ${staff.staffPicture}}" alt="Staff Avatar"
+                style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
               <em th:unless="${staff != null && staff.staffPicture != null}" class="icon ni ni-user-alt"></em>
             </a>
           </div>
+
         </div>
       </div>
     </div>
   </div>
+</div>
 </div>

@@ -50,13 +50,13 @@ public class AuthController {
 
     @PostMapping("/auth")
     public String handleAuth(@RequestParam String action,
-                             @RequestParam(required = false) String email,
-                             @RequestParam(required = false) String password,
-                             @RequestParam(required = false) String name,
-                             @RequestParam(required = false) String phone,
-                             @RequestParam(required = false) String confirmPassword,
-                             HttpSession session,
-                             Model model) {
+            @RequestParam(required = false) String email,
+            @RequestParam(required = false) String password,
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String phone,
+            @RequestParam(required = false) String confirmPassword,
+            HttpSession session,
+            Model model) {
 
         if ("login".equals(action)) {
             Optional<Customer> customerOpt = customerService.login(email, password);
@@ -80,7 +80,7 @@ public class AuthController {
             customer.setCustPassword(password);
             customer.setCustPhoneNumber(phone);
             customer.setCustLoyaltyPoints(0);
-            
+
             try {
                 customerService.registerCustomer(customer);
                 model.addAttribute("successMessage", "Registration successful! You can now login.");
@@ -100,38 +100,46 @@ public class AuthController {
             Model model) {
 
         Optional<Staff> staffOpt = staffService.login(staffEmail, staffPassword);
-        if (staffOpt.isPresent()) {
 
+        if (staffOpt.isPresent()) {
             Staff staff = staffOpt.get();
 
+            // 1. Set Authorities (Role)
             List<SimpleGrantedAuthority> authorities = new ArrayList<>();
             authorities.add(new SimpleGrantedAuthority("ROLE_" + staff.getStaffRole()));
 
-            UsernamePasswordAuthenticationToken auth =
-                    new UsernamePasswordAuthenticationToken(
-                            staffEmail,
-                            null,
-                            authorities
-                    );
-
-            // ✅ SET AUTH
-            SecurityContextHolder.getContext().setAuthentication(auth);
-
-            // ✅ 🔥 CRITICAL FIX: SAVE CONTEXT TO SESSION
-            session.setAttribute(
-                "SPRING_SECURITY_CONTEXT",
-                SecurityContextHolder.getContext()
+            // 2. Create Authentication Token
+            UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                    staffEmail, // Principal (Username/Email)
+                    null, // Credentials (Password tak perlu disimpan sini)
+                    authorities // Authories
             );
 
-            System.out.println("STAFF AUTH HIT");
+            // 3. Set Security Context
+            SecurityContextHolder.getContext().setAuthentication(auth);
 
-            return "redirect:/adminIndex";
+            // 4. CRITICAL: Save Context to Session
+            session.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
+
+            // Optional: Simpan staffId dalam session untuk kegunaan kod lama (jika ada)
+            session.setAttribute("staffId", staff.getStaffId());
+
+            System.out.println("STAFF AUTH HIT - Role: " + staff.getStaffRole());
+
+            // 5. ✅ LOGIK REDIRECT BARU
+            if ("ADMIN".equalsIgnoreCase(staff.getStaffRole())) {
+                return "redirect:/adminIndex";
+            } else if ("BARBER".equalsIgnoreCase(staff.getStaffRole())) {
+                return "redirect:/barber/dashboard";
+            } else {
+                // Default fallback (kalau ada role lain)
+                return "redirect:/";
+            }
         }
 
         model.addAttribute("loginError", "Invalid email or password");
         return "admin/adminLogin";
     }
-
 
     @GetMapping("/logout")
     public String logout(HttpSession session) {

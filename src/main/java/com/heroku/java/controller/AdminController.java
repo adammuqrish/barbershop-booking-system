@@ -3,6 +3,7 @@ package com.heroku.java.controller;
 import com.heroku.java.model.Appointment;
 import com.heroku.java.model.CashPayment;
 import com.heroku.java.model.Customer;
+import com.heroku.java.model.Feedback;
 import com.heroku.java.model.Staff;
 import com.heroku.java.repository.AppointmentRepository;
 import com.heroku.java.repository.CustomerRepository;
@@ -55,6 +56,288 @@ public class AdminController {
         this.appointmentRepository = appointmentRepository;
         this.paymentRepository = paymentRepository;
         this.feedbackRepository = feedbackRepository;
+    }
+
+    // Helper method untuk dapatkan Staff yang sedang login
+    private Staff getLoggedInStaff() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && !auth.getName().equals("anonymousUser")) {
+            return staffRepository.findByStaffEmail(auth.getName()).orElse(null);
+        }
+        return null;
+    }
+
+    // ==========================================
+    // SECTION: BARBER ENDPOINTS
+    // ==========================================
+
+    // 1. BARBER DASHBOARD
+    @GetMapping("/barber/dashboard")
+    public String barberDashboard(Model model) {
+        Staff barber = getLoggedInStaff();
+        if (barber == null)
+            return "redirect:/adminLogin";
+
+        // Set user info untuk header (sama macam admin)
+        model.addAttribute("staffName", barber.getStaffName());
+        model.addAttribute("staffRole", barber.getStaffRole());
+        model.addAttribute("staff", barber);
+
+        // 1. Total Sales (Hanya untuk appointment barber ini)
+        // Anggap method 'getTotalSalesByStaffId' wujud dalam PaymentRepository (lihat
+        // bahagian Repository)
+        java.math.BigDecimal totalSales = paymentRepository.getTotalSalesByStaffId(barber.getStaffId());
+        if (totalSales == null)
+            totalSales = java.math.BigDecimal.ZERO;
+        model.addAttribute("totalSales", totalSales);
+
+        // 2. Total Customers (Hanya customer yang ada appointment dengan barber ini)
+        // Anda mungkin ada method khas atau kita guna logic manual
+        // Untuk mudah, kita guna countDistinctCustomerByStaffId jika ada, atau 0 dulu
+        long totalCustomers = appointmentRepository.countDistinctCustomersByStaffId(barber.getStaffId());
+        model.addAttribute("customerCount", totalCustomers);
+
+        // 3. Total Appointments
+        long totalAppointments = appointmentRepository.countByBarberId(barber.getStaffId());
+        model.addAttribute("totalAppointments", totalAppointments);
+
+        // 4. Sales Graph Data (Filter ikut barber)
+        Map<String, Double> salesByDay = new HashMap<>();
+        salesByDay.put("SUNDAY", 0.0);
+        salesByDay.put("MONDAY", 0.0);
+        salesByDay.put("TUESDAY", 0.0);
+        salesByDay.put("WEDNESDAY", 0.0);
+        salesByDay.put("THURSDAY", 0.0);
+        salesByDay.put("FRIDAY", 0.0);
+        salesByDay.put("SATURDAY", 0.0);
+
+        // Dapatkan payment untuk barber ini sahaja
+        Iterable<Payment> barberPayments = paymentRepository.findAllByStaffId(barber.getStaffId());
+
+        for (Payment p : barberPayments) {
+            if (p.getPaymentDate() != null) {
+                String dayName = p.getPaymentDate().getDayOfWeek().toString();
+                Double currentAmount = salesByDay.get(dayName);
+                if (currentAmount == null)
+                    currentAmount = 0.0;
+                salesByDay.put(dayName, currentAmount + p.getAmount().doubleValue());
+            }
+        }
+        model.addAttribute("salesByDay", salesByDay);
+
+        // 5. List Customer (Hanya yang assign kepada barber ini)
+        // Kita guna kaedah findCustomersByStaffId jika ada, atau filter dari
+        // appointment
+        List<Customer> assignedCustomers = customerRepository.findCustomersByStaffId(barber.getStaffId());
+        model.addAttribute("customerList", assignedCustomers);
+
+        return "admin/adminIndex"; // Guna template yang sama
+    }
+
+    // 2. BARBER CUSTOMER LIST
+    @GetMapping("/barber/customers")
+    public String barberCustomerList(Model model) {
+        Staff barber = getLoggedInStaff();
+        if (barber == null)
+            return "redirect:/adminLogin";
+
+        model.addAttribute("staffName", barber.getStaffName());
+        model.addAttribute("staffRole", barber.getStaffRole());
+        model.addAttribute("staff", barber);
+
+        // Filter customers
+        List<Customer> customers = customerRepository.findCustomersByStaffId(barber.getStaffId());
+        model.addAttribute("customerList", customers);
+
+        return "admin/listCustomer"; // Guna template yang sama
+    }
+
+    // 3. BARBER APPOINTMENT LIST
+    @GetMapping("/barber/appointments")
+    public String barberAppointmentList(Model model) {
+        Staff barber = getLoggedInStaff();
+        if (barber == null)
+            return "redirect:/adminLogin";
+
+        model.addAttribute("staffName", barber.getStaffName());
+        model.addAttribute("staffRole", barber.getStaffRole());
+        model.addAttribute("staff", barber);
+        model.addAttribute("loggedInStaff", barber); // Untuk kegunaan template
+
+        // Filter appointments
+        List<Appointment> appointments = appointmentRepository.findByBarberId(barber.getStaffId());
+
+        for (Appointment a : appointments) {
+            customerRepository.findById(a.getCustId())
+                    .ifPresent(c -> a.setCustomerName(c.getCustName()));
+
+            // Set payment info
+            paymentRepository.findByAppointmentId(a.getAppointmentId())
+                    .ifPresent(p -> {
+                        if ("online-banking".equalsIgnoreCase(p.getPaymentMethod())) {
+                            a.setPaymentMethod("ONLINE");
+                            a.setPaymentStatus("completed");
+                        } else {
+                            a.setPaymentMethod("CASH");
+                            a.setPaymentStatus(a.getPaymentStatus());
+                        }
+                    });
+        }
+        model.addAttribute("appointmentList", appointments);
+
+        // Barber tak perlu dropdown list barber untuk edit (sebab dia tak boleh edit)
+        // tapi kita biarkan kosong atau null supaya butang edit tak keluar dalam
+        // template
+
+        return "admin/listAppointment";
+    }
+
+    // 4. BARBER TRANSACTION LIST
+    @GetMapping("/barber/transactions")
+    public String barberTransactionList(Model model) {
+        Staff barber = getLoggedInStaff();
+        if (barber == null)
+            return "redirect:/adminLogin";
+
+        model.addAttribute("staffName", barber.getStaffName());
+        model.addAttribute("staffRole", barber.getStaffRole());
+        model.addAttribute("staff", barber);
+
+        // Filter transactions (payment) berdasarkan staffId barber
+        Iterable<Payment> payments = paymentRepository.findAllByStaffId(barber.getStaffId());
+
+        List<TransactionDTO> transactions = new ArrayList<>();
+        for (Payment p : payments) {
+            appointmentRepository.findById(p.getAppointmentId()).ifPresent(appt -> {
+                customerRepository.findById(appt.getCustId()).ifPresent(cust -> {
+                    TransactionDTO dto = new TransactionDTO();
+                    dto.setPaymentId(p.getPaymentId());
+                    dto.setCustomerName(cust.getCustName());
+                    dto.setAmount(p.getAmount());
+                    dto.setPaymentMethod(p.getPaymentMethod());
+                    dto.setPaymentDate(p.getPaymentDate());
+                    dto.setPaymentStatus(appt.getPaymentStatus());
+                    transactions.add(dto);
+                });
+            });
+        }
+
+        model.addAttribute("transactions", transactions);
+        return "admin/listTransactions";
+    }
+
+    // 5. BARBER FEEDBACK LIST
+    @GetMapping("/barber/feedbacks")
+    public String barberFeedbackList(Model model) {
+        Staff barber = getLoggedInStaff();
+        if (barber == null)
+            return "redirect:/adminLogin";
+
+        model.addAttribute("staffName", barber.getStaffName());
+        model.addAttribute("staffRole", barber.getStaffRole());
+        model.addAttribute("staff", barber);
+
+        // Filter feedbacks (melalui appointment -> barberId)
+        List<Feedback> feedbacks = feedbackRepository.findByStaffId(barber.getStaffId());
+
+        List<FeedbackDTO> feedbackList = new ArrayList<>();
+        for (Feedback f : feedbacks) {
+            appointmentRepository.findById(f.getAppointmentId()).ifPresent(appt -> {
+                customerRepository.findById(appt.getCustId()).ifPresent(cust -> {
+                    FeedbackDTO dto = new FeedbackDTO();
+                    dto.setFeedbackId(f.getFeedbackId());
+                    dto.setCustomerName(cust.getCustName());
+                    dto.setRating(f.getRating());
+                    dto.setComments(f.getComments());
+                    dto.setAppointmentId(f.getAppointmentId());
+                    feedbackList.add(dto);
+                });
+            });
+        }
+
+        model.addAttribute("feedbackList", feedbackList);
+        return "admin/listFeedback";
+    }
+
+    // 6. BARBER PROFILE
+    @GetMapping("/barber/profile")
+    public String barberProfile(Model model) {
+        Staff barber = getLoggedInStaff();
+        if (barber == null)
+            return "redirect:/adminLogin";
+
+        model.addAttribute("staffName", barber.getStaffName());
+        model.addAttribute("staffRole", barber.getStaffRole());
+        model.addAttribute("staff", barber);
+
+        return "admin/profile"; // Guna template admin/profile
+    }
+
+    @PostMapping("/barber/update-profile")
+    public String updateBarberProfile(
+            @RequestParam("staffName") String staffName,
+            @RequestParam("staffEmail") String staffEmail,
+            @RequestParam("staffPhone") String staffPhone,
+            @RequestParam("description") String description,
+            @RequestParam(value = "staffPicture", required = false) MultipartFile staffPicture,
+            RedirectAttributes redirectAttributes) {
+
+        Staff barber = getLoggedInStaff();
+        if (barber == null)
+            return "redirect:/adminLogin";
+
+        // Logic update profile sama macam admin
+        barber.setStaffName(staffName);
+        barber.setStaffEmail(staffEmail);
+        barber.setStaffPhoneNumber(staffPhone);
+        barber.setDescription(description);
+
+        if (staffPicture != null && !staffPicture.isEmpty()) {
+            try {
+                String fileName = System.currentTimeMillis() + "_" + staffPicture.getOriginalFilename();
+                String uploadDir = System.getProperty("user.dir") + "/src/main/resources/static/resources/uploads/";
+                java.nio.file.Path uploadPath = java.nio.file.Paths.get(uploadDir);
+                java.nio.file.Files.createDirectories(uploadPath);
+                java.nio.file.Path path = uploadPath.resolve(fileName);
+                java.nio.file.Files.write(path, staffPicture.getBytes());
+                barber.setStaffPicture(fileName);
+            } catch (Exception e) {
+                e.printStackTrace();
+                redirectAttributes.addFlashAttribute("error", "Failed to upload picture: " + e.getMessage());
+                return "redirect:/barber/profile";
+            }
+        }
+
+        staffRepository.save(barber);
+        redirectAttributes.addFlashAttribute("success", "Profile updated successfully.");
+
+        return "redirect:/barber/profile";
+    }
+
+    // 7. BARBER LIST (Barber boleh tengok barber lain tapi tak boleh register)
+    @GetMapping("/barber/list-barber")
+    public String barberListBarber(Model model) {
+        Staff barber = getLoggedInStaff();
+        if (barber == null)
+            return "redirect:/adminLogin";
+
+        model.addAttribute("staffName", barber.getStaffName());
+        model.addAttribute("staffRole", barber.getStaffRole());
+        model.addAttribute("staff", barber);
+
+        model.addAttribute("barberList", staffRepository.findAll());
+
+        // Map admin name sama macam admin
+        Map<Long, String> adminNameMap = new HashMap<>();
+        for (Staff s : staffRepository.findAll()) {
+            if (s.getAdminId() != null) {
+                staffRepository.findById(s.getAdminId())
+                        .ifPresent(admin -> adminNameMap.put(s.getStaffId(), admin.getStaffName()));
+            }
+        }
+        model.addAttribute("adminNameMap", adminNameMap);
+
+        return "admin/listBarber";
     }
 
     @GetMapping("/adminIndex")

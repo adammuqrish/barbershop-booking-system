@@ -2,7 +2,6 @@ package com.heroku.java.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -12,23 +11,21 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 @Configuration
 @EnableWebSecurity
-// @EnableMethodSecurity
 public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
-
-                        // ✅ ADMIN ONLY (dashboard & admin pages)
+                        // ✅ ADMIN ONLY
                         .requestMatchers("/admin/**", "/adminIndex", "/listCustomer", "/listBarber", "/listAppointment")
                         .hasRole("ADMIN")
 
-                        // ✅ BARBER + ADMIN
+                        // ✅ BARBER ONLY (Path baharu untuk barber)
                         .requestMatchers("/barber/**")
-                        .hasAnyRole("ADMIN", "BARBER")
+                        .hasRole("BARBER")
 
-                        // ✅ PUBLIC (LOGIN ENDPOINT MESTI DI SINI)
+                        // ✅ PUBLIC & AUTH ENDPOINTS
                         .requestMatchers(
                                 "/", "/index",
                                 "/register",
