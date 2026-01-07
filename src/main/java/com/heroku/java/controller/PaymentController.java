@@ -39,35 +39,57 @@ public class PaymentController {
     private static final int MAX_LOYALTY_POINTS = 2;
 
     @GetMapping("/payment")
-    public String paymentPage(@RequestParam(required=false) Long appointmentId,
-                            HttpSession session,
-                            Model model) {
-        if (appointmentId == null) {
-            appointmentId = (Long) session.getAttribute("lastAppointmentId");
+    public String paymentPage(@RequestParam(required = false) Long appointmentId,
+            HttpSession session,
+            Model model) {
+
+        // ✅ 1. AMBIL APPOINTMENT DARI SESSION
+        Appointment appointment = (Appointment) session.getAttribute("pendingAppointment");
+
+        // 2. Jika tak ada dalam session, redirect ke Booking
+        if (appointment == null) {
+            return "redirect:/booking";
         }
 
-        Optional<Appointment> appointmentOpt = appointmentRepository.findById(appointmentId);
-        if (appointmentOpt.isEmpty())
-            return "redirect:/view-appointment";
-
-        Appointment appointment = appointmentOpt.get();
         model.addAttribute("appointment", appointment);
 
-        // If already paid, redirect to receipt
-        if ("completed".equalsIgnoreCase(appointment.getPaymentStatus())) {
-            return "redirect:/receipt?appointmentId=" + appointmentId;
+        // If already paid (unlikely if session based, but good safety check)
+        // Note: appointment ID might be null here as it's not saved yet
+        // So we skip the ID check for now or check status only if ID exists
+
+        // ✅ 3. LOGIK KIRA HARGA (AMBIL DARI OBJEK SESSION)
+        double price = 0.0;
+        String category = appointment.getCustType();
+
+        // Handle case kalau category null
+        if (category == null)
+            category = "Adult";
+
+        switch (category) {
+            case "Child":
+                price = 10.0;
+                break;
+            case "Teen":
+                price = 13.0;
+                break;
+            case "Senior":
+                price = 12.0;
+                break;
+            case "Adult":
+            default:
+                price = 15.0;
+                break;
         }
 
-        // Check Loyalty Points
-        double price = 15.0; // Default price
+        // 4. Check Loyalty Points
         Customer customer = (Customer) session.getAttribute("customer");
         if (customer != null) {
-            // Reload customer from DB to get latest points
+            // Reload from DB to get latest points
             customer = customerRepository.findById(customer.getCustId()).orElse(customer);
             if (customer.getCustLoyaltyPoints() != null && customer.getCustLoyaltyPoints() >= MAX_LOYALTY_POINTS) {
                 price = 0.0;
                 model.addAttribute("freeMessage",
-                        "Congratulations! This appointment is FREE as you have reached the loyalty reward.");
+                        "Congratulations! This appointment is FREE as you have reached loyalty reward.");
             }
         }
 
@@ -82,24 +104,42 @@ public class PaymentController {
             @RequestParam(required = false) String bankHolderName,
             HttpSession session) {
 
-        Long appointmentId = (Long) session.getAttribute("lastAppointmentId");
-        if (appointmentId == null)
-            return "redirect:/view-appointment";
-        
-        // ✅ BLOCK DOUBLE PAYMENT
-        if (paymentRepository.existsByAppointmentId(appointmentId)) {
-            return "redirect:/receipt?appointmentId=" + appointmentId;
+        // ✅ 1. AMBIL APPOINTMENT DARI SESSION
+        Appointment appointment = (Appointment) session.getAttribute("pendingAppointment");
+
+        // 2. Jika session hilang/tak ada, redirect ke booking
+        if (appointment == null) {
+            return "redirect:/booking";
         }
 
-        Optional<Appointment> appointmentOpt = appointmentRepository.findById(appointmentId);
-        if (appointmentOpt.isEmpty())
-            return "redirect:/view-appointment";
+        // ✅ 3. PASTIKAN ID KOSONG (Supaya JPA create new record)
+        appointment.setAppointmentId(null);
 
-        Appointment appointment = appointmentOpt.get();
+        // ✅ 4. KIRA HARGA (Sama macam atas)
         double price = 15.0;
+        String category = appointment.getCustType();
+        if (category == null)
+            category = "Adult";
 
-        // Check loyalty for price calculation
-        Optional<Customer> custOpt = customerRepository.findById(appointment.getCustId());
+        switch (category) {
+            case "Child":
+                price = 10.0;
+                break;
+            case "Teen":
+                price = 13.0;
+                break;
+            case "Senior":
+                price = 12.0;
+                break;
+            case "Adult":
+            default:
+                price = 15.0;
+                break;
+        }
+
+        // Check loyalty
+        Long custId = appointment.getCustId();
+        Optional<Customer> custOpt = customerRepository.findById(custId);
         if (custOpt.isPresent()) {
             Customer c = custOpt.get();
             if (c.getCustLoyaltyPoints() != null && c.getCustLoyaltyPoints() >= MAX_LOYALTY_POINTS) {
@@ -107,29 +147,32 @@ public class PaymentController {
             }
         }
 
+        // ✅ 5. SIMPAN APPOINTMENT KE DATABASE (BARU SEKARANG)
+        Appointment savedAppointment = appointmentRepository.save(appointment);
+        Long newAppointmentId = savedAppointment.getAppointmentId();
+
+        // ✅ 6. HANDLE PAYMENT
         Payment payment;
         if ("online".equals(paymentMethod)) {
             OnlinePayment op = new OnlinePayment();
             op.setAmount(java.math.BigDecimal.valueOf(price));
             op.setPaymentDate(LocalDate.now());
-            op.setAppointmentId(appointmentId);
+            op.setAppointmentId(newAppointmentId); // Guna ID baru
             op.setPaymentMethod("online-banking");
             op.setBankName(bankName);
             op.setBankHolderName(bankHolderName);
             payment = paymentRepository.save(op);
 
-            appointment.setPaymentStatus("completed");
+            savedAppointment.setPaymentStatus("completed");
 
             // Update Loyalty Points
-            Long custId = appointment.getCustId();
             customerRepository.findById(custId).ifPresent(customer -> {
                 int currentPoints = customer.getCustLoyaltyPoints() == null ? 0 : customer.getCustLoyaltyPoints();
-                // Logic: 1->2 ... Max->(reset) 1
                 int newPoints = (currentPoints % MAX_LOYALTY_POINTS) + 1;
                 customer.setCustLoyaltyPoints(newPoints);
                 customerRepository.save(customer);
 
-                // Update session if the logged in user is this customer
+                // Update session user
                 Customer sessionCustomer = (Customer) session.getAttribute("customer");
                 if (sessionCustomer != null && sessionCustomer.getCustId().equals(custId)) {
                     session.setAttribute("customer", customer);
@@ -140,19 +183,19 @@ public class PaymentController {
             CashPayment cp = new CashPayment();
             cp.setAmount(java.math.BigDecimal.valueOf(price));
             cp.setPaymentDate(LocalDate.now());
-            cp.setAppointmentId(appointmentId);
+            cp.setAppointmentId(newAppointmentId); // Guna ID baru
             cp.setPaymentMethod("cash");
-            cp.setCashReceive(0.0); // Will be updated by staff
+            cp.setCashReceive(0.0);
             payment = paymentRepository.save(cp);
 
-            appointment.setPaymentStatus("pending");
+            savedAppointment.setPaymentStatus("pending");
         }
 
-        appointmentRepository.save(appointment);
+        appointmentRepository.save(savedAppointment);
 
-        // ✅ CLEAR BOOKING FLOW STATE
-        session.removeAttribute("lastAppointmentId");
+        // ✅ 7. CLEAR SESSION (PENTING!)
+        session.removeAttribute("pendingAppointment");
 
-        return "redirect:/receipt?appointmentId=" + appointmentId + "&source=view-appointment";
+        return "redirect:/receipt?appointmentId=" + newAppointmentId + "&source=booking";
     }
 }

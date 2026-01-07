@@ -18,7 +18,7 @@
                             <p><strong>Time:</strong> <span th:text="${appt.appointmentTime}"></span></p>
                             <p><strong>Barber:</strong> <span th:text="${appt.appointmentBarber}"></span></p>
                             <p><strong>Payment:</strong> <span th:text="${appt.paymentStatus}"></span></p>
-                            <p><strong>Status:</strong> <span th:text="${appt.serviceStatus}"></span></p>
+                            <p><strong>Service:</strong> <span th:text="${appt.serviceStatus}"></span></p>
                         </div>
                         <div class="flex gap-2 mt-4 justify-end">
                             <a th:href="@{/receipt(appointmentId=${appt.appointmentId}, source='view-appointment')}"

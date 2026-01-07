@@ -9,6 +9,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes; // ✅ IMPORT NI
 
 import java.util.Optional;
 
@@ -37,8 +38,10 @@ public class FeedbackController {
     @PostMapping("/feedback")
     public String submitFeedback(@RequestParam Long appointmentId,
                                  @RequestParam int rating,
-                                 @RequestParam String feedback,
-                                 HttpSession session) {
+                                 @RequestParam String feedback, // Variable name 'feedback' mungkin conflict dengan nama controller, tapi masih ok
+                                 HttpSession session,
+                                 RedirectAttributes redirectAttributes) { // ✅ TAMBAH PARAMETER NI
+
         Long custId = (Long) session.getAttribute("custId");
         if (custId == null) return "redirect:/register";
 
@@ -48,12 +51,22 @@ public class FeedbackController {
         f.setComments(feedback);
         feedbackRepository.save(f);
 
-        return "redirect:/feedback?appointmentId=" + appointmentId;
+        // ✅ 1. SET MESSAGE SUCCESS
+        redirectAttributes.addFlashAttribute("success", "Feedback submitted successfully.");
+
+        // ✅ 2. REDIRECT KE HISTORY (DENGAN PARAMETER SOURCE)
+        return "redirect:/appointment-history?source=feedback"; 
     }
 
     @PostMapping("/delete-feedback")
-    public String deleteFeedback(@RequestParam Long appointmentId, HttpSession session) {
+    public String deleteFeedback(@RequestParam Long appointmentId, 
+                                 HttpSession session,
+                                 RedirectAttributes redirectAttributes) { // ✅ TAMBAH PARAMETER NI
+
         feedbackRepository.findByAppointmentId(appointmentId).ifPresent(feedbackRepository::delete);
-        return "redirect:/feedback?appointmentId=" + appointmentId;
+        
+        // ✅ DELETE JUGA REDIRECT KE HISTORY
+        redirectAttributes.addFlashAttribute("success", "Feedback deleted successfully.");
+        return "redirect:/appointment-history?source=feedback";
     }
 }

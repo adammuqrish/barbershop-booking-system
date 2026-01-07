@@ -41,7 +41,9 @@
                 <a th:href="@{'/' + ${source}}"
                     class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded">
                     <span th:if="${source == 'appointment-history'}">Back to Appointment History</span>
-                    <span th:if="${source == 'view-appointment'}">Back to Appointment Page</span>
+                    <span th:if="${source == 'view-appointment' || source != 'appointment-history'}">
+                        Back to Appointment Page
+                    </span>
                 </a>
             </div>
         </div>

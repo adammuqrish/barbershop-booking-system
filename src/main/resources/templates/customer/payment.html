@@ -23,6 +23,10 @@
                         th:text="${appointment.appointmentDate}"></span></p>
                 <p class="text-sm mb-1"><span class="font-semibold">Time:</span> <span
                         th:text="${appointment.appointmentTime}"></span></p>
+                <p class="text-sm mb-1">
+                    <span class="font-semibold">Category:</span>
+                    <span th:text="${appointment.custType}"></span>
+                </p>
                 <p class="text-sm"><span class="font-semibold">Amount:</span> RM <span
                         th:text="${#numbers.formatDecimal(price, 1, 2)}"></span></p>
             </div>

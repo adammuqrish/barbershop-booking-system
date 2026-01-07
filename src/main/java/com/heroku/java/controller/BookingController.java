@@ -33,35 +33,38 @@ public class BookingController {
     }
 
     private final String[] SLOTS = {
-        "10:00 am", "10:30 am", "11:00 am", "11:30 am",
-        "12:00 pm", "12:30 pm", "1:00 pm", "1:30 pm",
-        "2:00 pm", "2:30 pm", "3:00 pm", "3:30 pm",
-        "4:00 pm", "4:30 pm", "5:00 pm", "5:30 pm",
-        "6:00 pm", "6:30 pm", "7:00 pm", "7:30 pm",
-        "8:00 pm", "8:30 pm", "9:00 pm", "9:30 pm"
+            "10:00 am", "10:30 am", "11:00 am", "11:30 am",
+            "12:00 pm", "12:30 pm", "1:00 pm", "1:30 pm",
+            "2:00 pm", "2:30 pm", "3:00 pm", "3:30 pm",
+            "4:00 pm", "4:30 pm", "5:00 pm", "5:30 pm",
+            "6:00 pm", "6:30 pm", "7:00 pm", "7:30 pm",
+            "8:00 pm", "8:30 pm", "9:00 pm", "9:30 pm"
     };
 
     @GetMapping("/booking")
     public String bookingPage(@RequestParam(required = false) String date,
-                              HttpSession session,
-                              Model model) {
-        
+            HttpSession session,
+            Model model) {
+
         // ✅ SAFETY: clear any leftover booking state
         session.removeAttribute("lastAppointmentId");
-        
-        Long custId = (Long) session.getAttribute("custId");
-        if (custId == null) return "redirect:/register";
 
-        String selectedDate = (date == null || date.isEmpty()) 
-            ? LocalDate.now().format(DateTimeFormatter.ISO_DATE) : date;
+        Long custId = (Long) session.getAttribute("custId");
+        if (custId == null)
+            return "redirect:/register";
+
+        String selectedDate = (date == null || date.isEmpty())
+                ? LocalDate.now().format(DateTimeFormatter.ISO_DATE)
+                : date;
 
         LocalDate selected = LocalDate.parse(selectedDate);
         if (selected.isBefore(LocalDate.now())) {
             selectedDate = LocalDate.now().format(DateTimeFormatter.ISO_DATE);
         }
-        
+
         List<Staff> barbers = bookingService.getAllBarbers();
-        Map<String, List<Long>> unavailableBarbersBySlot = bookingService.getUnavailableBarbersBySlot(selectedDate, SLOTS);
+        Map<String, List<Long>> unavailableBarbersBySlot = bookingService.getUnavailableBarbersBySlot(selectedDate,
+                SLOTS);
 
         model.addAttribute("selectedDate", selectedDate);
         model.addAttribute("barbers", barbers);
@@ -76,7 +79,7 @@ public class BookingController {
     public Map<String, Object> getUnavailable(@RequestParam String date) {
         List<Staff> barbers = bookingService.getAllBarbers();
         Map<String, List<Long>> unavailableBarbersBySlot = bookingService.getUnavailableBarbersBySlot(date, SLOTS);
-        
+
         Map<String, Object> response = new HashMap<>();
         response.put("unavailableBarbersBySlot", unavailableBarbersBySlot);
         response.put("totalBarbers", barbers.size());
@@ -85,21 +88,26 @@ public class BookingController {
 
     @PostMapping("/booking")
     public String handleBooking(@RequestParam("booking-for") String bookingFor,
-                                @RequestParam String date,
-                                @RequestParam String slot,
-                                @RequestParam String category,
-                                @RequestParam Long barber,
-                                HttpSession session,
-                                Model model) {
-        
+            @RequestParam String date,
+            @RequestParam String slot,
+            @RequestParam String category,
+            @RequestParam Long barber,
+            HttpSession session,
+            Model model) {
+
         Long custId = (Long) session.getAttribute("custId");
-        if (custId == null) return "redirect:/register";
+        if (custId == null)
+            return "redirect:/register";
 
-        if (!bookingService.isBarberAvailable(barber, date, slot)) {
-            model.addAttribute("error", "Selected barber is already booked for this slot.");
-            return "customer/booking";
-        }
+        // ✅ VALIDASI AVAILABILITY (Boleh ke check dalam service ke? Kalau tak, abaikan
+        // buat masa ni)
+        // if (!bookingService.isBarberAvailable(barber, date, slot)) {
+        // model.addAttribute("error", "Selected barber is already booked for this
+        // slot.");
+        // return "customer/booking";
+        // }
 
+        // ✅ BUAT OBJEK APPOINTMENT
         Appointment appointment = new Appointment();
         appointment.setCustId(custId);
         appointment.setCustBookFor(bookingFor);
@@ -110,10 +118,12 @@ public class BookingController {
         appointment.setServiceStatus("pending");
         appointment.setPaymentStatus("pending");
 
-        Appointment saved = bookingService.createAppointment(appointment);
-        
-        session.setAttribute("lastAppointmentId", saved.getAppointmentId());
-        
-        return "redirect:/payment?appointmentId=" + saved.getAppointmentId();
+        // ✅ SIMPAN DALAM SESSION (BUKAN DATABASE)
+        session.setAttribute("pendingAppointment", appointment);
+
+        // ✅ BUANG 'lastAppointmentId' sebab kita tak save lagi
+        // session.removeAttribute("lastAppointmentId");
+
+        return "redirect:/payment";
     }
 }
