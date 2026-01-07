@@ -15,7 +15,10 @@
                 </svg>
                 My Profile
             </h1>
-
+            <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+                <span th:text="${success}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
             <div class="flex flex-col md:flex-row gap-6">
                 <!-- Left box (Loyalty) -->
                 <div class="bg-gray-100 rounded-xl p-4 flex flex-col items-center w-full md:w-1/3">
