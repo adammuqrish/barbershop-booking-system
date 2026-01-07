@@ -42,8 +42,18 @@
                                                 <td th:text="${cust.custName}"></td>
                                                 <td th:text="${cust.custPhoneNumber}"></td>
                                                 <td th:text="${cust.custLoyaltyPoints}"></td>
+                                                <!-- 
+                                                ✅ LOGIK ACTION BUTTON:
+                                                Admin -> /listCustomer
+                                                Barber -> /barber/customers
+                                                -->
                                                 <td>
-                                                    <a th:href="@{/listCustomer(custId=${cust.custId})}"
+                                                    <a th:if="${staffRole == 'ADMIN'}"
+                                                        th:href="@{/listCustomer(custId=${cust.custId})}"
+                                                        class="btn btn-sm btn-primary">View</a>
+
+                                                    <a th:if="${staffRole == 'BARBER'}"
+                                                        th:href="@{/barber/customers(custId=${cust.custId})}"
                                                         class="btn btn-sm btn-primary">View</a>
                                                 </td>
                                             </tr>
@@ -65,18 +75,23 @@
                                         </div>
                                         <h5>Details</h5>
                                         <div style="width:100%;">
-                                            <div class="mb-2"><strong>Full Name:</strong> <span th:text="${customer.custName}"></span>
+                                            <div class="mb-2"><strong>Full Name:</strong> <span
+                                                    th:text="${customer.custName}"></span>
                                             </div>
-                                            <div class="mb-2"><strong>Email:</strong> <span th:text="${customer.custEmail}"></span>
+                                            <div class="mb-2"><strong>Email:</strong> <span
+                                                    th:text="${customer.custEmail}"></span>
                                             </div>
-                                            <div class="mb-2"><strong>Phone Number:</strong> <span th:text="${customer.custPhoneNumber}"></span>
+                                            <div class="mb-2"><strong>Phone Number:</strong> <span
+                                                    th:text="${customer.custPhoneNumber}"></span>
                                             </div>
-                                            <div class="mb-2"><strong>Loyalty Points:</strong> <span th:text="${customer.custLoyaltyPoints}"></span>
+                                            <div class="mb-2"><strong>Loyalty Points:</strong> <span
+                                                    th:text="${customer.custLoyaltyPoints}"></span>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                                <div th:if="${param.custId != null and customer == null}" class="alert alert-danger mt-3">
+                                <div th:if="${param.custId != null and customer == null}"
+                                    class="alert alert-danger mt-3">
                                     Customer not found.
                                 </div>
                             </div>

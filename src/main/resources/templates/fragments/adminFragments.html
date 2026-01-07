@@ -1,7 +1,12 @@
 <div th:fragment="sidebar" id="sidebar" class="nk-sidebar nk-sidebar-fixed is-theme">
   <div class="nk-sidebar-element nk-sidebar-head">
     <div class="nk-sidebar-brand">
-      <a th:href="@{/adminIndex}" class="logo-link">
+      <!-- 
+        ✅ LOGIK REDIRECT: 
+        Jika ADMIN -> /adminIndex
+        Jika BARBER -> /barber/dashboard
+      -->
+      <a th:href="${staffRole == 'ADMIN' ? '/adminIndex' : '/barber/dashboard'}" class="logo-link">
         <div class="logo-wrap" style="width: 150px; height: 100px">
           <img class="logo-img logo-light" th:src="@{/resources/uploads/hugiBarber1.png}"
             style="width: 150px; height: 100px" />

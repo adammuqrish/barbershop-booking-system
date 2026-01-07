@@ -34,7 +34,9 @@
                                                     <th>Payment Method</th>
                                                     <th>Payment</th>
                                                     <th>Service</th>
-                                                    <th>Action</th>
+
+                                                    <!-- ✅ ACTION HEADER: Hanya Admin nampak -->
+                                                    <th th:if="${staffRole == 'ADMIN'}">Action</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -43,96 +45,103 @@
                                                     <td th:text="${a.appointmentDate + ' ' + a.appointmentTime}"></td>
                                                     <td th:text="${a.custType}"></td>
                                                     <td th:text="${a.paymentMethod}"></td>
-                                                    <td>
 
-                                                        <!-- ONLINE -->
+                                                    <td>
+                                                        <!-- =========================================
+                                                            PAYMENT COLUMN LOGIC
+                                                        ========================================= -->
+
+                                                        <!-- SCENARIO 1: ONLINE (View Only untuk kedua-dua) -->
                                                         <span th:if="${a.paymentMethod == 'ONLINE'}"
                                                             class="badge bg-success">
                                                             Completed
                                                         </span>
 
-                                                        <!-- CASH - COMPLETED -->
+                                                        <!-- SCENARIO 2: CASH - ADMIN VIEW (Boleh Update) -->
                                                         <form
-                                                            th:if="${a.paymentMethod == 'CASH' and a.paymentStatus == 'completed'}"
+                                                            th:if="${a.paymentMethod == 'CASH' and staffRole == 'ADMIN'}"
                                                             th:action="@{/admin/update-payment-status}" method="post"
                                                             class="d-inline">
-
                                                             <input type="hidden" name="appointmentId"
                                                                 th:value="${a.appointmentId}" />
-                                                            <input type="hidden" name="status" value="pending" />
 
-                                                            <button type="submit" class="btn btn-success btn-sm">
+                                                            <!-- Button: COMPLETED -->
+                                                            <button th:if="${a.paymentStatus == 'completed'}"
+                                                                type="submit" class="btn btn-success btn-sm">
                                                                 Completed
                                                             </button>
-                                                        </form>
 
-                                                        <!-- CASH - PENDING -->
-                                                        <form
-                                                            th:if="${a.paymentMethod == 'CASH' and a.paymentStatus == 'pending'}"
-                                                            th:action="@{/admin/update-payment-status}" method="post"
-                                                            class="d-inline">
-
-                                                            <input type="hidden" name="appointmentId"
-                                                                th:value="${a.appointmentId}" />
-                                                            <input type="hidden" name="status" value="completed" />
-
-                                                            <button type="submit" class="btn btn-warning btn-sm">
+                                                            <!-- Button: PENDING -->
+                                                            <button th:if="${a.paymentStatus == 'pending'}"
+                                                                type="submit" name="status" value="completed"
+                                                                class="btn btn-warning btn-sm">
                                                                 Pending
                                                             </button>
                                                         </form>
 
-                                                        <!-- ✅ FALLBACK -->
-                                                        <span th:if="${a.paymentMethod == null}"
-                                                            class="badge bg-secondary">
-                                                            No Payment
-                                                        </span>
+                                                        <!-- SCENARIO 3: CASH - BARBER VIEW (Disabled/Badge Sahaja) -->
+                                                        <!-- Barber tak boleh update, jadi kita tunjuk badge status je -->
+                                                        <div
+                                                            th:if="${a.paymentMethod == 'CASH' and staffRole == 'BARBER'}">
+                                                            <span th:if="${a.paymentStatus == 'completed'}"
+                                                                class="badge bg-success">Completed</span>
+                                                            <span th:if="${a.paymentStatus == 'pending'}"
+                                                                class="badge bg-warning">Pending</span>
+                                                        </div>
 
+                                                        <!-- SCENARIO 4: FALLBACK -->
+                                                        <span th:if="${a.paymentMethod == null}"
+                                                            class="badge bg-secondary">No Payment</span>
                                                     </td>
 
                                                     <td>
-                                                        <!-- DONE -->
-                                                        <form th:if="${a.serviceStatus == 'done'}"
+                                                        <!-- =========================================
+                                                        SERVICE COLUMN LOGIC
+                                                        ========================================= -->
+
+                                                        <!-- SCENARIO 1: SERVICE STATUS - ADMIN VIEW (Boleh Update) -->
+                                                        <form th:if="${staffRole == 'ADMIN'}"
                                                             th:action="@{/admin/update-service-status}" method="post"
                                                             class="d-inline">
-
                                                             <input type="hidden" name="appointmentId"
                                                                 th:value="${a.appointmentId}" />
-                                                            <input type="hidden" name="status" value="cancelled" />
 
-                                                            <button type="submit" class="btn btn-success btn-sm">
+                                                            <!-- Button: DONE -->
+                                                            <button th:if="${a.serviceStatus == 'done'}" type="submit"
+                                                                name="status" value="cancelled"
+                                                                class="btn btn-success btn-sm">
                                                                 Done
                                                             </button>
-                                                        </form>
 
-                                                        <!-- PENDING -->
-                                                        <form th:if="${a.serviceStatus == 'pending'}"
-                                                            th:action="@{/admin/update-service-status}" method="post"
-                                                            class="d-inline">
-
-                                                            <input type="hidden" name="appointmentId"
-                                                                th:value="${a.appointmentId}" />
-                                                            <input type="hidden" name="status" value="done" />
-
-                                                            <button type="submit" class="btn btn-warning btn-sm">
+                                                            <!-- Button: PENDING -->
+                                                            <button th:if="${a.serviceStatus == 'pending'}"
+                                                                type="submit" name="status" value="done"
+                                                                class="btn btn-warning btn-sm">
                                                                 Pending
                                                             </button>
-                                                        </form>
 
-                                                        <!-- CANCELLED -->
-                                                        <form th:if="${a.serviceStatus == 'cancelled'}"
-                                                            th:action="@{/admin/update-service-status}" method="post"
-                                                            class="d-inline">
-
-                                                            <input type="hidden" name="appointmentId"
-                                                                th:value="${a.appointmentId}" />
-                                                            <input type="hidden" name="status" value="pending" />
-
-                                                            <button type="submit" class="btn btn-danger btn-sm">
+                                                            <!-- Button: CANCELLED -->
+                                                            <button th:if="${a.serviceStatus == 'cancelled'}"
+                                                                type="submit" name="status" value="pending"
+                                                                class="btn btn-danger btn-sm">
                                                                 Cancelled
                                                             </button>
                                                         </form>
+
+                                                        <!-- SCENARIO 2: SERVICE STATUS - BARBER VIEW (Disabled/Badge Sahaja) -->
+                                                        <!-- Barber tak boleh update status service -->
+                                                        <div th:if="${staffRole == 'BARBER'}">
+                                                            <span th:if="${a.serviceStatus == 'done'}"
+                                                                class="badge bg-success">Done</span>
+                                                            <span th:if="${a.serviceStatus == 'pending'}"
+                                                                class="badge bg-warning">Pending</span>
+                                                            <span th:if="${a.serviceStatus == 'cancelled'}"
+                                                                class="badge bg-danger">Cancelled</span>
+                                                        </div>
                                                     </td>
-                                                    <td>
+
+                                                    <!-- ✅ ACTION COLUMN: Hanya Admin nampak -->
+                                                    <td th:if="${staffRole == 'ADMIN'}">
                                                         <a th:href="@{/listAppointment(appointmentId=${a.appointmentId})}"
                                                             class="btn btn-sm btn-icon">
                                                             <i class="fas fa-edit"></i>
@@ -204,8 +213,7 @@
                                                 <select class="form-select" id="editBarber" name="barberId"
                                                     onchange="updateAvailableTimes()">
                                                     <option th:each="b : ${barberList}" th:value="${b.staffId}"
-                                                        th:text="${b.staffName}"
-                                                        th:selected="${appointment != null && appointment.barberId ==
+                                                        th:text="${b.staffName}" th:selected="${appointment != null && appointment.barberId ==
                                                         b.staffId}">
                                                     </option>
                                                 </select>

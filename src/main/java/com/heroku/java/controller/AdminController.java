@@ -134,20 +134,48 @@ public class AdminController {
         return "admin/adminIndex"; // Guna template yang sama
     }
 
-    // 2. BARBER CUSTOMER LIST
+    // 2. BARBER CUSTOMER LIST (DENGAN SUPPORT VIEW DETAILS)
     @GetMapping("/barber/customers")
-    public String barberCustomerList(Model model) {
+    public String barberCustomerList(
+            @RequestParam(required = false) Long custId, // ✅ TAMBAH PARAMETER NI
+            Model model) {
+
         Staff barber = getLoggedInStaff();
         if (barber == null)
             return "redirect:/adminLogin";
 
+        // Set user info untuk header
         model.addAttribute("staffName", barber.getStaffName());
         model.addAttribute("staffRole", barber.getStaffRole());
         model.addAttribute("staff", barber);
 
-        // Filter customers
+        // 1. Dapatkan senarai customer yang assign kepada barber ini
         List<Customer> customers = customerRepository.findCustomersByStaffId(barber.getStaffId());
         model.addAttribute("customerList", customers);
+
+        // 2. Logik View Details (Jika ada custId dihantar)
+        if (custId != null) {
+            Optional<Customer> customerOpt = customerRepository.findById(custId);
+
+            if (customerOpt.isPresent()) {
+                Customer customer = customerOpt.get();
+
+                // ✅ SECURITY CHECK: Pastikan customer ni benar-benar assign kepada barber ini
+                // Kita check senarai customers tadi. Kalau customer wujud dalam senarai tu,
+                // baru layak tengok.
+                boolean isAssignedToBarber = customers.stream()
+                        .anyMatch(c -> c.getCustId().equals(custId));
+
+                if (isAssignedToBarber) {
+                    model.addAttribute("customer", customer);
+                } else {
+                    // Jika Barber cuba 'hack' URL untuk tengok customer lain
+                    model.addAttribute("error", "You are not authorized to view this customer.");
+                }
+            } else {
+                model.addAttribute("error", "Customer not found.");
+            }
+        }
 
         return "admin/listCustomer"; // Guna template yang sama
     }

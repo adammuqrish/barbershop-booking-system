@@ -1,26 +1,42 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Profile</title>
+    <!-- Title ikut Role: Admin atau Barber Profile -->
+    <title th:text="${staffRole == 'ADMIN' ? 'Admin Profile' : 'Barber Profile'}">Profile</title>
     <link rel="stylesheet" th:href="@{/resources/assetsAdmin/css/style.css}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
+
 <body class="nk-body" data-sidebar-collapse="lg" data-navbar-collapse="lg">
     <div class="nk-app-root">
         <div class="nk-main">
+            <!-- Sidebar -->
             <div th:replace="~{fragments/adminFragments :: sidebar}"></div>
+
             <div class="nk-wrap">
+                <!-- Header -->
                 <div th:replace="~{fragments/adminFragments :: header}"></div>
+
                 <div class="nk-content">
                     <div class="container-fluid">
                         <div class="nk-content-inner">
+                            <div th:if="${success}" class="alert alert-success alert-dismissible fade show"
+                                role="alert">
+                                <span th:text="${success}"></span>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
                             <div class="nk-content-body">
                                 <div class="nk-block-head nk-block-head-sm">
                                     <div class="nk-block-between">
                                         <div class="nk-block-head-content">
-                                            <h3 class="nk-block-title page-title">Admin Profile</h3>
+                                            <!-- Title ikut Role -->
+                                            <h3 class="nk-block-title page-title"
+                                                th:text="${staffRole == 'ADMIN' ? 'Admin Profile' : 'Barber Profile'}">
+                                                Profile
+                                            </h3>
                                             <div class="nk-block-des text-soft">
                                                 <p>View and update your profile information.</p>
                                             </div>
@@ -30,7 +46,7 @@
                                 <div class="nk-block">
                                     <div class="card">
                                         <div class="card-aside-wrap">
-                                            <div class="card-inner card-inner-lg">
+                                            <div class="card-inner card-inner-lg p-4">
                                                 <div class="nk-block-head">
                                                     <div class="nk-block-between">
                                                         <div class="nk-block-head-content">
@@ -39,64 +55,96 @@
                                                     </div>
                                                 </div>
                                                 <div class="nk-block">
-                                                    <form th:action="@{/admin/update-my-profile}" method="post" enctype="multipart/form-data">
+
+                                                    <!-- ✅ PERUBAHAN PENTING DI SINI -->
+                                                    <!-- action akan auto check role: 
+                                                         Admin -> /admin/update-my-profile
+                                                         Barber -> /barber/update-profile
+                                                    -->
+                                                    <form
+                                                        th:action="${staffRole == 'ADMIN' ? '/admin/update-my-profile' : '/barber/update-profile'}"
+                                                        method="post" enctype="multipart/form-data">
+
                                                         <div class="row g-3">
                                                             <div class="col-md-6">
                                                                 <div class="form-group">
-                                                                    <label class="form-label" for="staffName">Name</label>
+                                                                    <label class="form-label"
+                                                                        for="staffName">Name</label>
                                                                     <div class="form-control-wrap">
-                                                                        <input type="text" class="form-control" id="staffName" name="staffName" th:value="${staff.staffName}" required>
+                                                                        <input type="text" class="form-control"
+                                                                            id="staffName" name="staffName"
+                                                                            th:value="${staff.staffName}" required>
                                                                     </div>
                                                                 </div>
                                                             </div>
                                                             <div class="col-md-6">
                                                                 <div class="form-group">
-                                                                    <label class="form-label" for="staffEmail">Email</label>
+                                                                    <label class="form-label"
+                                                                        for="staffEmail">Email</label>
                                                                     <div class="form-control-wrap">
-                                                                        <input type="email" class="form-control" id="staffEmail" name="staffEmail" th:value="${staff.staffEmail}" required>
+                                                                        <input type="email" class="form-control"
+                                                                            id="staffEmail" name="staffEmail"
+                                                                            th:value="${staff.staffEmail}" required>
                                                                     </div>
                                                                 </div>
                                                             </div>
                                                             <div class="col-md-6">
                                                                 <div class="form-group">
-                                                                    <label class="form-label" for="staffPhone">Phone Number</label>
+                                                                    <label class="form-label" for="staffPhone">Phone
+                                                                        Number</label>
                                                                     <div class="form-control-wrap">
-                                                                        <input type="text" class="form-control" id="staffPhone" name="staffPhone" th:value="${staff.staffPhoneNumber}" required>
+                                                                        <input type="text" class="form-control"
+                                                                            id="staffPhone" name="staffPhone"
+                                                                            th:value="${staff.staffPhoneNumber}"
+                                                                            required>
                                                                     </div>
                                                                 </div>
                                                             </div>
                                                             <div class="col-md-6">
                                                                 <div class="form-group">
-                                                                    <label class="form-label" for="staffRole">Role</label>
+                                                                    <label class="form-label"
+                                                                        for="staffRole">Role</label>
                                                                     <div class="form-control-wrap">
-                                                                        <input type="text" class="form-control" id="staffRole" name="staffRole" th:value="${staff.staffRole}" readonly>
+                                                                        <input type="text" class="form-control"
+                                                                            id="staffRole" name="staffRole"
+                                                                            th:value="${staff.staffRole}" readonly>
                                                                     </div>
                                                                 </div>
                                                             </div>
                                                             <div class="col-md-12">
                                                                 <div class="form-group">
-                                                                    <label class="form-label" for="description">Description</label>
+                                                                    <label class="form-label"
+                                                                        for="description">Description</label>
                                                                     <div class="form-control-wrap">
-                                                                        <textarea class="form-control" id="description" name="description" rows="3" th:text="${staff.description}"></textarea>
+                                                                        <textarea class="form-control" id="description"
+                                                                            name="description" rows="3"
+                                                                            th:text="${staff.description}"></textarea>
                                                                     </div>
                                                                 </div>
                                                             </div>
                                                             <div class="col-md-6">
                                                                 <div class="form-group">
-                                                                    <label class="form-label" for="staffPicture">Profile Picture</label>
+                                                                    <label class="form-label" for="staffPicture">Profile
+                                                                        Picture</label>
                                                                     <div class="form-control-wrap">
-                                                                        <input type="file" class="form-control" id="staffPicture" name="staffPicture" accept="image/*">
-                                                                        <small class="form-text text-muted">Leave empty to keep current picture.</small>
+                                                                        <input type="file" class="form-control"
+                                                                            id="staffPicture" name="staffPicture"
+                                                                            accept="image/*">
+                                                                        <small class="form-text text-muted">Leave empty
+                                                                            to keep current picture.</small>
                                                                     </div>
                                                                 </div>
                                                             </div>
                                                             <div class="col-12">
                                                                 <div class="form-group">
-                                                                    <button type="submit" class="btn btn-primary">Update Profile</button>
+                                                                    <button type="submit" class="btn btn-primary">Update
+                                                                        Profile</button>
                                                                 </div>
                                                             </div>
                                                         </div>
                                                     </form>
+                                                    <!-- TAMAT FORM -->
+
                                                 </div>
                                             </div>
                                         </div>
@@ -113,4 +161,5 @@
     <script th:src="@{/resources/assetsAdmin/js/scripts.js}"></script>
     <script th:src="@{/resources/assetsAdmin/js/demo-init.js}"></script>
 </body>
+
 </html>
