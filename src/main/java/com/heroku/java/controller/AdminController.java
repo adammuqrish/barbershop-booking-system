@@ -134,48 +134,20 @@ public class AdminController {
         return "admin/adminIndex"; // Guna template yang sama
     }
 
-    // 2. BARBER CUSTOMER LIST (DENGAN SUPPORT VIEW DETAILS)
+    // 2. BARBER CUSTOMER LIST
     @GetMapping("/barber/customers")
-    public String barberCustomerList(
-            @RequestParam(required = false) Long custId, // ✅ TAMBAH PARAMETER NI
-            Model model) {
-
+    public String barberCustomerList(Model model) {
         Staff barber = getLoggedInStaff();
         if (barber == null)
             return "redirect:/adminLogin";
 
-        // Set user info untuk header
         model.addAttribute("staffName", barber.getStaffName());
         model.addAttribute("staffRole", barber.getStaffRole());
         model.addAttribute("staff", barber);
 
-        // 1. Dapatkan senarai customer yang assign kepada barber ini
+        // Filter customers
         List<Customer> customers = customerRepository.findCustomersByStaffId(barber.getStaffId());
         model.addAttribute("customerList", customers);
-
-        // 2. Logik View Details (Jika ada custId dihantar)
-        if (custId != null) {
-            Optional<Customer> customerOpt = customerRepository.findById(custId);
-
-            if (customerOpt.isPresent()) {
-                Customer customer = customerOpt.get();
-
-                // ✅ SECURITY CHECK: Pastikan customer ni benar-benar assign kepada barber ini
-                // Kita check senarai customers tadi. Kalau customer wujud dalam senarai tu,
-                // baru layak tengok.
-                boolean isAssignedToBarber = customers.stream()
-                        .anyMatch(c -> c.getCustId().equals(custId));
-
-                if (isAssignedToBarber) {
-                    model.addAttribute("customer", customer);
-                } else {
-                    // Jika Barber cuba 'hack' URL untuk tengok customer lain
-                    model.addAttribute("error", "You are not authorized to view this customer.");
-                }
-            } else {
-                model.addAttribute("error", "Customer not found.");
-            }
-        }
 
         return "admin/listCustomer"; // Guna template yang sama
     }
@@ -314,32 +286,46 @@ public class AdminController {
         if (barber == null)
             return "redirect:/adminLogin";
 
-        // Logic update profile sama macam admin
+        // 1. Simpan email lama
+        String oldEmail = barber.getStaffEmail();
+
+        // 2. Update data
         barber.setStaffName(staffName);
         barber.setStaffEmail(staffEmail);
         barber.setStaffPhoneNumber(staffPhone);
         barber.setDescription(description);
 
+        // 3. Handle Image
         if (staffPicture != null && !staffPicture.isEmpty()) {
             try {
                 String fileName = System.currentTimeMillis() + "_" + staffPicture.getOriginalFilename();
                 String uploadDir = System.getProperty("user.dir") + "/src/main/resources/static/resources/uploads/";
                 java.nio.file.Path uploadPath = java.nio.file.Paths.get(uploadDir);
-                java.nio.file.Files.createDirectories(uploadPath);
-                java.nio.file.Path path = uploadPath.resolve(fileName);
-                java.nio.file.Files.write(path, staffPicture.getBytes());
+                if (!java.nio.file.Files.exists(uploadPath))
+                    java.nio.file.Files.createDirectories(uploadPath);
+                java.nio.file.Files.write(uploadPath.resolve(fileName), staffPicture.getBytes());
                 barber.setStaffPicture(fileName);
             } catch (Exception e) {
                 e.printStackTrace();
-                redirectAttributes.addFlashAttribute("error", "Failed to upload picture: " + e.getMessage());
+                redirectAttributes.addFlashAttribute("error", "Failed to upload picture");
                 return "redirect:/barber/profile";
             }
         }
 
+        // 4. Save DB
         staffRepository.save(barber);
-        redirectAttributes.addFlashAttribute("success", "Profile updated successfully.");
 
-        return "redirect:/barber/profile";
+        // 5. ✅ CHECK EMAIL
+        if (!oldEmail.equalsIgnoreCase(staffEmail)) {
+            // Email berubah -> Logout
+            SecurityContextHolder.clearContext();
+            redirectAttributes.addFlashAttribute("forceLogoutModal", true);
+            return "redirect:/adminLogin";
+        } else {
+            // Email tak berubah -> Stay
+            redirectAttributes.addFlashAttribute("success", "Profile updated successfully.");
+            return "redirect:/barber/profile";
+        }
     }
 
     // 7. BARBER LIST (Barber boleh tengok barber lain tapi tak boleh register)
@@ -865,64 +851,6 @@ public class AdminController {
         return "admin/editProfile";
     }
 
-    @org.springframework.web.bind.annotation.PostMapping("/admin/update-profile")
-    @PreAuthorize("hasRole('ADMIN')")
-    public String updateAdminProfile(@org.springframework.web.bind.annotation.RequestParam String name,
-            @org.springframework.web.bind.annotation.RequestParam String email,
-            @org.springframework.web.bind.annotation.RequestParam String phone,
-            @org.springframework.web.bind.annotation.RequestParam(required = false) String password,
-            @org.springframework.web.bind.annotation.RequestParam(required = false) String description,
-            @org.springframework.web.bind.annotation.RequestParam("image") org.springframework.web.multipart.MultipartFile image,
-            jakarta.servlet.http.HttpSession session,
-            Model model) {
-        Long staffId = (Long) session.getAttribute("staffId");
-        if (staffId == null) {
-            return "redirect:/adminLogin";
-        }
-
-        staffRepository.findById(staffId).ifPresent(staff -> {
-            staff.setStaffName(name);
-            staff.setStaffEmail(email);
-            staff.setStaffPhoneNumber(phone);
-            staff.setDescription(description);
-
-            // Handle image upload
-            if (image != null && !image.isEmpty()) {
-                try {
-                    String fileName = java.util.UUID.randomUUID().toString() + "_" + image.getOriginalFilename();
-                    java.nio.file.Path uploadPath = java.nio.file.Paths
-                            .get("src/main/resources/static/resources/uploads");
-
-                    if (!java.nio.file.Files.exists(uploadPath)) {
-                        java.nio.file.Files.createDirectories(uploadPath);
-                    }
-
-                    java.nio.file.Path filePath = uploadPath.resolve(fileName);
-                    java.nio.file.Files.copy(image.getInputStream(), filePath,
-                            java.nio.file.StandardCopyOption.REPLACE_EXISTING);
-
-                    staff.setStaffPicture(fileName);
-                } catch (java.io.IOException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            // Handle password update
-            if (password != null && !password.isEmpty()) {
-                com.heroku.java.service.StaffService staffService = new com.heroku.java.service.StaffService(
-                        staffRepository);
-                staff.setStaffPassword(password);
-                staffService.saveStaff(staff); // Will hash password
-            } else {
-                staffRepository.save(staff);
-            }
-
-            session.setAttribute("loggedInStaff", staff);
-        });
-
-        return "redirect:/admin/profile";
-    }
-
     @GetMapping("/admin/profile")
     @PreAuthorize("hasRole('ADMIN')")
     public String adminProfile(Model model) {
@@ -948,52 +876,85 @@ public class AdminController {
         return "admin/profile";
     }
 
-    @org.springframework.web.bind.annotation.PostMapping("/admin/update-my-profile")
+    @PostMapping("/admin/update-my-profile")
     @PreAuthorize("hasRole('ADMIN')")
-    public String updateProfile(@org.springframework.web.bind.annotation.RequestParam("staffName") String staffName,
-            @org.springframework.web.bind.annotation.RequestParam("staffEmail") String staffEmail,
-            @org.springframework.web.bind.annotation.RequestParam("staffPhone") String staffPhone,
-            @org.springframework.web.bind.annotation.RequestParam("description") String description,
-            @org.springframework.web.bind.annotation.RequestParam(value = "staffPicture", required = false) org.springframework.web.multipart.MultipartFile staffPicture,
-            org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+    public String updateProfile(
+            @RequestParam("staffName") String staffName,
+            @RequestParam("staffEmail") String staffEmail,
+            @RequestParam("staffPhone") String staffPhone,
+            @RequestParam("description") String description,
+            @RequestParam(value = "staffPicture", required = false) MultipartFile staffPicture,
+            @RequestParam(value = "staffPassword", required = false) String staffPassword, // ✅ TAMBAH NI
+            RedirectAttributes redirectAttributes) {
+
+        // 1. Dapatkan user yang sedang login (Current Auth)
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth != null && !auth.getName().equals("anonymousUser")) {
-            String currentEmail = auth.getName();
-            Optional<Staff> staffOpt = staffRepository.findByStaffEmail(currentEmail);
-            if (staffOpt.isPresent()) {
-                Staff staff = staffOpt.get();
-                staff.setStaffName(staffName);
-                staff.setStaffEmail(staffEmail);
-                staff.setStaffPhoneNumber(staffPhone);
-                staff.setDescription(description);
+        String currentEmail = auth.getName();
 
-                if (staffPicture != null && !staffPicture.isEmpty()) {
-                    try {
-                        String fileName = System.currentTimeMillis() + "_" + staffPicture.getOriginalFilename();
-                        String uploadDir = System.getProperty("user.dir")
-                                + "/src/main/resources/static/resources/uploads/";
-                        java.nio.file.Path uploadPath = java.nio.file.Paths.get(uploadDir);
-                        java.nio.file.Files.createDirectories(uploadPath);
-                        java.nio.file.Path path = uploadPath.resolve(fileName);
-                        java.nio.file.Files.write(path, staffPicture.getBytes());
-                        staff.setStaffPicture(fileName);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        redirectAttributes.addFlashAttribute("error", "Failed to upload picture: " + e.getMessage());
-                        return "redirect:/admin/profile";
-                    }
-                }
+        // 2. Dapatkan data staff dari DB
+        Optional<Staff> staffOpt = staffRepository.findByStaffEmail(currentEmail);
 
-                staffRepository.save(staff);
-                redirectAttributes.addFlashAttribute("success", "Profile updated successfully.");
-            } else {
-                redirectAttributes.addFlashAttribute("error", "Staff not found.");
+        if (staffOpt.isPresent()) {
+            Staff staff = staffOpt.get();
+
+            // 3. Simpan email LAMA untuk comparison
+            String oldEmail = staff.getStaffEmail();
+
+            // 4. Update data asas
+            staff.setStaffName(staffName);
+            staff.setStaffEmail(staffEmail);
+            staff.setStaffPhoneNumber(staffPhone);
+            staff.setDescription(description);
+
+            // 5. Handle Password Update (Dari Method 1)
+            if (staffPassword != null && !staffPassword.isEmpty()) {
+                // Guna StaffService untuk hash password
+                com.heroku.java.service.StaffService staffService = new com.heroku.java.service.StaffService(
+                        staffRepository);
+                staff.setStaffPassword(staffPassword); // Service akan hashkan dia
+                staffService.saveStaff(staff);
             }
-        } else {
-            redirectAttributes.addFlashAttribute("error", "Not authenticated.");
-        }
 
-        return "redirect:/admin/profile";
+            // 6. Handle Image (Guna path yang lebih stabil)
+            if (staffPicture != null && !staffPicture.isEmpty()) {
+                try {
+                    String fileName = System.currentTimeMillis() + "_" + staffPicture.getOriginalFilename();
+                    String uploadDir = System.getProperty("user.dir") + "/src/main/resources/static/resources/uploads/";
+                    java.nio.file.Path uploadPath = java.nio.file.Paths.get(uploadDir);
+                    if (!java.nio.file.Files.exists(uploadPath)) {
+                        java.nio.file.Files.createDirectories(uploadPath);
+                    }
+                    java.nio.file.Path path = uploadPath.resolve(fileName);
+                    java.nio.file.Files.write(path, staffPicture.getBytes());
+                    staff.setStaffPicture(fileName);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    redirectAttributes.addFlashAttribute("error", "Failed to upload picture");
+                    return "redirect:/admin/profile";
+                }
+            }
+
+            // 7. Simpan ke Database (Jika password tak diupdate, save biasa)
+            if (staffPassword == null || staffPassword.isEmpty()) {
+                staffRepository.save(staff);
+            }
+
+            // 8. LOGIK PENENTUAN EMAIL
+            if (!oldEmail.equalsIgnoreCase(staffEmail)) {
+                // Email berubah -> Force Logout
+                SecurityContextHolder.clearContext();
+                redirectAttributes.addFlashAttribute("forceLogoutModal", true);
+                return "redirect:/adminLogin";
+            } else {
+                // Email tak berubah -> Refresh
+                redirectAttributes.addFlashAttribute("success", "Profile updated successfully.");
+                return "redirect:/admin/profile";
+            }
+
+        } else {
+            redirectAttributes.addFlashAttribute("error", "User not found.");
+            return "redirect:/admin/profile";
+        }
     }
 
     @PostMapping("/admin/delete-staff")

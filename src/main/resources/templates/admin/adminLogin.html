@@ -58,7 +58,53 @@
                 </div>
             </div>
         </div>
-    </div>
+        <!-- ✅ MODAL DIALOG -->
+        <div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true"
+            th:classappend="${forceLogoutModal} ? 'show d-block' : ''">
+
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="logoutModalLabel">Session Ended</h5>
+                        <!-- ✅ BUTANG X: Tambah onclick="forceCloseModal()" -->
+                        <button type="button" class="btn-close" onclick="forceCloseModal()" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p><strong>Your email has been changed.</strong></p>
+                        <p>You have been logged out. Please login again.</p>
+                    </div>
+                    <div class="modal-footer">
+                        <!-- ✅ BUTANG OK: Tambah onclick="forceCloseModal()" -->
+                        <button type="button" class="btn btn-primary" onclick="forceCloseModal()">OK</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ✅ BACKGROUND OVERLAY (LAYER HITAM) -->
+        <div th:if="${forceLogoutModal}" class="modal-backdrop fade show"></div>
+
+        <!-- ✅ JAVASCRIPT: Fungsi Khas Tutup Modal -->
+        <script th:if="${forceLogoutModal}">
+            function forceCloseModal() {
+                // 1. Dapatkan elemen modal
+                var modalElement = document.getElementById('logoutModal');
+
+                // 2. Buang class 'show' dan 'd-block' untuk sembunyikan modal
+                modalElement.classList.remove('show');
+                modalElement.classList.remove('d-block');
+
+                // 3. Cari dan buang background gelap (modal-backdrop)
+                var backdrop = document.querySelector('.modal-backdrop');
+                if (backdrop) {
+                    backdrop.remove();
+                }
+
+                // 4. Enable scroll balik pada body (selalunya modal disable scroll)
+                document.body.classList.remove('modal-open');
+                document.body.style.overflow = '';
+            }
+        </script>
 </body>
 
 </html>
