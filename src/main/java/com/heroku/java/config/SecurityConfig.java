@@ -40,7 +40,8 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/profile", "/edit-profile", "/update-profile",
                                 "/view-appointment", "/appointment-history", "/booking/**",
-                                "/payment", "/processPayment", "/receipt", "/feedback", "/cancel-appointment", "/edit-appointment")
+                                "/payment", "/processPayment", "/receipt", "/feedback", "/cancel-appointment", "/edit-appointment",
+                                "/update-appointment"        )
                         .permitAll()
 
                         .anyRequest().authenticated())

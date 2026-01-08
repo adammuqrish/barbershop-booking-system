@@ -69,23 +69,85 @@
         const barbersList = /*[[${barbers}]]*/[];
         let unavailableBarbersBySlot = /*[[${unavailableBarbersBySlot}]]*/ {};
 
+        // ✅ LOGIK TAMBAHAN: CHECK CURRENT TIME
         document.getElementById('date').addEventListener('change', function () {
             const selectedDate = this.value;
+
+            // Panggil API untuk check availability
             fetch('/booking/unavailable?date=' + selectedDate)
                 .then(r => r.json())
                 .then(data => {
                     unavailableBarbersBySlot = data.unavailableBarbersBySlot;
-                    const radios = document.querySelectorAll('.slot-radio');
-                    radios.forEach(radio => {
-                        radio.checked = false;
-                        const unavailableCount = (unavailableBarbersBySlot[radio.value] || []).length;
-                        radio.disabled = (unavailableCount >= data.totalBarbers);
-                    });
-                    document.getElementById('selected-time').value = '--:-- --';
-                    document.getElementById('barber').selectedIndex = 0;
+
+                    // ✅ CALL FUNCTION UNTUK UPDATE SLOT
+                    updateSlotStatus(selectedDate, data.totalBarbers);
                 });
         });
 
+        // ✅ FUNGSI BARU: Update Slot Status
+        function updateSlotStatus(selectedDate, totalBarbers) {
+            const radios = document.querySelectorAll('.slot-radio');
+            const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+
+            let currentTimeStr = ""; // Masa sekarang dalam format "HH:mm"
+            let isToday = (selectedDate === today);
+
+            // Jika tarikh hari ini, kita dapat masa sekarang
+            if (isToday) {
+                const now = new Date();
+                const hours = now.getHours();
+                const minutes = now.getMinutes();
+                // Convert 24h ke 12h format dan tambah am/pm untuk comparison
+                // ATAU lebih senang: Kita tukar slot array tu ke 24h format untuk banding
+
+                // Contoh simple: Kita bandingkan jam je (tanpa minit) untuk simplify
+                // "10:00 am" -> 10, "10:30 am" -> 10.5
+                // "01:00 pm" -> 13, "01:30 pm" -> 13.5
+                currentTimeVal = hours + (minutes / 60);
+            }
+
+            radios.forEach(radio => {
+                radio.checked = false;
+
+                // 1. Check Availability (Barber penuh)
+                const unavailableCount = (unavailableBarbersBySlot[radio.value] || []).length;
+                const isFull = (unavailableCount >= totalBarbers);
+
+                // 2. Check Time (Sudah lepas ke belum)
+                let isTimePassed = false;
+                if (isToday) {
+                    // Extract jam & minit dari slot string (contoh: "10:00 am")
+                    const timeParts = radio.value.trim().split(' ');
+                    const hm = timeParts[0].split(':');
+                    let slotHour = parseInt(hm[0]);
+                    const slotMin = parseInt(hm[1] || 0);
+                    const ampm = timeParts[1]; // am or pm
+
+                    // Convert slot ke format 24h (number decimal)
+                    let slotVal = slotHour;
+                    if (ampm.toLowerCase() === 'pm' && slotHour !== 12) {
+                        slotVal += 12;
+                    } else if (ampm.toLowerCase() === 'am' && slotHour === 12) {
+                        slotVal = 0;
+                    }
+                    slotVal = slotVal + (slotMin / 60);
+
+                    // Banding: Jika slot masa < masa sekarang, ia sudah lepas
+                    // Tambah buffer 30 minit (0.5) sebab masa tak menunggu orang
+                    if (slotVal < (currentTimeVal + 0.5)) {
+                        isTimePassed = true;
+                    }
+                }
+
+                // 3. Disable jika PENUH ATAU MASA DAH LEWAT
+                radio.disabled = isFull || isTimePassed;
+            });
+
+            document.getElementById('selected-time').value = '--:-- --';
+            document.getElementById('barber').selectedIndex = 0;
+        }
+
+        // Event listener bila pilih slot
         document.querySelectorAll('.slot-radio').forEach(radio => {
             radio.addEventListener('change', function () {
                 const slot = this.value;
@@ -101,6 +163,19 @@
                 });
                 barberSelect.selectedIndex = 0;
             });
+        });
+
+        // ✅ RUN CHECK SEKALI PADA MASA LOAD AWAL (Kalau user refresh page, date mungkin masih terisi)
+        window.addEventListener('DOMContentLoaded', () => {
+            const dateInput = document.getElementById('date');
+            if (dateInput.value) {
+                fetch('/booking/unavailable?date=' + dateInput.value)
+                    .then(r => r.json())
+                    .then(data => {
+                        unavailableBarbersBySlot = data.unavailableBarbersBySlot;
+                        updateSlotStatus(dateInput.value, data.totalBarbers);
+                    });
+            }
         });
     </script>
 </body>

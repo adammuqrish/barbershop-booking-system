@@ -1,6 +1,7 @@
 package com.heroku.java.controller;
 
 import com.heroku.java.model.Appointment;
+import com.heroku.java.model.Staff;
 import com.heroku.java.repository.AppointmentRepository;
 import com.heroku.java.repository.StaffRepository;
 import jakarta.servlet.http.HttpSession;
@@ -14,6 +15,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.heroku.java.service.BookingService;
 import java.util.Map;
@@ -166,7 +168,9 @@ public class AppointmentController {
             @RequestParam String slot,
             @RequestParam Long barber,
             HttpSession session,
-            Model model) {
+            Model model,
+            RedirectAttributes redirectAttributes) { // TAMBAH NI
+
         Long custId = (Long) session.getAttribute("custId");
         if (custId == null)
             return "redirect:/register";
@@ -178,24 +182,38 @@ public class AppointmentController {
         Appointment appt = apptOpt.get();
 
         if (!bookingService.isBarberAvailableForUpdate(barber, date, slot, appointmentId)) {
-            List<com.heroku.java.model.Staff> barbers = bookingService.getAllBarbers();
+            // ✅ 1. ADD ERROR ATTRIBUTE
+            model.addAttribute("error", "Selected barber is already booked for this slot.");
+
+            // ✅ 2. REPOPULATE DATA (Supaya form tak kosong)
+            // Set data baru pada object supaya form terisi value yang user cuba masukkan
+            // tadi
+            appt.setAppointmentDate(date);
+            appt.setAppointmentTime(slot);
+            appt.setBarberId(barber);
+
+            // Get barbers list & unavailable map
+            List<Staff> barbers = bookingService.getAllBarbers();
             Map<String, List<Long>> unavailableBarbersBySlot = bookingService.getUnavailableBarbersBySlot(date, SLOTS);
 
-            model.addAttribute("error", "Selected barber is already booked for this slot.");
             model.addAttribute("appointment", appt);
-            appt.setAppointmentDate(date);
             model.addAttribute("barbers", barbers);
             model.addAttribute("unavailableBarbersBySlot", unavailableBarbersBySlot);
             model.addAttribute("slots", SLOTS);
+
+            // ✅ 3. RETURN KE EDIT PAGE (BUKAN REDIRECT)
             return "customer/edit-appointment";
         }
 
+        // ✅ 4. JIKA BERJAYA (SUCCESS)
         appt.setAppointmentDate(date);
         appt.setAppointmentTime(slot);
         appt.setBarberId(barber);
 
         appointmentRepository.save(appt);
 
+        // Guna RedirectAttributes sebab kita redirect keluar dari page ni
+        redirectAttributes.addFlashAttribute("success", "Appointment updated successfully.");
         return "redirect:/view-appointment";
     }
 }
