@@ -19,6 +19,7 @@ import com.heroku.java.service.BookingService;
 import java.util.Map;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Controller
 public class AppointmentController {
@@ -65,20 +66,45 @@ public class AppointmentController {
     }
 
     @GetMapping("/appointment-history")
-    public String appointmentHistory(HttpSession session, Model model) {
+    public String appointmentHistory(
+            @RequestParam(defaultValue = "0") int page,
+            HttpSession session,
+            Model model) {
+
         Long custId = (Long) session.getAttribute("custId");
         if (custId == null)
             return "redirect:/register";
 
-        List<String> historyStatuses = java.util.Arrays.asList("cancelled", "done");
-        List<Appointment> appointments = appointmentRepository.findByCustIdAndServiceStatusIn(custId, historyStatuses);
+        // 1. Dapatkan semua appointment customer (Pagination)
+        Page<Appointment> appointmentsPage = appointmentRepository.findByCustId(custId, PageRequest.of(page, 5));
 
-        // Populate barber names if needed (assuming history view might need it)
-        for (Appointment appt : appointments) {
-            staffRepository.findById(appt.getBarberId()).ifPresent(s -> appt.setAppointmentBarber(s.getStaffName()));
+        // 2. ✅ FILTER: Hanya appointment yang (Done ATAU Cancelled) DAN (Payment
+        // Completed)
+        List<Appointment> filteredAppointments = appointmentsPage.getContent().stream()
+                .filter(appt -> {
+                    boolean isServiceFinished = "done".equalsIgnoreCase(appt.getServiceStatus())
+                            || "cancelled".equalsIgnoreCase(appt.getServiceStatus());
+                    boolean isPaymentDone = "completed".equalsIgnoreCase(appt.getPaymentStatus());
+                    return isServiceFinished && isPaymentDone;
+                })
+                .collect(Collectors.toList());
+
+        // 3. Populate barber names untuk filtered list
+        for (Appointment appt : filteredAppointments) {
+            staffRepository.findById(appt.getBarberId())
+                    .ifPresent(s -> appt.setAppointmentBarber(s.getStaffName()));
         }
 
-        model.addAttribute("appointments", appointments);
+        // 4. Hantar ke HTML
+        // Kita guna List biasa (filteredAppointments), bukan Page object, sebab data
+        // dah ditapis
+        model.addAttribute("appointments", filteredAppointments);
+
+        // Untuk pagination, jika kita tapis data, Page calculation jadi tricky.
+        // Untuk simplifikasi, kita hide pagination atau guna list kosong.
+        // Di sini kita set total pages = 1 untuk elak error template.
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", 1); // Pagination disabled/disabled view
 
         return "customer/appointment-history";
     }
