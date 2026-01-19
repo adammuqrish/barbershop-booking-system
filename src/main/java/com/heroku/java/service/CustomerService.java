@@ -71,4 +71,9 @@ public class CustomerService {
             customerRepository.save(customer);
         });
     }
+
+    public Customer findByCustPhoneNumber(String phone) {
+        // Anda perlu panggil method yang sama dalam Repository
+        return customerRepository.findByCustPhoneNumber(phone);
+    }
 }

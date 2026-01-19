@@ -14,9 +14,12 @@ public interface CustomerRepository extends CrudRepository<Customer, Long> {
     Optional<Customer> findByCustEmail(String custEmail);
 
     // ✅ WAJIB TAMBAH @Query dengan JOIN
-    // Kita join Appointment untuk cari customer yang pernah booking dengan barber ini
+    // Kita join Appointment untuk cari customer yang pernah booking dengan barber
+    // ini
     @Query("SELECT DISTINCT c FROM Customer c " +
-           "JOIN Appointment a ON c.custId = a.custId " +
-           "WHERE a.barberId = :staffId")
+            "JOIN Appointment a ON c.custId = a.custId " +
+            "WHERE a.barberId = :staffId")
     List<Customer> findCustomersByStaffId(@Param("staffId") Long staffId);
+
+    Customer findByCustPhoneNumber(String custPhoneNumber);
 }

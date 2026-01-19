@@ -169,7 +169,7 @@ public class AppointmentController {
             @RequestParam Long barber,
             HttpSession session,
             Model model,
-            RedirectAttributes redirectAttributes) { // TAMBAH NI
+            RedirectAttributes redirectAttributes) {
 
         Long custId = (Long) session.getAttribute("custId");
         if (custId == null)
@@ -181,18 +181,50 @@ public class AppointmentController {
         }
         Appointment appt = apptOpt.get();
 
+        // --- FIX: SEMAK TARIKH & MASA DAH LEWAT KE BELUM ---
+        try {
+            String time24 = convertTimeTo24Hour(slot);
+
+            java.time.LocalDateTime appointmentDateTime = java.time.LocalDateTime.parse(
+                    date + " " + time24,
+                    java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+
+            java.time.LocalDateTime now = java.time.LocalDateTime.now();
+
+            if (appointmentDateTime.isBefore(now)) {
+                model.addAttribute("error", "Cannot select a past date or time.");
+
+                // Repopulate data supaya form tak kosong
+                appt.setAppointmentDate(date);
+                appt.setAppointmentTime(slot);
+                appt.setBarberId(barber);
+
+                List<Staff> barbers = bookingService.getAllBarbers();
+                Map<String, List<Long>> unavailableBarbersBySlot = bookingService.getUnavailableBarbersBySlot(date,
+                        SLOTS);
+
+                model.addAttribute("appointment", appt);
+                model.addAttribute("barbers", barbers);
+                model.addAttribute("unavailableBarbersBySlot", unavailableBarbersBySlot);
+                model.addAttribute("slots", SLOTS);
+
+                return "customer/edit-appointment";
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        // -------------------------------------------------
+
+        // --- FIX: SEMAK SLOT DUPLIKAT (OVERLAP) ---
         if (!bookingService.isBarberAvailableForUpdate(barber, date, slot, appointmentId)) {
-            // ✅ 1. ADD ERROR ATTRIBUTE
             model.addAttribute("error", "Selected barber is already booked for this slot.");
 
-            // ✅ 2. REPOPULATE DATA (Supaya form tak kosong)
-            // Set data baru pada object supaya form terisi value yang user cuba masukkan
-            // tadi
+            // Repopulate data
             appt.setAppointmentDate(date);
             appt.setAppointmentTime(slot);
             appt.setBarberId(barber);
 
-            // Get barbers list & unavailable map
             List<Staff> barbers = bookingService.getAllBarbers();
             Map<String, List<Long>> unavailableBarbersBySlot = bookingService.getUnavailableBarbersBySlot(date, SLOTS);
 
@@ -201,19 +233,36 @@ public class AppointmentController {
             model.addAttribute("unavailableBarbersBySlot", unavailableBarbersBySlot);
             model.addAttribute("slots", SLOTS);
 
-            // ✅ 3. RETURN KE EDIT PAGE (BUKAN REDIRECT)
             return "customer/edit-appointment";
         }
+        // ------------------------------------------
 
-        // ✅ 4. JIKA BERJAYA (SUCCESS)
+        // Simpan jika ok
         appt.setAppointmentDate(date);
         appt.setAppointmentTime(slot);
         appt.setBarberId(barber);
 
         appointmentRepository.save(appt);
 
-        // Guna RedirectAttributes sebab kita redirect keluar dari page ni
         redirectAttributes.addFlashAttribute("success", "Appointment updated successfully.");
         return "redirect:/view-appointment";
+    }
+
+    // Helper method
+    private String convertTimeTo24Hour(String slot) {
+        String[] parts = slot.split(" ");
+        String time = parts[0];
+        String ampm = parts[1];
+
+        String[] hm = time.split(":");
+        int hour = Integer.parseInt(hm[0]);
+
+        if (ampm.equalsIgnoreCase("pm") && hour != 12) {
+            hour += 12;
+        } else if (ampm.equalsIgnoreCase("am") && hour == 12) {
+            hour = 0;
+        }
+
+        return String.format("%02d:%02d", hour, Integer.parseInt(hm[1]));
     }
 }

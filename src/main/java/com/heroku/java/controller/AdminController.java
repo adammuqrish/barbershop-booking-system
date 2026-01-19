@@ -8,6 +8,7 @@ import com.heroku.java.model.Staff;
 import com.heroku.java.repository.AppointmentRepository;
 import com.heroku.java.repository.CustomerRepository;
 import com.heroku.java.repository.StaffRepository;
+import com.heroku.java.service.BookingService;
 
 import jakarta.servlet.http.HttpSession;
 
@@ -44,18 +45,21 @@ public class AdminController {
     private final AppointmentRepository appointmentRepository;
     private final PaymentRepository paymentRepository;
     private final com.heroku.java.repository.FeedbackRepository feedbackRepository;
+    private final BookingService bookingService;
 
     @Autowired
     public AdminController(CustomerRepository customerRepository,
             StaffRepository staffRepository,
             AppointmentRepository appointmentRepository,
             PaymentRepository paymentRepository,
-            com.heroku.java.repository.FeedbackRepository feedbackRepository) {
+            com.heroku.java.repository.FeedbackRepository feedbackRepository,
+            BookingService bookingService) {
         this.customerRepository = customerRepository;
         this.staffRepository = staffRepository;
         this.appointmentRepository = appointmentRepository;
         this.paymentRepository = paymentRepository;
         this.feedbackRepository = feedbackRepository;
+        this.bookingService = bookingService;
     }
 
     // Helper method untuk dapatkan Staff yang sedang login
@@ -314,16 +318,31 @@ public class AdminController {
         if (barber == null)
             return "redirect:/adminLogin";
 
-        // 1. Simpan email lama
         String oldEmail = barber.getStaffEmail();
+        String oldPhone = barber.getStaffPhoneNumber();
+        Long currentStaffId = barber.getStaffId();
 
-        // 2. Update data
+        // --- VALIDASI DUPLIKAT PHONE (BUG FIX) ---
+
+        // Semak hanya jika nombor telefon ditukar
+        if (!staffPhone.equals(oldPhone)) {
+            Staff existingStaff = staffRepository.findByStaffPhoneNumber(staffPhone);
+
+            // Jika nombor wujud DAN ia bukan milik diri sendiri
+            if (existingStaff != null && !existingStaff.getStaffId().equals(currentStaffId)) {
+                redirectAttributes.addFlashAttribute("error", "Phone number already exist");
+                return "redirect:/barber/profile";
+            }
+        }
+        // ------------------------------------------
+
+        // Update data
         barber.setStaffName(staffName);
         barber.setStaffEmail(staffEmail);
         barber.setStaffPhoneNumber(staffPhone);
         barber.setDescription(description);
 
-        // 3. Handle Image
+        // Handle Image
         if (staffPicture != null && !staffPicture.isEmpty()) {
             try {
                 String fileName = System.currentTimeMillis() + "_" + staffPicture.getOriginalFilename();
@@ -340,17 +359,15 @@ public class AdminController {
             }
         }
 
-        // 4. Save DB
+        // Save DB
         staffRepository.save(barber);
 
-        // 5. ✅ CHECK EMAIL
+        // Check Email
         if (!oldEmail.equalsIgnoreCase(staffEmail)) {
-            // Email berubah -> Logout
             SecurityContextHolder.clearContext();
             redirectAttributes.addFlashAttribute("forceLogoutModal", true);
             return "redirect:/adminLogin";
         } else {
-            // Email tak berubah -> Stay
             redirectAttributes.addFlashAttribute("success", "Profile updated successfully.");
             return "redirect:/barber/profile";
         }
@@ -828,23 +845,94 @@ public class AdminController {
             @RequestParam String name,
             @RequestParam String email,
             @RequestParam String password,
+            @RequestParam String confirmPassword,
             @RequestParam String phone,
             @RequestParam String role,
             @RequestParam(required = false) String description,
             Model model) {
 
-        // ✅ Get logged-in admin
+        // 1. Dapatkan Admin yang login
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String adminEmail = auth.getName();
 
         Staff admin = staffRepository.findByStaffEmail(adminEmail)
                 .orElseThrow(() -> new RuntimeException("Admin not found"));
 
-        // ✅ Check email duplicate
-        if (staffRepository.findByStaffEmail(email).isPresent()) {
-            model.addAttribute("error", "Email already exists");
-            return "admin/registerStaff";
+        // 2. Set data asas untuk header (supaya header tak rosak)
+        model.addAttribute("staffName", admin.getStaffName());
+        model.addAttribute("staffRole", admin.getStaffRole());
+        model.addAttribute("staff", admin);
+
+        // 3. Dapatkan senarai barber & Map (Wajib ada untuk jadual!)
+        List<Staff> barberList = staffRepository.findAll();
+        model.addAttribute("barberList", barberList);
+
+        Map<Long, String> adminNameMap = new HashMap<>();
+        for (Staff s : barberList) {
+            if (s.getAdminId() != null) {
+                staffRepository.findById(s.getAdminId())
+                        .ifPresent(a -> adminNameMap.put(s.getStaffId(), a.getStaffName()));
+            }
         }
+        model.addAttribute("adminNameMap", adminNameMap);
+
+        // --- BAHAGIAN VALIDASI (Seperti sebelum ini) ---
+
+        if (name == null || name.trim().isEmpty()) {
+            model.addAttribute("error", "Please fill this input");
+            return "admin/listBarber";
+        }
+
+        if (email == null || email.trim().isEmpty()) {
+            model.addAttribute("error", "Please fill out this field");
+            return "admin/listBarber";
+        }
+
+        if (!email.matches("^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$")) {
+            model.addAttribute("error", "Please use correct format");
+            return "admin/listBarber";
+        }
+
+        if (staffRepository.findByStaffEmail(email).isPresent()) {
+            model.addAttribute("error", "Email already exist");
+            return "admin/listBarber";
+        }
+
+        // --- BAHAGIAN PHONE ---
+        if (phone == null || phone.trim().isEmpty()) {
+            model.addAttribute("error", "Please fill this input");
+            return "admin/listBarber";
+        }
+
+        // (Pastikan ada method ini dalam Repository)
+        if (staffRepository.findByStaffPhoneNumber(phone) != null) {
+            model.addAttribute("error", "Phone number already exist");
+            return "admin/listBarber";
+        }
+        // <-- Pastikan ada kurungan penutup di sini
+
+        // --- BAHAGIAN PASSWORD ---
+        if (password == null || password.trim().isEmpty()) {
+            model.addAttribute("error", "Please fill this input");
+            return "admin/listBarber";
+        }
+
+        if (confirmPassword == null || confirmPassword.trim().isEmpty()) {
+            model.addAttribute("error", "Please fill this input");
+            return "admin/listBarber";
+        }
+
+        if (!password.equals(confirmPassword)) {
+            model.addAttribute("error", "Password do not match");
+            return "admin/listBarber";
+        }
+
+        if (role == null || role.trim().isEmpty()) {
+            model.addAttribute("error", "Please select a role");
+            return "admin/listBarber";
+        }
+
+        // --- SIMPAN DATA (Seperti sebelum ini) ---
 
         Staff staff = new Staff();
         staff.setStaffName(name);
@@ -853,11 +941,8 @@ public class AdminController {
         staff.setStaffPhoneNumber(phone);
         staff.setStaffRole(role);
         staff.setDescription(description);
-
-        // ✅ IMPORTANT
         staff.setAdminId(admin.getStaffId());
 
-        // ✅ Save
         com.heroku.java.service.StaffService staffService = new com.heroku.java.service.StaffService(staffRepository);
         staffService.saveStaff(staff);
 
@@ -912,10 +997,10 @@ public class AdminController {
             @RequestParam("staffPhone") String staffPhone,
             @RequestParam("description") String description,
             @RequestParam(value = "staffPicture", required = false) MultipartFile staffPicture,
-            @RequestParam(value = "staffPassword", required = false) String staffPassword, // ✅ TAMBAH NI
+            @RequestParam(value = "staffPassword", required = false) String staffPassword,
             RedirectAttributes redirectAttributes) {
 
-        // 1. Dapatkan user yang sedang login (Current Auth)
+        // 1. Dapatkan user yang sedang login
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String currentEmail = auth.getName();
 
@@ -924,26 +1009,39 @@ public class AdminController {
 
         if (staffOpt.isPresent()) {
             Staff staff = staffOpt.get();
-
-            // 3. Simpan email LAMA untuk comparison
+            Long currentStaffId = staff.getStaffId();
             String oldEmail = staff.getStaffEmail();
+            String oldPhone = staff.getStaffPhoneNumber();
 
-            // 4. Update data asas
+            // --- VALIDASI DUPLIKAT PHONE (BUG FIX #004_11) ---
+
+            // Semak hanya jika nombor telefon ditukar
+            if (!staffPhone.equals(oldPhone)) {
+                Staff existingStaff = staffRepository.findByStaffPhoneNumber(staffPhone);
+
+                // Jika nombor wujud DAN ia bukan milik diri sendiri
+                if (existingStaff != null && !existingStaff.getStaffId().equals(currentStaffId)) {
+                    redirectAttributes.addFlashAttribute("error", "Phone number already exist");
+                    return "redirect:/admin/profile";
+                }
+            }
+            // -------------------------------------------------
+
+            // 3. Update data asas
             staff.setStaffName(staffName);
             staff.setStaffEmail(staffEmail);
             staff.setStaffPhoneNumber(staffPhone);
             staff.setDescription(description);
 
-            // 5. Handle Password Update (Dari Method 1)
+            // 4. Handle Password Update
             if (staffPassword != null && !staffPassword.isEmpty()) {
-                // Guna StaffService untuk hash password
                 com.heroku.java.service.StaffService staffService = new com.heroku.java.service.StaffService(
                         staffRepository);
-                staff.setStaffPassword(staffPassword); // Service akan hashkan dia
+                staff.setStaffPassword(staffPassword);
                 staffService.saveStaff(staff);
             }
 
-            // 6. Handle Image (Guna path yang lebih stabil)
+            // 5. Handle Image
             if (staffPicture != null && !staffPicture.isEmpty()) {
                 try {
                     String fileName = System.currentTimeMillis() + "_" + staffPicture.getOriginalFilename();
@@ -962,19 +1060,17 @@ public class AdminController {
                 }
             }
 
-            // 7. Simpan ke Database (Jika password tak diupdate, save biasa)
+            // 6. Simpan ke Database
             if (staffPassword == null || staffPassword.isEmpty()) {
                 staffRepository.save(staff);
             }
 
-            // 8. LOGIK PENENTUAN EMAIL
+            // 7. Logik Logout jika email berubah
             if (!oldEmail.equalsIgnoreCase(staffEmail)) {
-                // Email berubah -> Force Logout
                 SecurityContextHolder.clearContext();
                 redirectAttributes.addFlashAttribute("forceLogoutModal", true);
                 return "redirect:/adminLogin";
             } else {
-                // Email tak berubah -> Refresh
                 redirectAttributes.addFlashAttribute("success", "Profile updated successfully.");
                 return "redirect:/admin/profile";
             }
@@ -1065,7 +1161,7 @@ public class AdminController {
         return "admin/dashboard";
     }
 
-    @GetMapping("/editAppointment")
+    @GetMapping("/admin/edit-appointment")
     @PreAuthorize("hasRole('ADMIN')")
     public String editAppointment(@RequestParam Long appointmentId, Model model) {
 
@@ -1082,6 +1178,24 @@ public class AdminController {
         model.addAttribute("barberList",
                 staffRepository.findByStaffRole("BARBER"));
 
+        // --- TAMBAHAN: Hantar data slot yang tak available ---
+
+        // ✅ BAHARUI: Guna kurungan segi empat
+        String[] slots = new String[] { "10:00 am", "10:30 am", "11:00 am", "11:30 am", "12:00 pm", "12:30 pm",
+                "01:00 pm", "01:30 pm", "02:00 pm", "02:30 pm", "03:00 pm", "03:30 pm",
+                "04:00 pm", "04:30 pm", "05:00 pm", "05:30 pm", "06:00 pm", "06:30 pm",
+                "07:00 pm", "07:30 pm", "08:00 pm", "08:30 pm", "09:00 pm", "09:30 pm" };
+
+        String currentDate = appt.getAppointmentDate();
+
+        // PANGGIL SERVICE (Guna Arrays.asList sebab parameter service adalah List)
+        Map<String, List<Long>> unavailableBarbersBySlot = bookingService.getUnavailableBarbersBySlot(currentDate,
+                slots);
+
+        model.addAttribute("unavailableBarbersBySlot", unavailableBarbersBySlot);
+        model.addAttribute("currentSlot", appt.getAppointmentTime());
+        // --------------------------------------------------
+
         return "admin/editAppointment";
     }
 
@@ -1093,11 +1207,51 @@ public class AdminController {
             @RequestParam(required = false) String appointmentTime,
             @RequestParam(name = "barberId", required = false) Long staffId,
             RedirectAttributes redirectAttributes,
-            Authentication authentication) {
+            Authentication authentication,
+            Model model) {
 
         Appointment a = appointmentRepository.findById(appointmentId)
                 .orElseThrow(() -> new RuntimeException("Appointment not found"));
 
+        // --- FIX 1: VALIDASI TARIKH & MASA ---
+        if (appointmentDate != null && !appointmentDate.isEmpty() &&
+                appointmentTime != null && !appointmentTime.isEmpty()) {
+
+            try {
+                String time24 = convertTimeTo24Hour(appointmentTime);
+                java.time.LocalDateTime newDateTime = java.time.LocalDateTime.parse(
+                        appointmentDate + " " + time24,
+                        java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+
+                java.time.LocalDateTime now = java.time.LocalDateTime.now();
+
+                if (newDateTime.isBefore(now)) {
+                    // ❌ ERROR: Past Date/Time
+                    // Kita REDIRECT dengan mesej error (bukan return page)
+                    redirectAttributes.addFlashAttribute("error", "Cannot select a past date or time.");
+                    return "redirect:/listAppointment?appointmentId=" + appointmentId;
+                }
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        // -----------------------------------------
+
+        // --- FIX 2: VALIDASI SLOT DUPLIKAT ---
+        // Kita perlu check availability
+        if (staffId != null && appointmentDate != null && appointmentTime != null) {
+            // Guna logic BookingService atau manual check
+            if (!bookingService.isBarberAvailableForUpdate(staffId, appointmentDate, appointmentTime, appointmentId)) {
+                // ❌ ERROR: Slot Full
+                // Kita REDIRECT dengan mesej error (bukan return page)
+                redirectAttributes.addFlashAttribute("error", "Selected barber is already booked for this slot.");
+                return "redirect:/listAppointment?appointmentId=" + appointmentId;
+            }
+        }
+        // -----------------------------------------
+
+        // --- BERJAYA: UPDATE & REDIRECT ---
         if (appointmentDate != null && !appointmentDate.isEmpty()) {
             a.setAppointmentDate(appointmentDate);
         }
@@ -1118,8 +1272,27 @@ public class AdminController {
 
         appointmentRepository.save(a);
 
+        // Jika berjaya, hantar success message
         redirectAttributes.addFlashAttribute("success", "Appointment updated successfully.");
         return "redirect:/listAppointment?appointmentId=" + appointmentId;
+    }
+
+    // Helper method
+    private String convertTimeTo24Hour(String slot) {
+        String[] parts = slot.split(" ");
+        String time = parts[0];
+        String ampm = parts[1];
+
+        String[] hm = time.split(":");
+        int hour = Integer.parseInt(hm[0]);
+
+        if (ampm.equalsIgnoreCase("pm") && hour != 12) {
+            hour += 12;
+        } else if (ampm.equalsIgnoreCase("am") && hour == 12) {
+            hour = 0;
+        }
+
+        return String.format("%02d:%02d", hour, Integer.parseInt(hm[1]));
     }
 
     @PostMapping("/admin/delete-appointment")

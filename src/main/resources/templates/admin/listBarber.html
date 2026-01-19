@@ -140,6 +140,7 @@
         </div>
     </div>
 
+
     <!-- Register Barber Modal -->
     <div class="modal fade" id="addBarberModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
@@ -151,6 +152,12 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body">
+
+                        <!-- ALERT ERROR -->
+                        <div th:if="${error}" class="alert alert-danger mt-2" role="alert">
+                            <span th:text="${error}"></span>
+                        </div>
+
                         <div class="row g-3">
                             <div class="col-12">
                                 <label class="form-label">Name</label>
@@ -194,8 +201,26 @@
         </div>
     </div>
 
+    <!-- Hidden Input untuk JavaScript Check (Lebih Stabil) -->
+    <input type="hidden" id="has-error-flag" th:value="${error != null ? 'true' : 'false'}">
+
+    <!-- Script -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Baca nilai dari hidden input
+            var hasError = document.getElementById('has-error-flag').value;
+
+            // Jika 'true', buka modal
+            if (hasError === 'true') {
+                var myModal = new bootstrap.Modal(document.getElementById('addBarberModal'));
+                myModal.show();
+            }
+        });
+    </script>
+
 </body>
 
 </html>

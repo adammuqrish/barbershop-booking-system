@@ -273,6 +273,18 @@
                 toggleLoginBtn.style.display = 'none';
             });
         });
+        // Cari elemen input phone
+        const phoneInput = document.querySelector('input[name="phone"]');
+
+        if (phoneInput) {
+            // Tambah event listener bila user menaip
+            phoneInput.addEventListener('input', function () {
+
+                // 1. Buang semua aksara BUKAN nombor (0-9)
+                this.value = this.value.replace(/[^0-9]/g, '');
+
+            });
+        }
     </script>
 </body>
 

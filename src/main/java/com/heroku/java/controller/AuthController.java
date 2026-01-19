@@ -49,7 +49,8 @@ public class AuthController {
     }
 
     @PostMapping("/auth")
-    public String handleAuth(@RequestParam String action,
+    public String handleAuth(
+            @RequestParam(required = false) String action,
             @RequestParam(required = false) String email,
             @RequestParam(required = false) String password,
             @RequestParam(required = false) String name,
@@ -58,6 +59,7 @@ public class AuthController {
             HttpSession session,
             Model model) {
 
+        // --- SECTION 1: LOGIN CUSTOMER ---
         if ("login".equals(action)) {
             Optional<Customer> customerOpt = customerService.login(email, password);
             if (customerOpt.isPresent()) {
@@ -69,11 +71,66 @@ public class AuthController {
                 model.addAttribute("error", "Invalid email or password");
                 return "customer/register";
             }
-        } else if ("register".equals(action)) {
-            if (!password.equals(confirmPassword)) {
-                model.addAttribute("error", "Passwords do not match.");
+        }
+
+        // --- SECTION 2: REGISTER CUSTOMER ---
+        else if ("register".equals(action)) {
+
+            // --- BAHAGIAN VALIDASI (MENYELESAIKAN BUGS) ---
+
+            // FIX #002_2: Empty Name Field
+            if (name == null || name.trim().isEmpty()) {
+                model.addAttribute("error", "Please enter your name.");
                 return "customer/register";
             }
+
+            // FIX #002_3: Empty Email Field
+            if (email == null || email.trim().isEmpty()) {
+                model.addAttribute("error", "Please enter your email.");
+                return "customer/register";
+            }
+
+            // FIX #002_7: Invalid Email Format
+            if (!email.matches("^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$")) {
+                model.addAttribute("error", "Please enter a valid email format.");
+                return "customer/register";
+            }
+
+            // FIX #002_9: Duplicate Email Registration
+            // (Service akan throw error jika ada, tapi kita handle di bawah)
+
+            // FIX #002_4: Empty Phone Number Field
+            if (phone == null || phone.trim().isEmpty()) {
+                model.addAttribute("error", "Please enter your phone number.");
+                return "customer/register";
+            }
+
+            // FIX #002_10: Duplicate Phone Number Registration
+            // Anda perlu create method dalam CustomerRepository nanti.
+            if (customerService.findByCustPhoneNumber(phone) != null) {
+                model.addAttribute("error", "Phone number already exist");
+                return "customer/register";
+            }
+
+            // FIX #002_5: Empty Password Field
+            if (password == null || password.trim().isEmpty()) {
+                model.addAttribute("error", "Please enter your password.");
+                return "customer/register";
+            }
+
+            // FIX #002_6: Empty Confirm Password Field
+            if (confirmPassword == null || confirmPassword.trim().isEmpty()) {
+                model.addAttribute("error", "Please confirm your password.");
+                return "customer/register";
+            }
+
+            // FIX #002_8: Password and Confirm Password Do Not Match
+            if (!password.equals(confirmPassword)) {
+                model.addAttribute("error", "Password do not match");
+                return "customer/register";
+            }
+
+            // --- SIMPAN DATA ---
             Customer customer = new Customer();
             customer.setCustName(name);
             customer.setCustEmail(email);
@@ -84,11 +141,15 @@ public class AuthController {
             try {
                 customerService.registerCustomer(customer);
                 model.addAttribute("successMessage", "Registration successful! You can now login.");
+                return "customer/register";
             } catch (Exception e) {
+                // Ini menangkap Duplicate Email dari Constraint DB jika Repository tak
+                // menangkap awal
                 model.addAttribute("error", "Registration failed. Email might already exist.");
+                return "customer/register";
             }
-            return "customer/register";
         }
+
         return "redirect:/register";
     }
 
