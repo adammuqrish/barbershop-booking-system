@@ -229,17 +229,25 @@ public class AdminController {
     public String barberTransactionList(Model model) {
         Staff barber = getLoggedInStaff();
         if (barber == null)
+            
             return "redirect:/adminLogin";
 
         model.addAttribute("staffName", barber.getStaffName());
         model.addAttribute("staffRole", barber.getStaffRole());
         model.addAttribute("staff", barber);
 
-        // Filter transactions (payment) berdasarkan staffId barber
-        Iterable<Payment> payments = paymentRepository.findAllByStaffId(barber.getStaffId());
+        // --- LOGIK BARU: BARBER HANYA LIHAT MILIK SENDIRI ---
+
+        // 1. Dapatkan SEMUA payment (atau kita boleh terus filter appointment,
+        // tapi struktur anda join melalui Payment. Kita guna Payment)
+        Iterable<Payment> barberPayments = paymentRepository.findAllByStaffId(barber.getStaffId());
 
         List<TransactionDTO> transactions = new ArrayList<>();
-        for (Payment p : payments) {
+        for (Payment p : barberPayments) {
+            // Kita sudah filter di repository (findAllByStaffId),
+            // jadi kesemua 'p' di sini adalah untuk barber ini sahaja.
+            // Tiada perlu check lagi di sini.
+
             appointmentRepository.findById(p.getAppointmentId()).ifPresent(appt -> {
                 customerRepository.findById(appt.getCustId()).ifPresent(cust -> {
                     TransactionDTO dto = new TransactionDTO();
@@ -399,6 +407,7 @@ public class AdminController {
         return "admin/listBarber";
     }
 
+    // 8. ADMIN INDEX
     @GetMapping("/adminIndex")
     @PreAuthorize("hasRole('ADMIN')")
     public String adminIndex(Model model) {
@@ -470,6 +479,7 @@ public class AdminController {
         return "admin/adminIndex";
     }
 
+    // 9. ADMIN CUSTOMER LIST
     @GetMapping("/listCustomer")
     @PreAuthorize("hasRole('ADMIN')")
     public String listCustomers(
@@ -504,6 +514,7 @@ public class AdminController {
         return "admin/listCustomer";
     }
 
+    // 10. ADMIN BARBER LIST
     @GetMapping("/listBarber")
     @PreAuthorize("hasRole('ADMIN')")
     public String listBarber(
@@ -543,6 +554,7 @@ public class AdminController {
         return "admin/listBarber";
     }
 
+    // 11. ADMIN APPOINTMENT LIST
     @GetMapping("/listAppointment")
     @PreAuthorize("hasRole('ADMIN')")
     public String listAppointments(
@@ -616,6 +628,7 @@ public class AdminController {
         return "admin/listAppointment";
     }
 
+    // 12. API AVAILABLE TIMES
     @GetMapping("/api/available-times")
     @ResponseBody
     public List<String> getAvailableTimes(
@@ -698,6 +711,7 @@ public class AdminController {
         return slots;
     }
 
+    // 13. API UPDATE SERVICE STATUS
     @PostMapping("/admin/update-service-status")
     @PreAuthorize("hasRole('ADMIN')")
     public String updateServiceStatus(@RequestParam Long appointmentId,
@@ -745,6 +759,7 @@ public class AdminController {
         return "redirect:/listAppointment";
     }
 
+    // 14. ADMIN LIST TRANSACTIONS
     @GetMapping("/admin/list-transactions")
     @PreAuthorize("hasRole('ADMIN')")
     public String listTransactions(Model model) {
@@ -789,6 +804,7 @@ public class AdminController {
         return "admin/listTransactions";
     }
 
+    // 15. ADMIN LIST FEEDBACK
     @GetMapping("/admin/list-feedback")
     @PreAuthorize("hasRole('ADMIN')")
     public String listFeedback(Model model) {
@@ -833,6 +849,7 @@ public class AdminController {
         return "admin/listFeedback";
     }
 
+    // 16. ADMIN REGISTER STAFF
     @GetMapping("/admin/register-staff")
     @PreAuthorize("hasRole('ADMIN')")
     public String registerStaffPage() {
@@ -949,6 +966,7 @@ public class AdminController {
         return "redirect:/listBarber";
     }
 
+    // 17. ADMIN EDIT PROFILE
     @GetMapping("/admin/edit-profile")
     @PreAuthorize("hasRole('ADMIN')")
     public String editAdminProfile(jakarta.servlet.http.HttpSession session, Model model) {
@@ -964,6 +982,7 @@ public class AdminController {
         return "admin/editProfile";
     }
 
+    // 18. ADMIN PROFILE
     @GetMapping("/admin/profile")
     @PreAuthorize("hasRole('ADMIN')")
     public String adminProfile(Model model) {
@@ -989,6 +1008,7 @@ public class AdminController {
         return "admin/profile";
     }
 
+    // 19. ADMIN UPDATE HIS/HER PROFILE
     @PostMapping("/admin/update-my-profile")
     @PreAuthorize("hasRole('ADMIN')")
     public String updateProfile(
@@ -1081,6 +1101,7 @@ public class AdminController {
         }
     }
 
+    // 20. ADMIN DELETE STAFF
     @PostMapping("/admin/delete-staff")
     @PreAuthorize("hasRole('ADMIN')")
     public String deleteStaff(@RequestParam Long staffId,
@@ -1104,6 +1125,7 @@ public class AdminController {
         return "redirect:/listBarber";
     }
 
+    // 21. ADMIN EDIT STAFF
     @GetMapping("/admin/edit-staff")
     @PreAuthorize("hasRole('ADMIN')")
     public String editStaff(@RequestParam Long staffId, Model model) {
@@ -1115,6 +1137,7 @@ public class AdminController {
         return "admin/edit-staff";
     }
 
+    // 22. ADMIN UPDATE STAFF
     @PostMapping("/admin/update-staff")
     @PreAuthorize("hasRole('ADMIN')")
     public String updateStaff(
@@ -1161,44 +1184,49 @@ public class AdminController {
         return "admin/dashboard";
     }
 
-    @GetMapping("/admin/edit-appointment")
-    @PreAuthorize("hasRole('ADMIN')")
-    public String editAppointment(@RequestParam Long appointmentId, Model model) {
+    // 23. ADMIN EDIT APPOINTMENT
+    // @GetMapping("/admin/edit-appointment")
+    // @PreAuthorize("hasRole('ADMIN')")
+    // public String editAppointment(@RequestParam Long appointmentId, Model model)
+    // {
 
-        Appointment appt = appointmentRepository.findById(appointmentId)
-                .orElseThrow(() -> new RuntimeException("Appointment not found"));
+    // Appointment appt = appointmentRepository.findById(appointmentId)
+    // .orElseThrow(() -> new RuntimeException("Appointment not found"));
 
-        // customer name
-        customerRepository.findById(appt.getCustId())
-                .ifPresent(c -> appt.setCustomerName(c.getCustName()));
+    // // customer name
+    // customerRepository.findById(appt.getCustId())
+    // .ifPresent(c -> appt.setCustomerName(c.getCustName()));
 
-        model.addAttribute("appointment", appt);
+    // model.addAttribute("appointment", appt);
 
-        // barber list
-        model.addAttribute("barberList",
-                staffRepository.findByStaffRole("BARBER"));
+    // // barber list
+    // model.addAttribute("barberList",
+    // staffRepository.findByStaffRole("BARBER"));
 
-        // --- TAMBAHAN: Hantar data slot yang tak available ---
+    // // --- TAMBAHAN: Hantar data slot yang tak available ---
 
-        // ✅ BAHARUI: Guna kurungan segi empat
-        String[] slots = new String[] { "10:00 am", "10:30 am", "11:00 am", "11:30 am", "12:00 pm", "12:30 pm",
-                "01:00 pm", "01:30 pm", "02:00 pm", "02:30 pm", "03:00 pm", "03:30 pm",
-                "04:00 pm", "04:30 pm", "05:00 pm", "05:30 pm", "06:00 pm", "06:30 pm",
-                "07:00 pm", "07:30 pm", "08:00 pm", "08:30 pm", "09:00 pm", "09:30 pm" };
+    // // ✅ BAHARUI: Guna kurungan segi empat
+    // String[] slots = new String[] { "10:00 am", "10:30 am", "11:00 am", "11:30
+    // am", "12:00 pm", "12:30 pm",
+    // "01:00 pm", "01:30 pm", "02:00 pm", "02:30 pm", "03:00 pm", "03:30 pm",
+    // "04:00 pm", "04:30 pm", "05:00 pm", "05:30 pm", "06:00 pm", "06:30 pm",
+    // "07:00 pm", "07:30 pm", "08:00 pm", "08:30 pm", "09:00 pm", "09:30 pm" };
 
-        String currentDate = appt.getAppointmentDate();
+    // String currentDate = appt.getAppointmentDate();
 
-        // PANGGIL SERVICE (Guna Arrays.asList sebab parameter service adalah List)
-        Map<String, List<Long>> unavailableBarbersBySlot = bookingService.getUnavailableBarbersBySlot(currentDate,
-                slots);
+    // // PANGGIL SERVICE (Guna Arrays.asList sebab parameter service adalah List)
+    // Map<String, List<Long>> unavailableBarbersBySlot =
+    // bookingService.getUnavailableBarbersBySlot(currentDate,
+    // slots);
 
-        model.addAttribute("unavailableBarbersBySlot", unavailableBarbersBySlot);
-        model.addAttribute("currentSlot", appt.getAppointmentTime());
-        // --------------------------------------------------
+    // model.addAttribute("unavailableBarbersBySlot", unavailableBarbersBySlot);
+    // model.addAttribute("currentSlot", appt.getAppointmentTime());
+    // // --------------------------------------------------
 
-        return "admin/editAppointment";
-    }
+    // return "admin/editAppointment";
+    // }
 
+    // 24. ADMIN UPDATE APPOINTMENT
     @PostMapping("/admin/update-appointment")
     @PreAuthorize("hasRole('ADMIN')")
     public String updateAppointment(
@@ -1278,6 +1306,7 @@ public class AdminController {
     }
 
     // Helper method
+    // Convert time to 24-hour format
     private String convertTimeTo24Hour(String slot) {
         String[] parts = slot.split(" ");
         String time = parts[0];
@@ -1295,6 +1324,7 @@ public class AdminController {
         return String.format("%02d:%02d", hour, Integer.parseInt(hm[1]));
     }
 
+    // 25. ADMIN DELETE APPOINTMENT
     @PostMapping("/admin/delete-appointment")
     @PreAuthorize("hasRole('ADMIN')")
     public String deleteAppointment(@RequestParam Long appointmentId,

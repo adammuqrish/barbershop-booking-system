@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Hugi Barbershop System - Barbers</title>
+    <title>Hugi Barbershop System - Staffs</title>
     <link rel="stylesheet" th:href="@{/resources/assetsAdmin/css/style.css}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
@@ -24,11 +24,11 @@
                                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                                 </div>
                                 <div class="nk-block-head-content">
-                                    <h2 class="nk-block-title">Barber List</h2>
+                                    <h2 class="nk-block-title">Staff List</h2>
                                 </div>
                                 <div class="nk-block-head-content" th:if="${staffRole == 'ADMIN'}">
                                     <button class="btn btn-primary" data-bs-toggle="modal"
-                                        data-bs-target="#addBarberModal">Register New Barber</button>
+                                        data-bs-target="#addBarberModal">Register New Staff</button>
                                 </div>
                             </div>
                         </div>
@@ -148,7 +148,7 @@
                 <form th:action="@{/admin/register-staff}" method="post">
                     <input type="hidden" name="admin_id" th:value="${adminId}" value="Admin">
                     <div class="modal-header">
-                        <h4 class="modal-title">Register New Barber</h4>
+                        <h4 class="modal-title">Register New Staff</h4>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body">

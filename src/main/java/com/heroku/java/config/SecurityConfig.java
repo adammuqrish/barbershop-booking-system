@@ -12,53 +12,59 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+        @Bean
+        public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+                http
+                                .authorizeHttpRequests(auth -> auth
 
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
-                .authorizeHttpRequests(auth -> auth
-                        // ✅ ADMIN ONLY
-                        .requestMatchers("/admin/**", "/adminIndex", "/listCustomer", "/listBarber", "/listAppointment")
-                        .hasRole("ADMIN")
+                                                // --- 1. STATIC FILES ---
+                                                .requestMatchers("/css/**", "/js/**", "/images/**", "/resources/**",
+                                                                "/uploads/**", "/resources/assetsAdmin/**")
+                                                .permitAll()
 
-                        // ✅ BARBER ONLY (Path baharu untuk barber)
-                        .requestMatchers("/barber/**")
-                        .hasRole("BARBER")
+                                                // --- 2. PUBLIC PAGES (INDEX & LOGIN) ---
+                                                // TAMBAH "/error" SINI
+                                                .requestMatchers("/", "/index", "/register", "/adminLogin", "/error")
+                                                .permitAll()
 
-                        // ✅ PUBLIC & AUTH ENDPOINTS
-                        .requestMatchers(
-                                "/", "/index",
-                                "/register",
-                                "/adminLogin",
-                                "/auth",
-                                "/staffAuth",
-                                "/css/**", "/js/**",
-                                "/images/**", "/resources/**")
-                        .permitAll()
+                                                // --- 3. AUTH ENDPOINTS ---
+                                                .requestMatchers("/auth", "/staffAuth")
+                                                .permitAll()
 
-                        // ✅ CUSTOMER (SESSION BASED)
-                        .requestMatchers(
-                                "/profile", "/edit-profile", "/update-profile",
-                                "/view-appointment", "/appointment-history", "/booking/**",
-                                "/payment", "/processPayment", "/receipt", "/feedback", "/cancel-appointment", "/edit-appointment",
-                                "/update-appointment"        )
-                        .permitAll()
+                                                // --- 4. ADMIN ENDPOINTS ---
+                                                .requestMatchers("/admin/**", "/adminIndex")
+                                                .hasRole("ADMIN")
 
-                        .anyRequest().authenticated())
-                .logout(logout -> logout
-                        .logoutRequestMatcher(new AntPathRequestMatcher("/logout", "GET"))
-                        .logoutSuccessUrl("/index")
-                        .invalidateHttpSession(true)
-                        .deleteCookies("JSESSIONID")
-                        .permitAll())
-                .csrf(csrf -> csrf
-                        .ignoringRequestMatchers("/staffAuth", "/auth"));
+                                                // --- 5. BARBER ENDPOINTS ---
+                                                .requestMatchers("/barber/**")
+                                                .hasRole("BARBER")
 
-        return http.build();
-    }
+                                                // --- 6. CUSTOMER ENDPOINTS ---
+                                                .requestMatchers(
+                                                                "/profile", "/edit-profile", "/update-profile",
+                                                                "/view-appointment", "/appointment-history",
+                                                                "/booking/**",
+                                                                "/payment", "/processPayment", "/receipt", "/feedback",
+                                                                "/cancel-appointment", "/edit-appointment",
+                                                                "/update-appointment")
+                                                .permitAll()
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+                                                .anyRequest().authenticated())
+
+                                .logout(logout -> logout
+                                                .logoutRequestMatcher(new AntPathRequestMatcher("/logout", "GET"))
+                                                .logoutSuccessUrl("/index")
+                                                .invalidateHttpSession(true)
+                                                .deleteCookies("JSESSIONID")
+                                                .permitAll())
+                                .csrf(csrf -> csrf
+                                                .ignoringRequestMatchers("/staffAuth", "/auth"));
+
+                return http.build();
+        }
+
+        @Bean
+        public PasswordEncoder passwordEncoder() {
+                return new BCryptPasswordEncoder();
+        }
 }

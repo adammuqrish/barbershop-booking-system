@@ -15,6 +15,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +25,7 @@ import java.util.Optional;
 @Controller
 public class AuthController {
 
+    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
     private final CustomerService customerService;
     private final StaffService staffService;
 
@@ -48,12 +51,13 @@ public class AuthController {
         return "admin/adminLogin";
     }
 
+    // --- HANDLE CUSTOMER LOGIN & REGISTER ---
     @PostMapping("/auth")
     public String handleAuth(
             @RequestParam(required = false) String action,
-            @RequestParam(required = false) String email,
-            @RequestParam(required = false) String password,
-            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String email, // Login form sends "email"
+            @RequestParam(required = false) String password, // Login form sends "password"
+            @RequestParam(required = false) String name, // Registration form sends "name"
             @RequestParam(required = false) String phone,
             @RequestParam(required = false) String confirmPassword,
             HttpSession session,
@@ -61,13 +65,42 @@ public class AuthController {
 
         // --- SECTION 1: LOGIN CUSTOMER ---
         if ("login".equals(action)) {
+            logger.debug("Customer login request - Action: {}, Email: {}, Password: {}", action, email, password != null ? "[PROVIDED]" : "[NULL]");
+            
+            if (email == null || email.trim().isEmpty()) {
+                logger.error("Email is empty or null!");
+                model.addAttribute("error", "Email cannot be empty");
+                return "customer/register";
+            }
+            
+            if (password == null || password.trim().isEmpty()) {
+                logger.error("Password is empty or null!");
+                model.addAttribute("error", "Password cannot be empty");
+                return "customer/register";
+            }
+
             Optional<Customer> customerOpt = customerService.login(email, password);
             if (customerOpt.isPresent()) {
                 Customer customer = customerOpt.get();
+                logger.debug("Customer login successful - ID: {}, Email: {}", customer.getCustId(),
+                        customer.getCustEmail());
+
+                // 1. Set Session
                 session.setAttribute("customer", customer);
                 session.setAttribute("custId", customer.getCustId());
+                logger.debug("Session attributes set for customer ID: {}", customer.getCustId());
+
+                // 2. SET SPRING SECURITY CONTEXT
+                org.springframework.security.authentication.UsernamePasswordAuthenticationToken auth = new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(
+                        customer.getCustEmail(),
+                        null,
+                        java.util.Collections.emptyList());
+                org.springframework.security.core.context.SecurityContextHolder.getContext().setAuthentication(auth);
+                logger.debug("Spring Security context set for customer: {}", customer.getCustEmail());
+
                 return "redirect:/index";
             } else {
+                logger.debug("Customer login failed - Email: {}", email);
                 model.addAttribute("error", "Invalid email or password");
                 return "customer/register";
             }
@@ -76,55 +109,43 @@ public class AuthController {
         // --- SECTION 2: REGISTER CUSTOMER ---
         else if ("register".equals(action)) {
 
-            // --- BAHAGIAN VALIDASI (MENYELESAIKAN BUGS) ---
+            // --- BAHAGIAN VALIDASI ---
 
-            // FIX #002_2: Empty Name Field
             if (name == null || name.trim().isEmpty()) {
                 model.addAttribute("error", "Please enter your name.");
                 return "customer/register";
             }
 
-            // FIX #002_3: Empty Email Field
             if (email == null || email.trim().isEmpty()) {
                 model.addAttribute("error", "Please enter your email.");
                 return "customer/register";
             }
 
-            // FIX #002_7: Invalid Email Format
             if (!email.matches("^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$")) {
                 model.addAttribute("error", "Please enter a valid email format.");
                 return "customer/register";
             }
 
-            // FIX #002_9: Duplicate Email Registration
-            // (Service akan throw error jika ada, tapi kita handle di bawah)
-
-            // FIX #002_4: Empty Phone Number Field
             if (phone == null || phone.trim().isEmpty()) {
                 model.addAttribute("error", "Please enter your phone number.");
                 return "customer/register";
             }
 
-            // FIX #002_10: Duplicate Phone Number Registration
-            // Anda perlu create method dalam CustomerRepository nanti.
             if (customerService.findByCustPhoneNumber(phone) != null) {
                 model.addAttribute("error", "Phone number already exist");
                 return "customer/register";
             }
 
-            // FIX #002_5: Empty Password Field
             if (password == null || password.trim().isEmpty()) {
                 model.addAttribute("error", "Please enter your password.");
                 return "customer/register";
             }
 
-            // FIX #002_6: Empty Confirm Password Field
             if (confirmPassword == null || confirmPassword.trim().isEmpty()) {
                 model.addAttribute("error", "Please confirm your password.");
                 return "customer/register";
             }
 
-            // FIX #002_8: Password and Confirm Password Do Not Match
             if (!password.equals(confirmPassword)) {
                 model.addAttribute("error", "Password do not match");
                 return "customer/register";
@@ -143,8 +164,6 @@ public class AuthController {
                 model.addAttribute("successMessage", "Registration successful! You can now login.");
                 return "customer/register";
             } catch (Exception e) {
-                // Ini menangkap Duplicate Email dari Constraint DB jika Repository tak
-                // menangkap awal
                 model.addAttribute("error", "Registration failed. Email might already exist.");
                 return "customer/register";
             }
@@ -205,7 +224,7 @@ public class AuthController {
     @GetMapping("/logout")
     public String logout(HttpSession session) {
         session.invalidate();
-        SecurityContextHolder.clearContext();
+        SecurityContextHolder.clearContext(); // Pastikan ini ada
         return "redirect:/index";
     }
 }
