@@ -21,10 +21,10 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     List<Appointment> findByBarberIdAndAppointmentDateAndAppointmentTimeAndAppointmentIdNot(Long barberId, String date, String time, Long appointmentId);
 
     @Query("SELECT a FROM Appointment a " +
-           "ORDER BY a.appointmentDate ASC, " +
-           "a.appointmentTime ASC, " +
+           "ORDER BY a.appointmentDate DESC, " +
+           "a.appointmentTime DESC, " +
            "CASE WHEN a.serviceStatus = 'pending' THEN 0 ELSE 1 END, " +
-           "a.appointmentId ASC")
+           "a.appointmentId DESC")
     List<Appointment> findAllSortedByDateAndStatus();
 
     List<Appointment> findByBarberIdAndAppointmentDate(Long barberId, String date);
