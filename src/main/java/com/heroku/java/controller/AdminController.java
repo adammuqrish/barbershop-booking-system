@@ -483,7 +483,7 @@ public class AdminController {
     @GetMapping("/listCustomer")
     @PreAuthorize("hasRole('ADMIN')")
     public String listCustomers(
-            @org.springframework.web.bind.annotation.RequestParam(required = false) Long custId,
+            @org.springframework.web.bind.annotation.RequestParam(name = "custId", required = false) Long custId,
             Model model) {
         // Load staff role
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -518,7 +518,7 @@ public class AdminController {
     @GetMapping("/listBarber")
     @PreAuthorize("hasRole('ADMIN')")
     public String listBarber(
-            @RequestParam(required = false) Long staffId,
+            @RequestParam(name = "staffId", required = false) Long staffId,
             Model model) {
 
         // ✅ Get logged-in admin info
@@ -558,7 +558,7 @@ public class AdminController {
     @GetMapping("/listAppointment")
     @PreAuthorize("hasRole('ADMIN')")
     public String listAppointments(
-            @RequestParam(required = false) Long appointmentId,
+            @RequestParam(name = "appointmentId", required = false) Long appointmentId,
             Model model,
             Authentication authentication) {
 
