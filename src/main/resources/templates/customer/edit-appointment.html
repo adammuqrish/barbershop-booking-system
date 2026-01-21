@@ -1,235 +1,262 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 
-<head>
-    <meta charset="UTF-8">
-    <title>Edit Appointment</title>
+<head th:replace="~{fragments/header :: head}"></head>
 
-    <link rel="stylesheet" th:href="@{/resources/assetsAdmin/css/style.css}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-</head>
+<body class="flex flex-col h-screen justify-between bg-yellow-100">
+    <nav th:replace="~{fragments/nav :: nav}"></nav>
+    <main class="flex flex-col items-center mx-3 my-12 flex-grow">
+        <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-5xl mx-auto">
+            <h1 class="text-3xl font-bold mb-6">Edit Appointment</h1>
+            
+            <div th:if="${error}" class="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+                <span th:text="${error}"></span>
+            </div>
 
-<body class="nk-body" data-sidebar-collapse="lg" data-navbar-collapse="lg">
+            <!-- Form action diubah kepada mapping update -->
+            <form th:action="@{/update-appointment}" method="post">
+                
+                <!-- Hidden ID untuk proses update -->
+                <input type="hidden" name="appointmentId" th:value="${appointment.appointmentId}" />
 
-    <div class="nk-app-root">
-        <div class="nk-main">
+                <!-- Booking For (Read Only) -->
+                <div class="mb-6">
+                    <label class="block mb-1 font-semibold" for="booking-for">Booking For:</label>
+                    <input id="booking-for" name="booking-for" type="text" 
+                        class="w-full border rounded px-3 py-2 shadow bg-gray-100" 
+                        th:value="${appointment.custBookFor}" readonly />
+                </div>
 
-            <!-- Sidebar -->
-            <div th:replace="~{fragments/adminFragments :: sidebar}"></div>
+                <!-- Date Picker -->
+                <div class="mb-6">
+                    <label class="block font-semibold mb-2">Select Date:</label>
+                    <input id="date" name="appointmentDate" type="date" 
+                        class="w-full border rounded px-3 py-2 shadow" 
+                        th:value="${appointment.appointmentDate}" 
+                        th:min="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}" required />
+                </div>
 
-            <div class="nk-wrap">
-
-                <!-- Header -->
-                <div th:replace="~{fragments/adminFragments :: header}"></div>
-
-                <!-- Content -->
-                <div class="nk-content">
-                    <div class="container text-left">
-
-                        <!-- Page Title -->
-                        <div class="nk-block-head">
-                            <div class="nk-block-head-content">
-                                <h2 class="nk-block-title">
-                                    <i class="fas fa-calendar-check me-2"></i>
-                                    Edit Appointment
-                                </h2>
-                            </div>
-                        </div>
-
-                        <!-- Alert Error (TAMBAHAN) -->
-                        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
-                            <span th:text="${error}"></span>
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        </div>
-
-                        <!-- Form Card -->
-                        <div class="nk-block">
-                            <div class="card">
-                                <div class="card-inner">
-
-                                    <form th:action="@{/admin/update-appointment}" method="post">
-
-                                        <input type="hidden" name="appointmentId"
-                                            th:value="${appointment.appointmentId}" />
-
-                                        <div class="row g-4">
-
-                                            <!-- Booking For -->
-                                            <div class="col-md-6">
-                                                <label class="form-label">Booking For</label>
-                                                <input type="text" class="form-control"
-                                                    th:value="${appointment.customerName}" readonly>
-                                            </div>
-
-                                            <!-- Customer Category -->
-                                            <div class="col-md-6">
-                                                <label class="form-label">Customer Category</label>
-                                                <select name="custType" class="form-select" required>
-                                                    <option value="Adult"
-                                                        th:selected="${appointment.custType == 'Adult'}">
-                                                        Adult
-                                                    </option>
-                                                    <option value="Kids"
-                                                        th:selected="${appointment.custType == 'Kids'}">
-                                                        Kids
-                                                    </option>
-                                                </select>
-                                            </div>
-
-                                            <!-- Appointment Date -->
-                                            <div class="col-md-6">
-                                                <label class="form-label">Appointment Date</label>
-                                                <input type="date" id="appointmentDate" name="appointmentDate"
-                                                    class="form-control" th:value="${appointment.appointmentDate}"
-                                                    required>
-                                            </div>
-
-                                            <!-- Appointment Time -->
-                                            <div class="col-md-6">
-                                                <label class="form-label">Appointment Time</label>
-                                                <input type="time" id="appointmentTime" name="appointmentTime"
-                                                    class="form-control" th:value="${appointment.appointmentTime}"
-                                                    required>
-                                            </div>
-
-                                            <!-- Select Barber -->
-                                            <div class="col-12">
-                                                <label class="form-label">Select Barber</label>
-                                                <select name="staffId" id="barberSelect" class="form-select" required>
-                                                    <option value="">-- Select Barber --</option>
-                                                    <option th:each="b : ${barberList}" th:value="${b.staffId}"
-                                                        th:text="${b.staffName}"
-                                                        th:selected="${b.staffId == appointment.staffId}"
-                                                        data-id="${b.staffId}"> <!-- Tambah data-id untuk JS -->
-                                                    </option>
-                                                </select>
-                                            </div>
-
-                                        </div>
-
-                                        <!-- Buttons -->
-                                        <div class="mt-4 d-flex justify-content-end gap-2">
-                                            <a th:href="@{/listAppointment}" class="btn btn-light">
-                                                Cancel
-                                            </a>
-
-                                            <button type="submit" class="btn btn-primary">
-                                                <i class="fas fa-save me-1"></i>
-                                                Update Appointment
-                                            </button>
-                                        </div>
-
-                                    </form>
-
-                                </div>
-                            </div>
-                        </div>
-
+                <!-- Time Slots -->
+                <div class="mb-6">
+                    <label class="block mb-1 font-semibold">Booking Time:</label>
+                    <input id="selected-time" name="selected-time" type="text" 
+                        class="w-full border rounded px-3 py-2 shadow mb-2 bg-gray-100" 
+                        value="--:-- --" readonly />
+                    
+                    <div class="grid grid-cols-6 gap-2">
+                        <th:block th:each="slot : ${slots}">
+                            <label class="flex items-center space-x-1">
+                                <input type="radio" name="slot" th:value="${slot}" class="slot-radio" 
+                                    th:checked="${slot == appointment.appointmentTime}"
+                                    required />
+                                <span th:text="${slot}"></span>
+                            </label>
+                        </th:block>
                     </div>
                 </div>
 
-            </div>
+                <!-- Customer Category -->
+                <div class="mb-6">
+                    <label class="block mb-1 font-semibold" for="category">Customer Category:</label>
+                    <select id="category" name="custType" class="w-full border rounded px-3 py-2 shadow">
+                        <option value="Child" th:selected="${appointment.custType == 'Child'}">Child</option>
+                        <option value="Teen" th:selected="${appointment.custType == 'Teen'}">Teen</option>
+                        <option value="Adult" th:selected="${appointment.custType == 'Adult'}">Adult</option>
+                        <option value="Senior" th:selected="${appointment.custType == 'Senior'}">Senior</option>
+                    </select>
+                </div>
+
+                <!-- Barber Selection -->
+                <div class="mb-6">
+                    <label class="block mb-1 font-semibold" for="barber">Select Barber:</label>
+                    <select id="barber" name="staffId" class="w-full border rounded px-3 py-2 shadow" required>
+                        <option value="" selected disabled>-- Select Barber --</option>
+                        <th:block th:each="barber : ${barbers}">
+                            <option th:value="${barber.staffId}" th:text="${barber.staffName}"
+                                th:selected="${barber.staffId == appointment.barberId}"
+                                th:data-id="${barber.staffId}">
+                            </option>
+                        </th:block>
+                    </select>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex gap-2">
+                    <!-- Back Button ( assuming user returns to history or details) -->
+                    <a th:href="@{/view-appointment}" class="bg-gray-500 text-white px-5 py-2 rounded shadow hover:bg-gray-600 transition">
+                        Cancel
+                    </a>
+                    <button type="submit" 
+                        class="bg-blue-500 text-white px-5 py-2 rounded shadow hover:bg-blue-600 transition">
+                        Update Appointment
+                    </button>
+                </div>
+            </form>
         </div>
-    </div>
+    </main>
+    <footer th:replace="~{fragments/footer :: footer}"></footer>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
-    <!-- TAMBAHAN JAVASCRIPT UNTUK CHECK BARBER CLASH -->
     <script th:inline="javascript">
-        // 1. Tangkap data dari server
-        const unavailableBarbersBySlot = /*[[${unavailableBarbersBySlot}]]*/ {};
-        const currentAppointmentId = /*[[${appointment.appointmentId}]]*/ 0;
-        const currentBarberId = /*[[${appointment.staffId}]]*/ 0;
+        // Data dari Spring Boot
+        const barbersList = /*[[${barbers}]]*/[];
+        const unavailableBarbersBySlotInitial = /*[[${unavailableBarbersBySlot}]]*/ {};
+        let unavailableBarbersBySlot = {...unavailableBarbersBySlotInitial}; // Copy mutable
+        
+        // Data asal appointment (untuk allow selection walaupun full kalau dia booking lama)
         const originalDate = /*[[${appointment.appointmentDate}]]*/ '';
+        const originalTime = /*[[${appointment.appointmentTime}]]*/ '';
+        const originalBarberId = /*[[${appointment.barberId}]]*/ 0;
+        
+        // Global variable untuk track current time
+        let currentTimeVal = 0;
 
-        // Function untuk check availability dan update dropdown
-        function updateBarberAvailability(selectedDate, selectedTime) {
-            const barberSelect = document.getElementById('barberSelect');
+        document.getElementById('date').addEventListener('change', function () {
+            const selectedDate = this.value;
+            // Panggil API untuk check availability (sama macam booking page)
+            fetch('/booking/unavailable?date=' + selectedDate)
+                .then(r => r.json())
+                .then(data => {
+                    unavailableBarbersBySlot = data.unavailableBarbersBySlot;
+                    updateSlotStatus(selectedDate, data.totalBarbers);
+                });
+        });
 
-            if (!selectedDate || !selectedTime) return; // Jika belum pilih, biarkan semua
+        function updateSlotStatus(selectedDate, totalBarbers) {
+            const radios = document.querySelectorAll('.slot-radio');
+            const today = new Date().toISOString().split('T')[0];
+            let isToday = (selectedDate === today);
+            
+            console.log('updateSlotStatus called:');
+            console.log('  selectedDate =', selectedDate);
+            console.log('  today =', today);
+            console.log('  isToday =', isToday);
 
-            // Tukar format time (HH:mm) kepada slot format (HH:mm am/pm) untuk cari dalam map
-            // Contoh: 14:00 -> "02:00 pm"
-            let slotKey = "";
-            let [h, m] = selectedTime.split(':');
-            let hour = parseInt(h);
-            let ampm = hour >= 12 ? 'pm' : 'am';
-            hour = hour % 12;
-            hour = hour ? hour : 12; // the hour '0' should be '12'
-            slotKey = hour + ':' + m + ' ' + ampm;
+            if (isToday) {
+                const now = new Date();
+                currentTimeVal = now.getHours() + (now.getMinutes() / 60);
+                console.log('Today: Current time as decimal =', currentTimeVal, '(', now.getHours() + ':' + String(now.getMinutes()).padStart(2, '0'), ')');
+            } else {
+                currentTimeVal = 0; // Reset jika bukan hari ini
+                console.log('Future date - no time restriction');
+            }
 
-            // Dapatkan senarai barber yang tak available untuk slot tersebut
-            const unavailableList = unavailableBarbersBySlot[slotKey] || [];
+            radios.forEach(radio => {
+                const slotValStr = radio.value; // e.g., "10:00 am"
+                const unavailableList = unavailableBarbersBySlot[slotValStr] || [];
+                
+                // Logic Availability
+                // 1. Jika ini slot asal user, ia TIDAK boleh disabled kerana full (dia dah booking tempat tu)
+                const isOriginalSlot = (selectedDate === originalDate && slotValStr === originalTime);
+                const unavailableCount = unavailableList.length;
+                
+                // Slot full jika unavailableCount >= totalBarbers
+                let isFull = (unavailableCount >= totalBarbers);
 
-            // Loop setiap option dalam dropdown
-            Array.from(barberSelect.options).forEach(opt => {
-                if (opt.value === "") return; // Skip default option
-
-                const barberId = parseInt(opt.getAttribute('data-id'));
-
-                // Logic: Adakah barber ini unavailable?
-                let isUnavailable = unavailableList.includes(barberId);
-
-                // Exception: Jika ini adalah booking asal (Barber sama, Date sama, Time sama), ia allowed.
-                // Perhatian: slotKey mungkin tak sama 100% jika format berubah, jadi kita bandingkan ID Barber dan Date
-                const isMyOriginalBooking = (barberId === currentBarberId && selectedDate === originalDate);
-
-                if (isMyOriginalBooking) {
-                    isUnavailable = false;
+                // Kecualikan slot asal dari check "Full"
+                if (isOriginalSlot) {
+                    isFull = false;
                 }
 
-                // Sembunyikan (display:none) jika unavailable
-                if (isUnavailable) {
-                    opt.style.display = 'none';
-                    opt.disabled = true;
+                // 2. Check Time Passed (Logic sama macam booking page)
+                let isTimePassed = false;
+                if (isToday) {
+                    const parts = slotValStr.trim().split(' ');
+                    const hm = parts[0].split(':');
+                    let h = parseInt(hm[0]);
+                    const m = parseInt(hm[1] || 0);
+                    const ampm = parts[1];
 
-                    // Jika user sedang memilih barber ini tapi tiba-tiba dia jadi unavailable, reset selection
-                    if (barberSelect.value === opt.value.toString()) {
-                        barberSelect.value = "";
+                    let slotVal = h;
+                    if (ampm.toLowerCase() === 'pm' && h !== 12) slotVal += 12;
+                    else if (ampm.toLowerCase() === 'am' && h === 12) slotVal = 0;
+                    slotVal += (m / 60);
+
+                    // Exception: Jika ini slot asal user, biarkan dia boleh ubah walaupun dah lewat
+                    if (isOriginalSlot) {
+                        isTimePassed = false;
+                    } else if (slotVal < (currentTimeVal + 0.5)) {
+                        isTimePassed = true;
+                        console.log('Slot', slotValStr, '-> decimal', slotVal, 'is past (current:', currentTimeVal, ')');
                     }
-                } else {
-                    opt.style.display = '';
-                    opt.disabled = false;
                 }
+
+                // Disable jika Full (bukan original) ATAU Time Passed
+                radio.disabled = isFull || isTimePassed;
             });
+
+            // JANGAN reset fields di sini - biarkan nilai asal tetap
+            // (Ini adalah edit page, bukan booking page baru)
+            // Reset hanya untuk booking page baru
         }
 
-        // Event Listener: Bila user tukar Date
-        document.getElementById('appointmentDate').addEventListener('change', function () {
-            const dateVal = this.value;
-            const timeVal = document.getElementById('appointmentTime').value;
+        // Bila user klik slot
+        document.querySelectorAll('.slot-radio').forEach(radio => {
+            radio.addEventListener('change', function () {
+                const slot = this.value;
+                document.getElementById('selected-time').value = slot;
+                
+                const barberSelect = document.getElementById('barber');
+                const unavailableForSlot = unavailableBarbersBySlot[slot] || [];
+                const selectedDate = document.getElementById('date').value;
 
-            // Jika tukar date, kita perlu fetch data baru untuk tarikh tersebut
-            if (dateVal) {
-                // Panggil endpoint admin (atau buat endpoint baru) untuk dapatkan data fresh
-                // Untuk admin, endpoint mungkin belum ada. Kita boleh guna logic simple:
-                // Reload page dengan parameter baru? Atau buat endpoint API.
+                Array.from(barberSelect.options).forEach(opt => {
+                    if (opt.value === "") return;
+                    
+                    const optBarberId = parseInt(opt.getAttribute('data-id'));
+                    const isUnavailable = unavailableForSlot.includes(optBarberId);
 
-                // SEKARANG: Kita guna logik simple.
-                // Jika user tukar tarikh, kita reset barber dropdown dulu sementara 
-                // (sehingga user tukar masa dan kita boleh check).
-                // ATAU lebih baik: Tidak check kecuali masa dipilih.
-                // Biarkan update dipanggil bila masa tukar.
-                updateBarberAvailability(dateVal, timeVal);
-            }
+                    // Exception: Jika ini adalah gabungan Date+Time+Barber asal, biarkan enabled
+                    const isOriginalCombo = (selectedDate === originalDate && slot === originalTime && optBarberId === originalBarberId);
+
+                    if (isUnavailable && !isOriginalCombo) {
+                        opt.style.display = "none";
+                        opt.disabled = true;
+                    } else {
+                        opt.style.display = "";
+                        opt.disabled = false;
+                    }
+                });
+                
+                // Jika barber yang sedang dipilih tiba-tiba disabled, reset pilihan
+                if (barberSelect.options[barberSelect.selectedIndex].disabled) {
+                    barberSelect.selectedIndex = 0;
+                }
+            });
         });
 
-        // Event Listener: Bila user tukar Time
-        document.getElementById('appointmentTime').addEventListener('change', function () {
-            const dateVal = document.getElementById('appointmentDate').value;
-            const timeVal = this.value;
-            updateBarberAvailability(dateVal, timeVal);
-        });
-
-        // Run check pada load awal page (jika date & time dah ada)
+        // Initialize pada load page
         window.addEventListener('DOMContentLoaded', () => {
-            const dateVal = document.getElementById('appointmentDate').value;
-            const timeVal = document.getElementById('appointmentTime').value;
-            if (dateVal && timeVal) {
-                updateBarberAvailability(dateVal, timeVal);
+            const dateInput = document.getElementById('date');
+            
+            // 1. Set slot text value jika ada original time
+            // Cari radio button yang checked (originalTime)
+            const checkedRadio = document.querySelector('input[name="slot"]:checked');
+            if (checkedRadio) {
+                document.getElementById('selected-time').value = checkedRadio.value;
+                
+                // Trigger event manual untuk update barber dropdown list ikut slot asal
+                const event = new Event('change');
+                checkedRadio.dispatchEvent(event);
+            }
+
+            // 2. Fetch availability untuk date asal
+            if (dateInput.value) {
+                fetch('/booking/unavailable?date=' + dateInput.value)
+                    .then(r => r.json())
+                    .then(data => {
+                        unavailableBarbersBySlot = data.unavailableBarbersBySlot;
+                        // Calculate total barbers from the barbersList
+                        const totalBarbersCount = barbersList.length || Object.keys(data.unavailableBarbersBySlot).reduce((max, slot) => Math.max(max, (data.unavailableBarbersBySlot[slot] || []).length), 0);
+                        updateSlotStatus(dateInput.value, totalBarbersCount);
+                    })
+                    .catch(err => {
+                        console.error('Error fetching availability:', err);
+                        // Fallback: just update with initial data
+                        const totalBarbersCount = barbersList.length;
+                        updateSlotStatus(dateInput.value, totalBarbersCount);
+                    });
             }
         });
-
     </script>
 </body>
 

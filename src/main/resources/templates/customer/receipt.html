@@ -8,7 +8,11 @@
     <main class="flex flex-col items-center mx-3 my-4 flex-grow">
         <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-5xl mx-auto">
             <h1 class="text-2xl font-bold text-center mb-2">Receipt</h1>
-            <p class="text-center text-lg mb-6">Thank you for your payment!</p>
+            <!-- Show different message based on payment method -->
+            <p class="text-center text-lg mb-6">
+                <span th:if="${payment != null && payment.paymentMethod == 'cash'}">Thank you for booking!</span>
+                <span th:if="${payment == null || payment.paymentMethod != 'cash'}">Thank you for your payment!</span>
+            </p>
 
             <hr class="mb-4">
 
@@ -16,10 +20,19 @@
                 <h2 class="font-semibold mb-2">Payment Details</h2>
                 <p>Payment ID: <span th:text="${payment != null ? payment.paymentId : 'N/A'}"></span></p>
                 <p>Payment Method: <span th:text="${payment != null ? payment.paymentMethod : 'N/A'}"></span></p>
-                <p>Amount Paid: RM <span
-                        th:text="${payment != null ? #numbers.formatDecimal(payment.amount, 1, 2) : '0.00'}"></span></p>
-                <p>Date of Payment: <span
-                        th:text="${payment != null ? #temporals.format(payment.paymentDate, 'yyyy-MM-dd') : 'N/A'}"></span>
+                <!-- Show different label based on payment method -->
+                <p th:if="${payment != null && payment.paymentMethod == 'cash'}">
+                    Amount Need to Pay: RM <span th:text="${#numbers.formatDecimal(payment.amount, 1, 2)}"></span>
+                </p>
+                <p th:if="${payment == null || payment.paymentMethod != 'cash'}">
+                    Amount Paid: RM <span th:text="${payment != null ? #numbers.formatDecimal(payment.amount, 1, 2) : '0.00'}"></span>
+                </p>
+                <!-- Show different label for date based on payment method -->
+                <p th:if="${payment != null && payment.paymentMethod == 'cash'}">
+                    Date of Booking: <span th:text="${appointment != null ? appointment.appointmentDate : 'N/A'}"></span>
+                </p>
+                <p th:if="${payment == null || payment.paymentMethod != 'cash'}">
+                    Date of Payment: <span th:text="${payment != null ? #temporals.format(payment.paymentDate, 'yyyy-MM-dd') : 'N/A'}"></span>
                 </p>
             </div>
 
@@ -41,7 +54,7 @@
                 <a th:href="@{'/' + ${source}}"
                     class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded">
                     <span th:if="${source == 'appointment-history'}">Back to Appointment History</span>
-                    <span th:if="${source == 'view-appointment' || source != 'appointment-history'}">
+                    <span th:if="${source != 'appointment-history'}">
                         Back to Appointment Page
                     </span>
                 </a>

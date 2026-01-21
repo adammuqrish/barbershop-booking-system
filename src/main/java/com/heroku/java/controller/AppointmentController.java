@@ -39,8 +39,8 @@ public class AppointmentController {
     }
 
     @GetMapping("/view-appointment")
-    public String viewAppointments(@RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "6") int size,
+    public String viewAppointments(@RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "6") int size,
             HttpSession session, Model model) {
         Long custId = (Long) session.getAttribute("custId");
         if (custId == null)
@@ -69,7 +69,7 @@ public class AppointmentController {
 
     @GetMapping("/appointment-history")
     public String appointmentHistory(
-            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(name = "page", defaultValue = "0") int page,
             HttpSession session,
             Model model) {
 
@@ -112,7 +112,7 @@ public class AppointmentController {
     }
 
     @PostMapping("/cancel-appointment")
-    public String cancelAppointment(@RequestParam Long appointmentId, HttpSession session) {
+    public String cancelAppointment(@RequestParam(name = "appointmentId") Long appointmentId, HttpSession session) {
         Long custId = (Long) session.getAttribute("custId");
         if (custId == null)
             return "redirect:/register";
@@ -139,7 +139,7 @@ public class AppointmentController {
     };
 
     @GetMapping("/edit-appointment")
-    public String editAppointment(@RequestParam Long appointmentId, HttpSession session, Model model) {
+    public String editAppointment(@RequestParam(name = "appointmentId") Long appointmentId, HttpSession session, Model model) {
         Long custId = (Long) session.getAttribute("custId");
         if (custId == null)
             return "redirect:/register";
@@ -150,27 +150,47 @@ public class AppointmentController {
         }
         Appointment appt = apptOpt.get();
 
+        // ✅ TUKAR SINI: Guna Array [] bukan List <>
+        String[] slots = {
+                "10:00 am", "10:30 am", "11:00 am", "11:30 am",
+                "12:00 pm", "12:30 pm", "1:00 pm", "1:30 pm",
+                "2:00 pm", "2:30 pm", "3:00 pm", "3:30 pm",
+                "4:00 pm", "4:30 pm", "5:00 pm", "5:30 pm",
+                "6:00 pm", "6:30 pm", "7:00 pm", "7:30 pm",
+                "8:00 pm", "8:30 pm", "9:00 pm", "9:30 pm"
+        };
+
         List<com.heroku.java.model.Staff> barbers = bookingService.getAllBarbers();
+
+        // Sekarang ini tiada error kerana slots adalah String[]
         Map<String, List<Long>> unavailableBarbersBySlot = bookingService
-                .getUnavailableBarbersBySlot(appt.getAppointmentDate(), SLOTS);
+                .getUnavailableBarbersBySlot(appt.getAppointmentDate(), slots);
 
         model.addAttribute("appointment", appt);
         model.addAttribute("barbers", barbers);
         model.addAttribute("unavailableBarbersBySlot", unavailableBarbersBySlot);
-        model.addAttribute("slots", SLOTS);
+        model.addAttribute("slots", slots);
 
         return "customer/edit-appointment";
     }
 
     @PostMapping("/update-appointment")
-    public String updateAppointment(@RequestParam Long appointmentId,
-            @RequestParam String date,
-            @RequestParam String slot,
-            @RequestParam Long barber,
+    public String updateAppointment(@RequestParam(name = "appointmentId") Long appointmentId,
+            @RequestParam(name = "appointmentDate") String date,
+            @RequestParam(name = "slot") String slot,
+            @RequestParam(name = "custType") String custType,
+            @RequestParam(name = "staffId") Long barber,
             HttpSession session,
             Model model,
             RedirectAttributes redirectAttributes) {
 
+        System.out.println("=== UPDATE APPOINTMENT ===");
+        System.out.println("appointmentId: " + appointmentId);
+        System.out.println("date: " + date);
+        System.out.println("slot: " + slot);
+        System.out.println("custType: " + custType);
+        System.out.println("barber: " + barber);
+        
         Long custId = (Long) session.getAttribute("custId");
         if (custId == null)
             return "redirect:/register";
@@ -197,6 +217,7 @@ public class AppointmentController {
                 // Repopulate data supaya form tak kosong
                 appt.setAppointmentDate(date);
                 appt.setAppointmentTime(slot);
+                appt.setCustType(custType);
                 appt.setBarberId(barber);
 
                 List<Staff> barbers = bookingService.getAllBarbers();
@@ -223,6 +244,7 @@ public class AppointmentController {
             // Repopulate data
             appt.setAppointmentDate(date);
             appt.setAppointmentTime(slot);
+            appt.setCustType(custType);
             appt.setBarberId(barber);
 
             List<Staff> barbers = bookingService.getAllBarbers();
@@ -240,6 +262,7 @@ public class AppointmentController {
         // Simpan jika ok
         appt.setAppointmentDate(date);
         appt.setAppointmentTime(slot);
+        appt.setCustType(custType);
         appt.setBarberId(barber);
 
         appointmentRepository.save(appt);

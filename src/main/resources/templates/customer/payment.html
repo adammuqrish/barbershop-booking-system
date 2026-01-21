@@ -56,7 +56,7 @@
                         <label for="cash" class="ml-2 text-sm">Cash</label>
                     </div>
                     <div class="flex items-center mb-4">
-                        <input type="radio" id="online" name="paymentMethod" value="online" checked class="h-4 w-4"
+                        <input type="radio" id="online" name="paymentMethod" value="online" class="h-4 w-4"
                             onchange="togglePaymentDetails()" />
                         <label for="online" class="ml-2 text-sm">Online Banking</label>
                     </div>
@@ -116,6 +116,14 @@
         }
 
         document.getElementById('paymentForm').addEventListener('submit', function (e) {
+            // Check if payment method is selected
+            const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked');
+            if (!paymentMethod) {
+                e.preventDefault();
+                alert('Please select a payment method (Cash or Online Banking)');
+                return;
+            }
+
             if (price === 0) {
                 // Allow direct submission for free appointment
                 return;
