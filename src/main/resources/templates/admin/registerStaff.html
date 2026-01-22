@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Register New Staff - Hugi Barbershop</title>
+    <link rel="stylesheet" th:href="@{/resources/assetsAdmin/css/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+
+<body class="nk-body" data-sidebar-collapse="lg" data-navbar-collapse="lg">
+
+    <div class="nk-app-root">
+        <div class="nk-main">
+
+            <!-- Sidebar -->
+            <div th:replace="~{fragments/adminFragments :: sidebar}"></div>
+
+            <div class="nk-wrap">
+
+                <!-- Header -->
+                <div th:replace="~{fragments/adminFragments :: header}"></div>
+
+                <!-- Content -->
+                <div class="nk-content">
+                    <div class="container">
+
+                        <!-- Page Header -->
+                        <div class="nk-block-head">
+                            <div class="nk-block-head-content">
+                                <h3 class="nk-block-title">
+                                    <i class="fas fa-user-plus me-2"></i>Register New Staff
+                                </h3>
+                                <p class="nk-block-subtitle">
+                                    Add a new barber or administrator account
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Form Card -->
+                        <div class="nk-block">
+                            <div class="card">
+                                <div class="card-inner">
+
+                                    <!-- Error Alert -->
+                                    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                                        <i class="fas fa-exclamation-circle me-2"></i>
+                                        <strong>Error:</strong> <span th:text="${error}"></span>
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                    </div>
+
+                                    <!-- Success Alert -->
+                                    <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+                                        <i class="fas fa-check-circle me-2"></i>
+                                        <span th:text="${success}"></span>
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                    </div>
+
+                                    <form th:action="@{/admin/register-staff}" method="post">
+
+                                        <div class="row g-4">
+
+                                            <!-- Full Name -->
+                                            <div class="col-md-6">
+                                                <label class="form-label">
+                                                    Full Name <span class="text-danger">*</span>
+                                                </label>
+                                                <input type="text" name="name" class="form-control" placeholder="Enter full name" required>
+                                            </div>
+
+                                            <!-- Email -->
+                                            <div class="col-md-6">
+                                                <label class="form-label">
+                                                    Email Address <span class="text-danger">*</span>
+                                                </label>
+                                                <input type="email" name="email" class="form-control" placeholder="example@email.com" required>
+                                            </div>
+
+                                            <!-- Phone Number -->
+                                            <div class="col-md-6">
+                                                <label class="form-label">
+                                                    Phone Number <span class="text-danger">*</span>
+                                                </label>
+                                                <input type="tel" name="phone" class="form-control" placeholder="012-3456789" required>
+                                            </div>
+
+                                            <!-- Role -->
+                                            <div class="col-md-6">
+                                                <label class="form-label">
+                                                    Role <span class="text-danger">*</span>
+                                                </label>
+                                                <select name="role" class="form-select" required>
+                                                    <option value="">-- Select Role --</option>
+                                                    <option value="ADMIN">Administrator</option>
+                                                    <option value="BARBER">Barber</option>
+                                                </select>
+                                            </div>
+
+                                            <!-- Password -->
+                                            <div class="col-md-6">
+                                                <label class="form-label">
+                                                    Password <span class="text-danger">*</span>
+                                                </label>
+                                                <input type="password" name="password" class="form-control" placeholder="Enter password" required>
+                                            </div>
+
+                                            <!-- Confirm Password -->
+                                            <div class="col-md-6">
+                                                <label class="form-label">
+                                                    Confirm Password <span class="text-danger">*</span>
+                                                </label>
+                                                <input type="password" name="confirmPassword" class="form-control" placeholder="Confirm password" required>
+                                            </div>
+
+                                            <!-- Description -->
+                                            <div class="col-12">
+                                                <label class="form-label">Description (Optional)</label>
+                                                <textarea name="description" class="form-control" rows="3" placeholder="Add any additional information..."></textarea>
+                                            </div>
+
+                                        </div>
+
+                                        <!-- Buttons -->
+                                        <div class="mt-4 d-flex justify-content-end gap-2">
+                                            <a th:href="@{/listBarber}" class="btn btn-light">
+                                                <i class="fas fa-times me-2"></i>Cancel
+                                            </a>
+                                            <button type="submit" class="btn btn-primary">
+                                                <i class="fas fa-save me-2"></i>Register Staff
+                                            </button>
+                                        </div>
+
+                                    </form>
+
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+
+</html>

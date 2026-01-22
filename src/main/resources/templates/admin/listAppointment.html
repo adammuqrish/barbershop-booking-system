@@ -253,12 +253,41 @@
                 const dateInput = document.getElementById('editDate');
                 if (dateInput) {
                     dateInput.setAttribute('min', today);
+                    // Add change listener to validate past dates
+                    dateInput.addEventListener('change', function() {
+                        if (this.value && this.value < today) {
+                            this.value = '';
+                            alert('Cannot select a past date.');
+                        }
+                    });
                 }
 
                 // ✅ PENTING: Panggil updateAvailableTimes() sekali pada load
                 // ini akan isi dropdown masa dengan data yang betul bila edit panel dibuka
                 updateAvailableTimes();
             });
+
+            function isTimeInPast(dateStr, timeStr) {
+                if (!dateStr || !timeStr) return false;
+                
+                try {
+                    // Convert time format (e.g., "02:00 pm" -> "14:00")
+                    const timeParts = timeStr.split(' ');
+                    const [hour, minute] = timeParts[0].split(':');
+                    let h = parseInt(hour);
+                    const ampm = timeParts[1].toLowerCase();
+                    
+                    if (ampm === 'pm' && h !== 12) h += 12;
+                    if (ampm === 'am' && h === 12) h = 0;
+                    
+                    const appointmentDateTime = new Date(dateStr + ' ' + String(h).padStart(2, '0') + ':' + minute);
+                    const now = new Date();
+                    
+                    return appointmentDateTime < now;
+                } catch (e) {
+                    return false;
+                }
+            }
 
             function updateAvailableTimes() {
                 const date = document.getElementById('editDate').value;
@@ -292,6 +321,13 @@
                     .then(response => response.json())
                     .then(times => {
                         times.forEach(time => {
+                            // Filter out past times for today
+                            const today = new Date().toISOString().split('T')[0];
+                            if (date === today && isTimeInPast(date, time)) {
+                                // Skip past times
+                                return;
+                            }
+                            
                             const option = document.createElement('option');
                             option.value = time;
                             option.textContent = time;

@@ -9,6 +9,7 @@ import com.heroku.java.repository.AppointmentRepository;
 import com.heroku.java.repository.CustomerRepository;
 import com.heroku.java.repository.StaffRepository;
 import com.heroku.java.service.BookingService;
+import com.heroku.java.service.StaffService;
 
 import jakarta.servlet.http.HttpSession;
 
@@ -46,6 +47,7 @@ public class AdminController {
     private final PaymentRepository paymentRepository;
     private final com.heroku.java.repository.FeedbackRepository feedbackRepository;
     private final BookingService bookingService;
+    private final StaffService staffService;
 
     @Autowired
     public AdminController(CustomerRepository customerRepository,
@@ -53,13 +55,15 @@ public class AdminController {
             AppointmentRepository appointmentRepository,
             PaymentRepository paymentRepository,
             com.heroku.java.repository.FeedbackRepository feedbackRepository,
-            BookingService bookingService) {
+            BookingService bookingService,
+            StaffService staffService) {
         this.customerRepository = customerRepository;
         this.staffRepository = staffRepository;
         this.appointmentRepository = appointmentRepository;
         this.paymentRepository = paymentRepository;
         this.feedbackRepository = feedbackRepository;
         this.bookingService = bookingService;
+        this.staffService = staffService;
     }
 
     // Helper method untuk dapatkan Staff yang sedang login
@@ -852,7 +856,16 @@ public class AdminController {
     // 16. ADMIN REGISTER STAFF
     @GetMapping("/admin/register-staff")
     @PreAuthorize("hasRole('ADMIN')")
-    public String registerStaffPage() {
+    public String registerStaffPage(Model model) {
+        // Get logged-in admin info for header
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && !auth.getName().equals("anonymousUser")) {
+            staffRepository.findByStaffEmail(auth.getName()).ifPresent(admin -> {
+                model.addAttribute("staffName", admin.getStaffName());
+                model.addAttribute("staffRole", admin.getStaffRole());
+                model.addAttribute("staff", admin);
+            });
+        }
         return "admin/registerStaff";
     }
 
@@ -960,7 +973,6 @@ public class AdminController {
         staff.setDescription(description);
         staff.setAdminId(admin.getStaffId());
 
-        com.heroku.java.service.StaffService staffService = new com.heroku.java.service.StaffService(staffRepository);
         staffService.saveStaff(staff);
 
         return "redirect:/listBarber";
@@ -1128,11 +1140,25 @@ public class AdminController {
     // 21. ADMIN EDIT STAFF
     @GetMapping("/admin/edit-staff")
     @PreAuthorize("hasRole('ADMIN')")
-    public String editStaff(@RequestParam Long staffId, Model model) {
+    public String editStaff(@RequestParam(required = false) Long staffId, Model model) {
+        
+        // Get logged-in admin info for header
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && !auth.getName().equals("anonymousUser")) {
+            staffRepository.findByStaffEmail(auth.getName()).ifPresent(admin -> {
+                model.addAttribute("staffName", admin.getStaffName());
+                model.addAttribute("staffRole", admin.getStaffRole());
+            });
+        }
 
-        staffRepository.findById(staffId).ifPresent(staff -> {
-            model.addAttribute("staff", staff);
-        });
+        if (staffId != null) {
+            staffRepository.findById(staffId).ifPresentOrElse(
+                staff -> model.addAttribute("staff", staff),
+                () -> model.addAttribute("error", "Staff not found.")
+            );
+        } else {
+            model.addAttribute("error", "Invalid staff ID provided.");
+        }
 
         return "admin/edit-staff";
     }

@@ -39,8 +39,15 @@
                         </div>
                     </div>
 
-                    <!-- Form Card -->
-                    <div class="nk-block">
+                    <!-- Error Alert -->
+                    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        <strong>Error:</strong> <span th:text="${error}"></span>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+
+                    <!-- Form Card (Only show if staff exists) -->
+                    <div th:if="${staff}" class="nk-block">
                         <div class="card">
                             <div class="card-inner">
 
@@ -75,44 +82,46 @@
                                                    th:value="${staff.staffPhoneNumber}" required>
                                         </div>
 
-                                        <!-- Role -->
+                                        <!-- Role (Disabled - Display Only) -->
                                         <div class="col-md-6">
                                             <label class="form-label">Role</label>
-                                            <select name="role" class="form-select" required>
-                                                <option value="ADMIN"
-                                                    th:selected="${staff.staffRole == 'ADMIN'}">
+                                            <select name="role" class="form-select" disabled>
+                                                <option th:if="${staff.staffRole == 'ADMIN'}"
+                                                    value="ADMIN" selected>
                                                     Administrator
                                                 </option>
-                                                <option value="BARBER"
-                                                    th:selected="${staff.staffRole == 'BARBER'}">
+                                                <option th:if="${staff.staffRole == 'BARBER'}"
+                                                    value="BARBER" selected>
                                                     Barber
                                                 </option>
                                             </select>
+                                            <small class="form-text text-muted d-block mt-1">
+                                                <i class="fas fa-lock me-1"></i>Role cannot be changed
+                                            </small>
                                         </div>
 
                                         <!-- Description -->
                                         <div class="col-12">
-                                            <label class="form-label">Description</label>
+                                            <label class="form-label">Description (Optional)</label>
                                             <textarea name="description"
                                                       class="form-control"
-                                                      rows="3"
-                                                      th:text="${staff.description}">
-                                            </textarea>
+                                                      rows="4"
+                                                      placeholder="Add any additional information about this staff member..."
+                                                      th:inline="text">${staff.description}</textarea>
                                         </div>
 
                                     </div>
 
                                     <!-- Buttons -->
-                                    <div class="mt-4 d-flex justify-content-end gap-2">
-                                        <a th:href="@{/listBarber(staffId=${staff.staffId})}"
+                                    <div class="mt-5 d-flex justify-content-end gap-2 border-top pt-4">
+                                        <a th:href="@{/listBarber}"
                                            class="btn btn-light">
-                                            Cancel
+                                            <i class="fas fa-times me-2"></i>Cancel
                                         </a>
 
                                         <button type="submit"
-                                            class="btn btn-primary"
-                                            onclick="return confirm('Save changes?')">
-                                            Save Changes
+                                            class="btn btn-primary">
+                                            <i class="fas fa-save me-2"></i>Save Changes
                                         </button>
                                     </div>
 
@@ -120,6 +129,12 @@
 
                             </div>
                         </div>
+                    </div>
+
+                    <!-- No Staff Message -->
+                    <div th:if="${!staff}" class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <a th:href="@{/listBarber}" class="alert-link">Go back to staff list</a> to select a staff member to edit.
                     </div>
 
                 </div>
