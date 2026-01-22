@@ -81,16 +81,8 @@
                                             <!-- Role (Disabled - Display Only) -->
                                             <div class="col-md-6">
                                                 <label class="form-label">Role</label>
-                                                <select name="roleDisplay" class="form-select" disabled>
-                                                    <option th:if="${staff.staffRole == 'ADMIN'}" value="ADMIN"
-                                                        selected>
-                                                        Administrator
-                                                    </option>
-                                                    <option th:if="${staff.staffRole == 'BARBER'}" value="BARBER"
-                                                        selected>
-                                                        Barber
-                                                    </option>
-                                                </select>
+                                                <input type="text" class="form-control" disabled
+                                                    th:value="${staff.staffRole == 'ADMIN' ? 'Administrator' : 'Barber'}">
                                                 <!-- Hidden input to submit the role value -->
                                                 <input type="hidden" name="role" th:value="${staff.staffRole}">
                                                 <small class="form-text text-muted d-block mt-1">
@@ -103,9 +95,7 @@
                                                 <label class="form-label">Description (Optional)</label>
                                                 <textarea name="description" class="form-control" rows="4"
                                                     placeholder="Add any additional information about this staff member..."
-                                                    th:inline="text">${staff.description}
-                                            </textarea><input type="hidden" name="description"
-                                                    th:value="${staff.description}"></textarea>
+                                                    th:inline="text">${staff.description}</textarea>
                                             </div>
 
                                         </div>
@@ -117,7 +107,7 @@
                                             </a>
 
                                             <button type="submit" class="btn btn-primary">
-                                                <i class="fas fa-save me-2"></i>Save Changessssssssssss
+                                                <i class="fas fa-save me-2"></i>Save Changes
                                             </button>
                                         </div>
 
