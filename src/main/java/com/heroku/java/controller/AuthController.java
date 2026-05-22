@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -19,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -49,6 +51,19 @@ public class AuthController {
             return "redirect:/adminIndex";
         }
         return "admin/adminLogin";
+    }
+
+    @GetMapping("/login")
+    public String loginPage(HttpSession session, 
+                           @RequestParam(required = false) String error,
+                           Model model) {
+        if (session.getAttribute("customer") != null || session.getAttribute("loggedInStaff") != null) {
+            return "redirect:/index";
+        }
+        if (error != null) {
+            model.addAttribute("error", "Invalid credentials");
+        }
+        return "customer/register";
     }
 
     // --- HANDLE CUSTOMER LOGIN & REGISTER ---
@@ -90,19 +105,21 @@ public class AuthController {
                 session.setAttribute("custId", customer.getCustId());
                 logger.debug("Session attributes set for customer ID: {}", customer.getCustId());
 
-                // 2. SET SPRING SECURITY CONTEXT
-                org.springframework.security.authentication.UsernamePasswordAuthenticationToken auth = new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(
+                // 2. SET SPRING SECURITY CONTEXT with ROLE_CUSTOMER authority
+                List<SimpleGrantedAuthority> authorities = new ArrayList<>();
+                authorities.add(new SimpleGrantedAuthority("ROLE_CUSTOMER"));
+                
+                UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
                         customer.getCustEmail(),
                         null,
-                        java.util.Collections.emptyList());
-                org.springframework.security.core.context.SecurityContextHolder.getContext().setAuthentication(auth);
+                        authorities);
+                SecurityContextHolder.getContext().setAuthentication(auth);
+                
+                // 3. CRITICAL: Save context to session
+                session.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
                 logger.debug("Spring Security context set for customer: {}", customer.getCustEmail());
 
                 return "redirect:/index";
-            } else {
-                logger.debug("Customer login failed - Email: {}", email);
-                model.addAttribute("error", "Invalid email or password");
-                return "customer/register";
             }
         }
 
