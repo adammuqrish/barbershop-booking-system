@@ -16,41 +16,29 @@ public class SecurityConfig {
         public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
                 http
                                 .authorizeHttpRequests(auth -> auth
-
-                                                // --- 1. STATIC FILES ---
+                                                .requestMatchers("/", "/index", "/register", "/adminLogin", "/login",
+                                                                "/error")
+                                                .permitAll()
+                                                .requestMatchers("/auth/**", "/staffAuth/**").permitAll()
                                                 .requestMatchers("/css/**", "/js/**", "/images/**", "/resources/**",
-                                                                "/uploads/**", "/resources/assetsAdmin/**")
+                                                                "/uploads/**", "/assetsAdmin/**",
+                                                                "/resources/assetsAdmin/**",
+                                                                "/webjars/**", "/favicon.ico")
                                                 .permitAll()
-
-                                                // --- 2. PUBLIC PAGES (INDEX & LOGIN) ---
-                                                // TAMBAH "/error" SINI
-                                                .requestMatchers("/", "/index", "/register", "/adminLogin", "/error")
-                                                .permitAll()
-
-                                                // --- 3. AUTH ENDPOINTS ---
-                                                .requestMatchers("/auth", "/staffAuth")
-                                                .permitAll()
-
-                                                // --- 4. ADMIN ENDPOINTS ---
-                                                .requestMatchers("/admin/**", "/adminIndex")
-                                                .hasRole("ADMIN")
-
-                                                // --- 5. BARBER ENDPOINTS ---
-                                                .requestMatchers("/barber/**")
-                                                .hasRole("BARBER")
-
-                                                // --- 6. CUSTOMER ENDPOINTS ---
-                                                .requestMatchers(
-                                                                "/profile", "/edit-profile", "/update-profile",
+                                                .requestMatchers("/admin/**", "/adminIndex").hasRole("ADMIN")
+                                                .requestMatchers("/barber/**").hasRole("BARBER")
+                                                .requestMatchers("/profile", "/edit-profile", "/update-profile",
                                                                 "/view-appointment", "/appointment-history",
                                                                 "/booking/**",
-                                                                "/payment", "/processPayment", "/receipt", "/feedback",
+                                                                "/payment/**", "/processPayment", "/receipt/**",
+                                                                "/feedback/**",
                                                                 "/cancel-appointment", "/edit-appointment",
                                                                 "/update-appointment")
-                                                .permitAll()
-
+                                                .authenticated()
                                                 .anyRequest().authenticated())
-
+                                .formLogin(form -> form
+                                                .loginPage("/login")
+                                                .permitAll())
                                 .logout(logout -> logout
                                                 .logoutRequestMatcher(new AntPathRequestMatcher("/logout", "GET"))
                                                 .logoutSuccessUrl("/index")
@@ -58,7 +46,9 @@ public class SecurityConfig {
                                                 .deleteCookies("JSESSIONID")
                                                 .permitAll())
                                 .csrf(csrf -> csrf
-                                                .ignoringRequestMatchers("/staffAuth", "/auth"));
+                                                .ignoringRequestMatchers("/staffAuth", "/auth")
+                                                .ignoringRequestMatchers("/payment/**", "/booking/**", "/feedback/**")
+                                                .ignoringRequestMatchers("/admin/**"));
 
                 return http.build();
         }
