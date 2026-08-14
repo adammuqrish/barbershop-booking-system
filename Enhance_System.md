@@ -113,10 +113,14 @@ This document catalogues frontend issues, inconsistencies, and improvement oppor
 
 ## 3. Customer Pages
 
-### 3.1 Sliding Login/Register Form Has No Password Visibility Toggle
+### 3.1 Sliding Login/Register Form Has No Password Visibility Toggle ✅ [COMPLETED]
 - **File:** `customer/register.html`
-- **Issue:** The password fields have no "show/hide password" toggle, even though the admin `scripts.js` has a `showHidePassword` utility. The register page has its own custom CSS for a sliding panel modal but doesn't integrate password visibility.
+- **Issue:** The password fields had no "show/hide password" toggle, even though the admin `scripts.js` has a `showHidePassword` utility. The register page has its own custom CSS for a sliding panel modal but didn't integrate password visibility.
 - **Enhancement:** Add eye-icon toggle for both password fields. The custom modal CSS is already well-written; just add the toggle.
+- **Change made:** In `customer/register.html`:
+  - Wrapped all three password inputs (Login, Register, Confirm Password) in `relative` containers and added a reusable `.password-toggle` eye-button (`data-target` → input id) positioned inside the input (`inset-y-0 right-0`, `pr-10` on the input). Each button holds an open-eye SVG (`eye-icon`) and a slashed-eye SVG (`eye-off-icon`).
+  - Added a small, generic script that binds every `.password-toggle`: toggles the input `type` between `password`/`text`, swaps the eye/eye-off icons, and updates the `aria-label`.
+  - Regenerated `main.css` to include the new utilities (`inset-y-0`, `right-0`, `pr-10`, `px-3`, `items-center`). `mvn -o compile` → **BUILD SUCCESS**. ✅
 
 ### 3.2 Registration Form Lacks Client-Side Validation
 - **File:** `customer/register.html:166-214`
@@ -316,7 +320,7 @@ This document catalogues frontend issues, inconsistencies, and improvement oppor
 | 2.3 | UX | `script.js` | Medium | ✅ Done
 | 2.4 | CSS Bug | `nav.html` | Low | ✅ Done
 | 2.5 | UX | `script.js` | Low | ✅ Done
-| 3.1 | UX | `register.html` | Low |
+| 3.1 | UX | `register.html` | Low | ✅ Done
 | 3.2 | UX | `register.html` | Medium |
 | 3.3 | Responsive | `booking.html` | Low |
 | 3.4 | UX | `booking.html` | Low |
