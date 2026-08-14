@@ -97,10 +97,11 @@ This document catalogues frontend issues, inconsistencies, and improvement oppor
   - Keeps the existing `text-yellow-300` highlight (verified it appears after `text-white` in the compiled `main.css`, so it overrides the white nav text).
   - Verified with `node --check` (JS syntax OK). ✅
 
-### 2.4 User Avatar Container Size Mismatch
+### 2.4 User Avatar Container Size Mismatch ✅ [COMPLETED]
 - **File:** `fragments/nav.html:75-88`
-- **Issue:** The avatar wrapper is `relative w-10 h-10 overflow-hidden` but the image inside is `absolute w-12 h-12` — the image is **larger** than its container, causing overflow/overlap with adjacent nav items.
+- **Issue:** The avatar wrapper was `relative w-10 h-10 overflow-hidden` but the image inside was `absolute w-12 h-12` — the image was **larger** than its container, causing overflow/overlap with adjacent nav items (the fallback SVG also used `w-12 h-12` plus a `-left-1` offset).
 - **Enhancement:** Make the image fit the container (`w-10 h-10`) and use `object-cover object-center`.
+- **Change made:** In `fragments/nav.html`, resized the profile `<img>` from `w-12 h-12` to `w-10 h-10` and added `object-cover object-center` (fills the circular `10x10` container and centers/crops the image). Resized the fallback user-icon `<svg>` from `w-12 h-12 -left-1` to `w-10 h-10` and removed the `-left-1` offset so it no longer overflows either. Regenerated `main.css` to include `object-cover` / `object-center`. ✅
 
 ### 2.5 Login Dropdown Doesn't Close on Navigation
 - **File:** `static/resources/js/script.js:132-154`
@@ -312,7 +313,7 @@ This document catalogues frontend issues, inconsistencies, and improvement oppor
 | 2.1 | Config | `nav.html` | Low | ✅ Done
 | 2.2 | Responsiveness | `nav.html`, `script.js` | Medium | ✅ Done
 | 2.3 | UX | `script.js` | Medium | ✅ Done
-| 2.4 | CSS Bug | `nav.html` | Low |
+| 2.4 | CSS Bug | `nav.html` | Low | ✅ Done
 | 2.5 | UX | `script.js` | Low |
 | 3.1 | UX | `register.html` | Low |
 | 3.2 | UX | `register.html` | Medium |
