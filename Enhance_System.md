@@ -63,6 +63,18 @@ This document catalogues frontend issues, inconsistencies, and improvement oppor
   - `fragments/footer.html`: replaced the stale comment in the brand column with a Facebook + Instagram social SVG row; added location-pin, phone (`tel:` link), and envelope (`mailto:` link) SVG icons to the "Barbershop Information" column so the contact details now have icons.
   - Regenerated `main.css` (`npm run build:css`, ~30 KB) so the newly-used utilities (`flex-shrink-0`, `mt-0.5`, `gap-2`, `items-start`, `space-y-2`, `mt-3`) are included. ✅
 
+### 1.6 External CDN Assets Self-Hosted (Icons Missing on Production) ✅ [COMPLETED]
+- **Files:** All admin templates + `fragments/adminScripts.html`, `fragments/header.html`, `customer/view-customer-details.html`, `admin/adminIndex.html`
+- **Issue:** Templates loaded key assets from third-party CDNs. Locally these load fine, but on production the browser must fetch them from `cdnjs.cloudflare.com` (Font Awesome), `code.jquery.com` (jQuery), and `cdn.jsdelivr.net` (Bootstrap, Flowbite, Chart.js). When those CDNs are blocked/slow/unreachable, the icons silently disappear — e.g. the `fa-eye` / `fa-eye-slash` password-toggle icons on admin pages (while the customer page's inline-SVG eye still shows, since it has no external dependency).
+- **Enhancement:** Self-host all external assets in `static/` and reference them via local `th:href` / `th:src` URLs, so production has zero third-party runtime dependencies.
+- **Change made:**
+  - Downloaded **Font Awesome 6.5.0** (`css/all.min.css` + `webfonts/*`) into `static/resources/assetsAdmin/css/fontawesome/` and pointed all 11 templates (all `admin/*` + `customer/view-customer-details.html`) at `@{/resources/assetsAdmin/css/fontawesome/css/all.min.css}`.
+  - Downloaded **jQuery 3.6.0**, **Bootstrap 5.3.3** (`bootstrap.bundle.min.js`), **Flowbite 3.1.2**, and **Chart.js 4.4.1** (`chart.umd.min.js`) into `static/resources/assetsAdmin/js/vendors/`.
+  - `fragments/adminScripts.html` now loads jQuery + Bootstrap from the vendored paths.
+  - `fragments/header.html` now loads Flowbite from the vendored path.
+  - `admin/adminIndex.html` now loads Chart.js from the vendored path.
+  - Verified: `grep https:// templates` → none; `mvnw -o compile` → **BUILD SUCCESS**; `target/classes` synced and verified. ✅
+
 ---
 
 ## 2. Navigation Bar (`fragments/nav.html`)
