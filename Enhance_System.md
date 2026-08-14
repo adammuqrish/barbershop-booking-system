@@ -1,0 +1,309 @@
+# Frontend Enhancement Plan — Hugi Barbershop
+
+This document catalogues frontend issues, inconsistencies, and improvement opportunities identified across the project's HTML templates, CSS, and JavaScript. Each item includes the affected file(s), a description of the problem, and a recommended enhancement. Items are grouped by category and ordered roughly by priority/impact.
+
+---
+
+## 1. Global / Shared Fragments
+
+### 1.1 Stale "Java Getting Started on Heroku" Layout Fragment
+- **File:** `src/main/resources/templates/fragments/layout.html`
+- **Issue:** This is a leftover from Heroku's default "Java getting-started" template. It references Bootstrap 3.3.7, jQuery UI, links to Heroku Dev Center guides, uses outdated `glyphicon` icons, and is **not actually used** by any page in the app. It is dead code that clutters the codebase and could confuse future developers.
+- **Enhancement:** Delete `layout.html` and its reference in `target/classes/templates/fragments/layout.html` (build artifact, will regenerate). It serves no purpose in the current app.
+
+### 1.2 Duplicate / Unused JS File Paths
+- **Files:**
+  - `src/main/resources/static/resources/js/script.js` (loaded in `fragments/header.html`)
+  - `src/main/resources/static/js/scripts.js` (the full NioBoard admin script)
+  - `src/main/resources/static/resources/jsAdmin/scripts.js`
+- **Issue:** There are duplicated JavaScript files in two separate locations (`static/js/` vs `static/resources/jsAdmin/`). The admin pages reference `assetsAdmin/css/style.css` but don't explicitly load `scripts.js`, so the admin sidebar/navbar toggles and other interactive features may not be wired up.
+- **Enhancement:** Consolidate JS to one canonical path (`static/js/`) and explicitly load the required admin JS (`scripts.js`) in admin page templates. Remove the `resources/jsAdmin` duplicates.
+
+### 1.3 Header Fragment Misses Common Meta Tags & Favicon
+- **File:** `src/main/resources/templates/fragments/header.html`
+- **Issue:** The `<head th:fragment="head">` block does not include:
+  - A favicon reference (`favicon.png` exists in uploads but is never linked)
+  - `charset` meta is present but there are no `http-equiv`, theme-color, or social/Open Graph meta tags
+  - It loads `@{ /resources/js/script.js }` unconditionally even on pages that don't need it (e.g., admin pages)
+- **Enhancement:** Add `<link rel="icon" th:href="@{/resources/uploads/favicon.png}">` and a theme-color meta tag. Make the `script.js` include conditional or move it to pages that need it.
+
+### 1.4 Tailwind CSS CDN (JIT) Loaded at Runtime
+- **File:** `fragments/header.html:10`
+- **Issue:** Tailwind is loaded via `<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>`. The `@tailwindcss/browser` build is intended for **development only**. It is slow (JIT compilation happens in-browser on every load) and not production-ready.
+- **Enhancement:** Replace with a **compiled Tailwind CSS build**: generate `main.css` via `postcss-cli` / `tailwindcss-cli` as part of the Maven build (using `tailwindcss` plugin) and reference a static CSS file. If staying with CDN for dev, at minimum add a note.
+
+### 1.5 Nav & Footer Comments Contain Placeholder Text
+- **Files:** `fragments/nav.html:11`, `fragments/footer.html:10`
+- **Issue:** Both contain literal comment text like `<!-- ... (omitted SVGs for brevity, but I will include them) ... -->` and `<!-- SVG Icons from original JSP (restoring them exactly) -->`. This is leftover from a migration and indicates SVGs that were supposed to be restored but never were.
+- **Enhancement:** Remove the stale comments. Add actual SVG icons for social/contact info in the footer (currently missing).
+
+---
+
+## 2. Navigation Bar (`fragments/nav.html`)
+
+### 2.1 Contact Info Hardcoded in Template
+- **File:** `fragments/nav.html:5-7`
+- **Issue:** "CONTACT US: 0127865132" and "OPENING HOUR: TUESDAY - SUNDAY (10 a.m - 10 p.m)" are hardcoded. They should come from a config/properties file so the barbershop owner can change them without modifying templates.
+- **Enhancement:** Move to `application.properties` (e.g. `barbershop.phone`, `barbershop.opening-hours`) and inject via Thymeleaf `th:text`.
+
+### 2.2 Appointment Dropdown — Conflicting Desktop & Mobile Logic
+- **File:** `fragments/nav.html:35-65` + `static/resources/js/script.js:84-130`
+- **Issue:** The nav has **two separate triggers** for the Appointment dropdown: `appointment-desktop-trigger` (a `<span>` shown on desktop via `hidden md:flex`) and `dropdown-toggle` (a `<button>` shown on mobile). The JS handles both with separate listeners. The barber dropdown button also uses `dropdown-toggle` class which the mobile script targets via a fragile selector: `.dropdown-toggle.md\\:hidden, .dropdown-toggle.md\\:block.md\\:hidden`. This is fragile and could break if class names change.
+- **Enhancement:** Simplify to a single dropdown trigger pattern. Use a consistent `data-dropdown` attribute or Flowbite's built-in dropdown component instead of custom JS.
+
+### 2.3 Nav Active-Link Highlighting is Broken
+- **File:** `static/resources/js/script.js:56-82`
+- **Issue:** The script selects links with class `.lg\:hover\:bg-transparent` to add a yellow text highlight when the link href matches the current page. However, this only works for **top-level nav links** (Home, About Us). Dropdown items (Book Appointment, Current Appointment, Appointment History) and the Login/Logout links are not covered. Also, `linkHref === currentPage` compares full href to the last path segment — this fails for links like `/index#aboutUs`.
+- **Enhancement:** Use a more robust active-link detection (compare `new URL(link.href).pathname` to `window.location.pathname`). Add active states to dropdown sub-items too.
+
+### 2.4 User Avatar Container Size Mismatch
+- **File:** `fragments/nav.html:75-88`
+- **Issue:** The avatar wrapper is `relative w-10 h-10 overflow-hidden` but the image inside is `absolute w-12 h-12` — the image is **larger** than its container, causing overflow/overlap with adjacent nav items.
+- **Enhancement:** Make the image fit the container (`w-10 h-10`) and use `object-cover object-center`.
+
+### 2.5 Login Dropdown Doesn't Close on Navigation
+- **File:** `static/resources/js/script.js:132-154`
+- **Issue:** The login dropdown has a "close on outside click" handler, but if a user clicks a dropdown item (Login as Customer / Login as Staff), the dropdown doesn't immediately close before navigation — the click bubbles and the menu stays visible momentarily during navigation.
+- **Enhancement:** Add `click` handlers on dropdown items that close the menu before following the link.
+
+---
+
+## 3. Customer Pages
+
+### 3.1 Sliding Login/Register Form Has No Password Visibility Toggle
+- **File:** `customer/register.html`
+- **Issue:** The password fields have no "show/hide password" toggle, even though the admin `scripts.js` has a `showHidePassword` utility. The register page has its own custom CSS for a sliding panel modal but doesn't integrate password visibility.
+- **Enhancement:** Add eye-icon toggle for both password fields. The custom modal CSS is already well-written; just add the toggle.
+
+### 3.2 Registration Form Lacks Client-Side Validation
+- **File:** `customer/register.html:166-214`
+- **Issue:** The form has `required` attributes and server-side validation, but no client-side validation feedback. The phone field strips non-numeric chars (good), but there's no email format validation, no password strength check, and no match indicator for confirm password.
+- **Enhancement:** Add real-time validation feedback (error messages inline, password strength meter, confirm-password match indicator).
+
+### 3.3 Booking Page — Slot Grid Uses `grid-cols-6` Without Mobile Responsiveness
+- **File:** `customer/booking.html:27-36`
+- **Issue:** Time slots are rendered in a fixed `grid grid-cols-6 gap-2` which doesn't adapt on small screens. On mobile, 6 columns is too cramped — labels overlap.
+- **Enhancement:** Use responsive grid (`grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6`) so slots wrap nicely on all screen sizes.
+
+### 3.4 Booking Page — "Booking For" Field Has No Input Validation / Labeling
+- **File:** `customer/booking.html:12-17`
+- **Issue:** The "Booking For" text input allows any value with no pattern or suggestion. There's no clear label association error (the `for` matches `id`, which is correct, but the field name `booking-for` with a hyphen is fine). The main issue is no guidance on expected input format.
+- **Enhancement:** Add a placeholder like "e.g., John Doe" and consider making it a select with "Myself" / "Someone else" for better UX.
+
+### 3.5 Edit Appointment — Duplicate Slot Radio JS Logic (No Availability Check)
+- **File:** `customer/edit-appointment.html`
+- **Issue:** Unlike the new `booking.html`, the `edit-appointment.html` page renders **all** time slots as enabled radio buttons (no `disabled` attribute) and the JS only updates the selected-time display field. It fetches availability from `/booking/unavailable` but then **never disables any slots** based on the result in `updateSlotStatus()`. The availability logic from `booking.html` is not replicated here.
+- **Enhancement:** Port the availability + time-past disabling logic from `booking.html` into `edit-appointment.html`'s `updateSlotStatus` function.
+
+### 3.6 Payment Page — Online Banking Is a Mock with No Real Checkout Flow
+- **File:** `customer/payment.html`
+- **Issue:** The "Online Banking" option shows a fake "Select Bank" modal with hardcoded bank options (Maybank, CIMB, Public Bank). Clicking "Confirm Payment" just submits the form with a hidden bank name — no real payment gateway integration. The bank modal is a placeholder.
+- **Enhancement:** Either integrate a real payment gateway (e.g., Stripe, SenangPay, FPX) **or** clearly label this as a simulation with a disclaimer and auto-complete step. At minimum, show a spinner/loading state on "Confirm Payment" to indicate processing.
+
+### 3.7 Payment Page — Button Text/State Inconsistency on Price = 0
+- **File:** `customer/payment.html:95-116`
+- **Issue:** When `price === 0` (free appointment via loyalty points), the button text changes to "Proceed" but selecting "Cash" or "Online Banking" still triggers the bank modal check. The `togglePaymentDetails()` function doesn't account for the free case properly — if price is 0 and user selects online, the bank modal still appears.
+- **Enhancement:** When price is 0, hide the payment method selection entirely and only show the "Proceed" button, or auto-set payment method to "cash" with completed status.
+
+### 3.8 Profile Page — No Change Password Confirmation Field
+- **File:** `customer/editProfile.html:55-59`
+- **Issue:** The "New Password" field has no "Confirm Password" field, unlike the register form. Users could mistype their new password.
+- **Enhancement:** Add a "Confirm New Password" field with match validation.
+
+### 3.9 Profile Page — Image Upload Preview Is Missing
+- **File:** `customer/editProfile.html:41-53`
+- **Issue:** The file upload shows the filename but no image preview. The existing `NioApp.Custom.uploadImage` function in `scripts.js` supports preview but isn't used here.
+- **Enhancement:** Add a live image preview thumbnail that appears when a file is selected.
+
+### 3.10 Appointment History — Cards Have Inconsistent Action Button Styling
+- **File:** `customer/appointment-history.html:36-49`
+- **Issue:** The "View Receipt" button uses a custom Tailwind class (`bg-blue-200 text-blue-800`) while "Give Feedback" uses (`bg-blue-500 text-white`). The styling is inconsistent.
+- **Enhancement:** Standardize action button styles across all customer pages (use a consistent color palette for primary/secondary actions).
+
+### 3.11 Receipt Page — No Print Button
+- **File:** `customer/receipt.html`
+- **Issue:** The receipt page has a "Back" button but no "Print Receipt" button. Users would want to print or save the receipt as PDF.
+- **Enhancement:** Add a print button that calls `window.print()` and applies receipt-specific print styles.
+
+---
+
+## 4. Admin / Staff Dashboard & Management Pages
+
+### 4.1 Admin Dashboard — Chart.js Canvas Has No Aspect Ratio Container
+- **File:** `admin/adminIndex.html:86-93`
+- **Issue:** The `<canvas id="salesChart">` is placed directly inside a `.card` with no height constraint. On some screen sizes the chart can render with zero height or stretched proportions.
+- **Enhancement:** Wrap the canvas in a container with a fixed aspect ratio (e.g., `style="position: relative; height: 300px;"`) or use Chart.js's `maintainAspectRatio: false` with an explicit height.
+
+### 4.2 Admin Dashboard — Sales Chart Labels Don't Match Data Order
+- **File:** `admin/adminIndex.html:100-117`
+- **Issue:** The `dayLabels` array is defined but **never used**. The chart labels array is `['Sun', 'Mon', 'Tue', ...]` while the data is pushed from the `days` array which is in the same order, so it works but the unused variable is dead code.
+- **Enhancement:** Remove the unused `dayLabels` variable. Consider labeling full day names for accessibility.
+
+### 4.3 Admin Sidebar — Logo Link Uses Inline Width/Height Styles
+- **File:** `fragments/adminFragments.html:9-13`
+- **Issue:** The sidebar logo image has `style="width: 150px; height: 100px"` which will distort the image (not maintain aspect ratio). The logo wrapper also has fixed dimensions.
+- **Enhancement:** Use `object-contain` or `max-width: 100%` with auto height on the image, and remove forced height on the wrapper.
+
+### 4.4 Admin Sidebar — Missing "Active" Class Highlighting for Current Page
+- **File:** `fragments/adminFragments.html:1-78`
+- **Issue:** The sidebar menu items don't have dynamic "active" class highlighting based on the current URL. The `scripts.js` has `CurrentLink` logic but the sidebar uses `nk-menu-link` class which may or may not be targeted.
+- **Enhancement:** Add `th:classappend` to highlight the current section based on `window.location.pathname` or a server-provided active menu variable.
+
+### 4.5 Staff List Page — "Admin" Column Shows Admin Name for Non-Admin Staff Only
+- **File:** `admin/listBarber.html:54`
+- **Issue:** The "Admin" column shows `${adminNameMap[barber.staffId]}`, which only includes entries where `staff.adminId != null`. Admins themselves (who have `adminId == null`) show `—`. This is actually correct behavior, but the column header says "Admin" which is ambiguous — it really means "Created By".
+- **Enhancement:** Rename the column header to "Created By" for clarity.
+
+### 4.6 Staff List Page — Register Modal Phone Field Lacks Input Masking
+- **File:** `admin/listBarber.html:178-181`
+- **Issue:** The phone number input in the register staff modal has no input masking (unlike the customer register page which strips non-numeric chars). Users could enter invalid characters.
+- **Enhancement:** Add `inputmode="numeric"` and the same non-numeric stripping script as the customer register page.
+
+### 4.7 Appointment List — Edit Panel Date Picker Min Attribute Logic is Client-Side Only
+- **File:** `admin/listAppointment.html:198-203`
+- **Issue:** The date picker has `th:value="${appointment.appointmentDate}"` but no `min` attribute set server-side. The `min` is only set via JS in `DOMContentLoaded`. This means the native date picker could allow selecting past dates before JS runs.
+- **Enhancement:** Set `th:min="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}"` server-side as a fallback.
+
+### 4.8 Appointment List — Time Select Starts Empty, No "Loading" State
+- **File:** `admin/listAppointment.html:206-214` + JS `:292-348`
+- **Issue:** When editing an appointment, the time `<select>` starts with only a "Select Time" placeholder option. The `updateAvailableTimes()` function fetches options via AJAX but there's no loading indicator or error handling. If the fetch fails, the user sees an empty dropdown with no feedback.
+- **Enhancement:** Add a loading spinner placeholder option and a `.catch()` handler that shows an error message in the dropdown.
+
+### 4.9 Appointment List / Edit Appointment — Barber Hidden When All Slots Full
+- **File:** `admin/listAppointment.html:219-224`
+- **Issue:** When no barber is selected, the available-times API returns all slots booked (checks all appointments for that date). The time dropdown will be nearly empty. There's no guidance telling the admin to select a barber first.
+- **Enhancement:** Default the barber select to the appointment's current barber so times load immediately. Add a "Select a barber first" placeholder message.
+
+### 4.10 Admin Login Page — Layout Is Not Centered on Large Screens
+- **File:** `admin/adminLogin.html:11-16`
+- **Issue:** The login container has `d-flex` (Bootstrap) but the wrapper uses `display: flex` with `align-items: center` inline style. On very large screens the login form can appear left-aligned rather than perfectly centered.
+- **Enhancement:** Add `justify-content-center` to the flex container or use `mx-auto` centering.
+
+### 4.11 All Admin Pages — Missing CSRF Token Handling
+- **File:** `config/SecurityConfig.java:48-51`
+- **Issue:** The CSRF configuration ignores `/staffAuth`, `/auth`, `/payment/**`, `/booking/**`, `/feedback/**`, and `/admin/**`. While this allows forms to submit without tokens, it also disables CSRF protection on admin actions (delete staff, update appointment, register staff, etc.). This is a security concern, though the CSRF exemption was likely intentional to avoid adding token fields to every form.
+- **Enhancement (Frontend):** Add `<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />` to all admin POST forms. Remove the `/admin/**` CSRF exemption from `SecurityConfig`. *This requires a backend change but the frontend template updates are documented here.*
+
+---
+
+## 5. Booking Flow / Appointment Management
+
+### 5.1 Booking Page — No Visual Feedback After Form Submission
+- **File:** `customer/booking.html`
+- **Issue:** When the user clicks "Book Appointment", the form submits and redirects to `/payment`. There's no loading state or confirmation. If the server is slow, the user may double-submit.
+- **Enhancement:** Add a loading spinner to the submit button on click (`disabled` + spinner text).
+
+### 5.2 Booking Page — Barber Dropdown Hides Options Based on First Slot Only
+- **File:** `customer/booking.html:51-55`
+- **Issue:** The `th:style` on barber `<option>` elements checks only `unavailableBarbersBySlot[slots[0]]` (the first slot). This hides barbers who are unavailable at the **first time slot** regardless of which slot the user will actually select. This is incorrect — it should not pre-hide barbers based on the first slot.
+- **Enhancement:** Remove the `th:style` on options. Let the JS (slot change listener) dynamically hide/show barbers based on the actually selected slot.
+
+### 5.3 Booking Page — Radio Button Disabling Doesn't Update Barber Dropdown on Date Change
+- **File:** `customer/booking.html:68-85` (JS)
+- **Issue:** When the date changes, `updateSlotStatus()` disables time slots and resets the barber dropdown. But if a time was previously selected and becomes disabled, the `selected-time` input keeps the old (now invalid) value. There's no visual cue that the previously selected time is no longer available.
+- **Enhancement:** When date changes and no time is selected, or when a previously selected time becomes disabled, show a notice like "Please select a new time slot."
+
+---
+
+## 6. CSS / Styling Consistency
+
+### 6.1 Inconsistent Background Colors Across Pages
+- **Files:** All customer pages use `bg-yellow-100` on `<body>`. Admin pages use a white/light-gray bg with `#101820` color scheme. There is no unified theme.
+- **Enhancement:** Define a consistent color palette in CSS custom properties (`:root`) and use them across all pages. Consider a shared theme token file.
+
+### 6.2 Admin Pages Don't Load `script.js` or NioBoard Scripts
+- **Files:** `admin/adminIndex.html`, `admin/listBarber.html`, `admin/listAppointment.html`, etc.
+- **Issue:** These pages load `assetsAdmin/css/style.css` (the NioBoard theme) but don't load `assetsAdmin/js/scripts.js` or any JS. This means sidebar toggle, dropdown menus, and other NioBoard interactions **don't work** on admin pages.
+- **Enhancement:** Add `<script>` includes for jQuery, Bootstrap 5, and `scripts.js` (NioBoard) to a shared admin layout/head fragment so all admin pages get interactivity.
+
+### 6.3 Customer Pages Load `script.js` Twice (via header + body inline script)
+- **File:** `fragments/header.html:9` loads `@{ /resources/js/script.js }` — this is the correct path for customer pages. But the file at `static/resources/js/script.js` (with the nav toggle logic) is a **different, simpler** script than `static/js/scripts.js` (full NioBoard). The naming is confusing.
+- **Enhancement:** Rename `static/resources/js/script.js` to `nav-scripts.js` to avoid confusion with the full `scripts.js`. Document which pages use which.
+
+### 6.4 No Dark Mode Support
+- **Issue:** The entire app uses light-themed UIs for both customer and admin. The barbershop branding (`#101820` dark color) is used for nav headers, but there's no toggle.
+- **Enhancement:** Add a dark/light mode toggle (Persists in `localStorage`). Tailwind CSS v4 supports this via the `dark:` variant.
+
+---
+
+## 7. Accessibility (a11y)
+
+### 7.1 Missing ARIA Attributes on Form Controls
+- **Files:** All customer pages (booking, register, payment, edit-profile)
+- **Issue:** Custom radio button groups (time slots), dropdowns, and the login/register sliding form have no ARIA roles, labels, or keyboard navigation support beyond native HTML.
+- **Enhancement:** Add `role="radiogroup"`, `aria-labelledby`, `aria-describedby` on custom control groups. Ensure all interactive elements are keyboard-accessible.
+
+### 7.2 Images Missing Alt Text in Several Places
+- **Files:** `index.html:34,36`, `customer/profile.html`, `admin/listBarber.html`
+- **Issue:** Barber images on the homepage and profile pictures lack descriptive `alt` attributes (some use empty alt, some have none). 
+- **Enhancement:** Add meaningful `alt` text (e.g., "Barber at work" or the barber's name) or `alt=""` for decorative images.
+
+### 7.3 Color-Only Indicators for Status / Errors
+- **Files:** `admin/listAppointment.html` (status badges), `customer/feedback.html` (error alerts)
+- **Issue:** Status indicators use color badges (green=success, yellow=warning, red=danger) with text labels, which is mostly OK, but error/success alerts rely solely on color for the icon.
+- **Enhancement:** Ensure all status indicators have text labels or `aria-label` attributes for screen readers.
+
+---
+
+## 8. Performance & Asset Optimization
+
+### 8.1 Images Not Optimized / No Lazy Loading
+- **Files:** All pages with `<img>` tags, especially `index.html` (barber background images), `customer/profile.html`, `admin/profile.html`
+- **Issue:** Images are loaded eagerly with no `loading="lazy"` attribute and no width/height attributes for layout stability. Background images in `index.html` are large.
+- **Enhancement:** Add `loading="lazy"`, `width`/`height` attributes, and `object-cover`. Consider responsive `srcset` for different screen sizes. Optimize background images (they appear to be full-size JPEGs in hero sections).
+
+### 8.2 Unused Static Assets
+- **Files:** `static/js/editors/`, `static/js/kanban/`, `static/js/data-tables/`, `static/js/fullcalendar/`, `static/js/apps/`, `static/js/sweetalert/`
+- **Issue:** Many JS library files (TinyMCE, Quill, Kanban, FullCalendar, SweetAlert, Data Tables) are bundled but **not referenced** in any template. They bloat the deployment.
+- **Enhancement:** Audit and remove unused JS/CSS assets. Only the NioBoard theme, Chart.js, Tailwind, and Flowbite are actually needed.
+
+---
+
+## 9. Summary Table
+
+| # | Category | File(s) | Priority |
+|---|----------|---------|----------|
+| 1.1 | Dead Code | `fragments/layout.html` | Low |
+| 1.2 | JS Consolidation | Multiple | Medium |
+| 1.3 | SEO / UX | `fragments/header.html` | Medium |
+| 1.4 | Performance | `fragments/header.html` | High |
+| 1.5 | Cleanup | `nav.html`, `footer.html` | Low |
+| 2.1 | Config | `nav.html` | Low |
+| 2.2 | Responsiveness | `nav.html`, `script.js` | Medium |
+| 2.3 | UX | `script.js` | Medium |
+| 2.4 | CSS Bug | `nav.html` | Low |
+| 2.5 | UX | `script.js` | Low |
+| 3.1 | UX | `register.html` | Low |
+| 3.2 | UX | `register.html` | Medium |
+| 3.3 | Responsive | `booking.html` | Low |
+| 3.4 | UX | `booking.html` | Low |
+| 3.5 | Bug | `edit-appointment.html` | High |
+| 3.6 | Functionality | `payment.html` | High |
+| 3.7 | Logic Bug | `payment.html` | Medium |
+| 3.8 | UX | `editProfile.html` | Low |
+| 3.9 | UX | `editProfile.html` | Low |
+| 3.10 | Consistency | `appointment-history.html` | Low |
+| 3.11 | Feature | `receipt.html` | Low |
+| 4.1 | Layout | `adminIndex.html` | Low |
+| 4.2 | Code Quality | `adminIndex.html` | Low |
+| 4.3 | CSS Bug | `adminFragments.html` | Low |
+| 4.4 | UX | `adminFragments.html` | Medium |
+| 4.5 | Clarity | `listBarber.html` | Low |
+| 4.6 | UX | `listBarber.html` | Low |
+| 4.7 | Bug | `listAppointment.html` | Medium |
+| 4.8 | UX | `listAppointment.html` | Medium |
+| 4.9 | UX | `listAppointment.html` | Medium |
+| 4.10 | Layout | `adminLogin.html` | Low |
+| 4.11 | Security | Admin POST forms | High |
+| 5.1 | UX | `booking.html` | Low |
+| 5.2 | Bug | `booking.html` | Medium |
+| 5.3 | UX | `booking.html` | Low |
+| 6.1 | Consistency | All pages | Medium |
+| 6.2 | Bug | All admin pages | High |
+| 6.3 | Code Quality | `header.html` | Low |
+| 6.4 | Feature | All pages | Low |
+| 7.1 | a11y | All forms | Medium |
+| 7.2 | a11y | Image tags | Medium |
+| 7.3 | a11y | Badges | Low |
+| 8.1 | Performance | All pages | Medium |
+| 8.2 | Performance | Static JS | Medium |
