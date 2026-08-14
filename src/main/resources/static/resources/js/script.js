@@ -53,31 +53,28 @@ function goBack() {
 	window.history.back(); // This navigates back to the previous page in the browser's history.
 }
 
-// active nav click
-document.addEventListener("DOMContentLoaded", function() {
-	var links = document.querySelectorAll('.lg\\:hover\\:bg-transparent');
-
-	// Get current URL path and extract last segment (e.g. 'profile')
+// Active nav link highlighting (compare normalized paths; covers dropdown sub-items too)
+document.addEventListener('DOMContentLoaded', function() {
 	var currentPath = window.location.pathname;
-	var currentPage = currentPath.split("/").pop(); // removes everything before last /
+	var navLinks = document.querySelectorAll('#navbar-default a[href]');
 
-	links.forEach(function(link) {
-		var linkHref = link.getAttribute("href"); // e.g. 'profile'
+	navLinks.forEach(function(link) {
+		var linkPath;
+		try {
+			linkPath = new URL(link.href).pathname;
+		} catch (e) {
+			return; // skip malformed hrefs
+		}
 
-		// Highlight if href matches current page
-		if (linkHref === currentPage) {
+		// Normalize: ignore trailing slashes so '/', '' and '/index' behave predictably
+		var normalizedLink = linkPath.replace(/\/+$/, '') || '/';
+		var normalizedCurrent = currentPath.replace(/\/+$/, '') || '/';
+
+		if (normalizedLink === normalizedCurrent) {
 			link.classList.add('text-yellow-300');
 		} else {
 			link.classList.remove('text-yellow-300');
 		}
-
-		// Optional: still handle highlight before reload (on click)
-		link.addEventListener('click', function() {
-			links.forEach(function(item) {
-				item.classList.remove('text-yellow-300');
-			});
-			link.classList.add('text-yellow-300');
-		});
 	});
 });
 

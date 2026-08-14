@@ -87,10 +87,15 @@ This document catalogues frontend issues, inconsistencies, and improvement oppor
   - `static/resources/js/script.js`: deleted the three separate dropdown handlers (desktop appt, mobile appt with the fragile selector, login) and replaced them with one delegated handler bound to `[data-dropdown]`. It toggles the referenced menu, ensures only one dropdown is open at a time, syncs `aria-expanded`, and closes all dropdowns on outside click. No fragile class selectors remain.
   - `mvn -o compile` → **BUILD SUCCESS**. (Flowbite is unaffected — it only reacts to `data-dropdown-toggle`, not our `data-dropdown`.) ✅
 
-### 2.3 Nav Active-Link Highlighting is Broken
+### 2.3 Nav Active-Link Highlighting is Broken ✅ [COMPLETED]
 - **File:** `static/resources/js/script.js:56-82`
-- **Issue:** The script selects links with class `.lg\:hover\:bg-transparent` to add a yellow text highlight when the link href matches the current page. However, this only works for **top-level nav links** (Home, About Us). Dropdown items (Book Appointment, Current Appointment, Appointment History) and the Login/Logout links are not covered. Also, `linkHref === currentPage` compares full href to the last path segment — this fails for links like `/index#aboutUs`.
+- **Issue:** The script selected links with class `.lg\:hover\:bg-transparent` to add a yellow text highlight when the link href matched the current page. It only covered top-level nav links (Home, About Us). Dropdown items (Book Appointment, Current Appointment, Appointment History) and the Login/Logout links were not covered. Worse, `linkHref === currentPage` compared the full href (e.g. `/booking`) to the last path segment (e.g. `booking`), which **never matched**, so highlighting was effectively broken. It also failed for links like `/index#aboutUs`.
 - **Enhancement:** Use a more robust active-link detection (compare `new URL(link.href).pathname` to `window.location.pathname`). Add active states to dropdown sub-items too.
+- **Change made:** Rewrote the handler in `static/resources/js/script.js`:
+  - Selects all nav links via `#navbar-default a[href]` (covers top-level links **and** the dropdown sub-items for Appointment and Login, plus Logout/Profile).
+  - Compares `new URL(link.href).pathname` (hash/query ignored) to `window.location.pathname`, normalized to strip trailing slashes — so `/index#aboutUs` now resolves to `/index` and highlights correctly.
+  - Keeps the existing `text-yellow-300` highlight (verified it appears after `text-white` in the compiled `main.css`, so it overrides the white nav text).
+  - Verified with `node --check` (JS syntax OK). ✅
 
 ### 2.4 User Avatar Container Size Mismatch
 - **File:** `fragments/nav.html:75-88`
@@ -306,7 +311,7 @@ This document catalogues frontend issues, inconsistencies, and improvement oppor
 | 1.5 | Cleanup | `nav.html`, `footer.html` | Low | ✅ Done
 | 2.1 | Config | `nav.html` | Low | ✅ Done
 | 2.2 | Responsiveness | `nav.html`, `script.js` | Medium | ✅ Done
-| 2.3 | UX | `script.js` | Medium |
+| 2.3 | UX | `script.js` | Medium | ✅ Done
 | 2.4 | CSS Bug | `nav.html` | Low |
 | 2.5 | UX | `script.js` | Low |
 | 3.1 | UX | `register.html` | Low |
