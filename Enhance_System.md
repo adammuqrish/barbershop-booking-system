@@ -122,11 +122,15 @@ This document catalogues frontend issues, inconsistencies, and improvement oppor
   - Added a small, generic script that binds every `.password-toggle`: toggles the input `type` between `password`/`text`, swaps the eye/eye-off icons, and updates the `aria-label`.
   - Regenerated `main.css` to include the new utilities (`inset-y-0`, `right-0`, `pr-10`, `px-3`, `items-center`). `mvn -o compile` → **BUILD SUCCESS**. ✅
 
-  **Follow-up:** The customer `register.html` sliding form already had the toggle, but two admin pages had password fields with **no** visibility toggle:
+  **Follow-up:** The customer `register.html` sliding form already had the toggle, but three admin/customer pages had password fields with **no** visibility toggle:
   - `admin/registerStaff.html` — `Password` and `Confirm Password` fields
   - `admin/adminLogin.html` — `Password` field
+  - `admin/listBarber.html` — `Password` and `Confirm Password` fields (in the "Add Barber" modal)
+  - `customer/editProfile.html` — `New Password` field (note: `script.js` has no toggle binding, so each page gets its own inline binding)
 
-  Added eye/eye-slash Font Awesome toggles to all three fields (Bootstrap wrapper with `position:relative` + absolute-positioned button using inline styles), plus inline scripts that swap the icon (`display:none`/`display:inline-block`), toggle `input.type`, and update `aria-label`. Used pure inline styles to avoid NioBoard theme compatibility issues. ✅
+  Added eye/eye-slash toggles to all of them. Admin pages (NioBoard theme) use Font Awesome icons with inline styles for positioning. The customer `editProfile.html` uses inline SVG icons (Tailwind sizing classes) + an inline `.password-toggle` script (since the shared `script.js` has no toggle binding). Used pure inline styles on admin pages to avoid NioBoard theme compatibility issues. ✅
+
+  **Important deployment note:** With `spring.thymeleaf.cache=false` the server re-reads templates from `target/classes` on each request, so after editing `src/` you must rebuild/copy resources into `target/classes` and confirm the app process is running the latest build (restart the server). The customer inline-SVG toggle renders without external CSS, so it is a reliable signal of whether fresh templates are being served.
 
 ### 3.2 Registration Form Lacks Client-Side Validation
 - **File:** `customer/register.html:166-214`

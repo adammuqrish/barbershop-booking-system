@@ -167,14 +167,32 @@
                                 <label class="form-label">Email</label>
                                 <input type="email" name="email" class="form-control" required>
                             </div>
-                            <div class="col-6">
-                                <label class="form-label">Password</label>
-                                <input type="password" name="password" class="form-control" required>
-                            </div>
-                            <div class="col-6">
-                                <label class="form-label">Confirm Password</label>
-                                <input type="password" name="confirmPassword" class="form-control" required>
-                            </div>
+                                <div class="col-6">
+                                    <label class="form-label">Password</label>
+                                    <div style="position:relative;">
+                                        <input type="password" name="password" id="barberPassword" class="form-control" required style="padding-right:2.5rem;">
+                                        <button type="button" data-target="barberPassword"
+                                            class="btn btn-link password-toggle"
+                                            tabindex="-1" aria-label="Show password"
+                                            style="position:absolute;top:50%;right:0;transform:translateY(-50%);padding:0.3rem 0.5rem;text-decoration:none;color:#6c757d;">
+                                            <i class="fas fa-eye eye-icon"></i>
+                                            <i class="fas fa-eye-slash eye-off-icon" style="display:none;"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label">Confirm Password</label>
+                                    <div style="position:relative;">
+                                        <input type="password" name="confirmPassword" id="barberConfirmPassword" class="form-control" required style="padding-right:2.5rem;">
+                                        <button type="button" data-target="barberConfirmPassword"
+                                            class="btn btn-link password-toggle"
+                                            tabindex="-1" aria-label="Show password"
+                                            style="position:absolute;top:50%;right:0;transform:translateY(-50%);padding:0.3rem 0.5rem;text-decoration:none;color:#6c757d;">
+                                            <i class="fas fa-eye eye-icon"></i>
+                                            <i class="fas fa-eye-slash eye-off-icon" style="display:none;"></i>
+                                        </button>
+                                    </div>
+                                </div>
                             <div class="col-12">
                                 <label class="form-label">Phone Number</label>
                                 <input type="text" name="phone" class="form-control" required>
@@ -217,6 +235,24 @@
                 var myModal = new bootstrap.Modal(document.getElementById('addBarberModal'));
                 myModal.show();
             }
+
+            // Password visibility toggle
+            document.querySelectorAll('.password-toggle').forEach(function (button) {
+                button.addEventListener('click', function () {
+                    var input = document.getElementById(button.getAttribute('data-target'));
+                    if (!input) return;
+
+                    var isPassword = input.type === 'password';
+                    input.type = isPassword ? 'text' : 'password';
+
+                    var eyeIcon = button.querySelector('.eye-icon');
+                    var eyeOffIcon = button.querySelector('.eye-off-icon');
+                    if (eyeIcon) eyeIcon.style.display = isPassword ? 'none' : 'inline-block';
+                    if (eyeOffIcon) eyeOffIcon.style.display = isPassword ? 'inline-block' : 'none';
+
+                    button.setAttribute('aria-label', isPassword ? 'Hide password' : 'Show password');
+                });
+            });
         });
     </script>
 
