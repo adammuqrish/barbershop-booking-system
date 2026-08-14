@@ -103,10 +103,11 @@ This document catalogues frontend issues, inconsistencies, and improvement oppor
 - **Enhancement:** Make the image fit the container (`w-10 h-10`) and use `object-cover object-center`.
 - **Change made:** In `fragments/nav.html`, resized the profile `<img>` from `w-12 h-12` to `w-10 h-10` and added `object-cover object-center` (fills the circular `10x10` container and centers/crops the image). Resized the fallback user-icon `<svg>` from `w-12 h-12 -left-1` to `w-10 h-10` and removed the `-left-1` offset so it no longer overflows either. Regenerated `main.css` to include `object-cover` / `object-center`. ✅
 
-### 2.5 Login Dropdown Doesn't Close on Navigation
+### 2.5 Login Dropdown Doesn't Close on Navigation ✅ [COMPLETED]
 - **File:** `static/resources/js/script.js:132-154`
-- **Issue:** The login dropdown has a "close on outside click" handler, but if a user clicks a dropdown item (Login as Customer / Login as Staff), the dropdown doesn't immediately close before navigation — the click bubbles and the menu stays visible momentarily during navigation.
+- **Issue:** The login dropdown has a "close on outside click" handler, but if a user clicks a dropdown item (Login as Customer / Login as Staff), the dropdown didn't immediately close before navigation — the click bubbled and the menu stayed visible momentarily during navigation.
 - **Enhancement:** Add `click` handlers on dropdown items that close the menu before following the link.
+- **Change made:** In `static/resources/js/script.js`, extended the shared `[data-dropdown]` handler (added in 2.2) with a document-level click handler that, when a link inside any open dropdown menu (Appointment **and** Login) is clicked, hides that menu and resets `aria-expanded` *before* the browser navigates. Verified with `node --check` (JS syntax OK). ✅
 
 ---
 
@@ -314,7 +315,7 @@ This document catalogues frontend issues, inconsistencies, and improvement oppor
 | 2.2 | Responsiveness | `nav.html`, `script.js` | Medium | ✅ Done
 | 2.3 | UX | `script.js` | Medium | ✅ Done
 | 2.4 | CSS Bug | `nav.html` | Low | ✅ Done
-| 2.5 | UX | `script.js` | Low |
+| 2.5 | UX | `script.js` | Low | ✅ Done
 | 3.1 | UX | `register.html` | Low |
 | 3.2 | UX | `register.html` | Medium |
 | 3.3 | Responsive | `booking.html` | Low |

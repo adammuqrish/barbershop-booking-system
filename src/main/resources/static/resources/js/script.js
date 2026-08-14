@@ -120,6 +120,21 @@ document.addEventListener('DOMContentLoaded', function () {
 			closeAllDropdowns(null);
 		}
 	});
+
+	// Close a dropdown immediately when one of its links is clicked, so the menu
+	// doesn't stay visible while the browser navigates to the next page
+	document.addEventListener('click', function (e) {
+		const link = e.target.closest ? e.target.closest('a[href]') : null;
+		if (!link) return;
+
+		triggers.forEach(function (trigger) {
+			const menu = document.getElementById(trigger.getAttribute('data-dropdown'));
+			if (menu && menu.contains(link) && !menu.classList.contains('hidden')) {
+				menu.classList.add('hidden');
+				trigger.setAttribute('aria-expanded', 'false');
+			}
+		});
+	});
 });
 
 
