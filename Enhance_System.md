@@ -148,6 +148,7 @@ This document catalogues frontend issues, inconsistencies, and improvement oppor
 - **File:** `customer/register.html:166-214`
 - **Issue:** The form has `required` attributes and server-side validation, but no client-side validation feedback. The phone field strips non-numeric chars (good), but there's no email format validation, no password strength check, and no match indicator for confirm password.
 - **Enhancement:** Add real-time validation feedback (error messages inline, password strength meter, confirm-password match indicator).
+- **Status:** ✅ COMPLETED — Added `id`s to all register inputs (`registerName`, `registerEmail`, `registerPhone`, `registerPassword`, `registerConfirmPassword`), inline error `<span>`s (`data-error-for`), a 4-bar password strength meter (`#passwordStrength`/`#strengthText`), and a confirm-password match indicator (`#passwordMatch`, green "Passwords match." / red "Passwords do not match."). New `<script>` (DOMContentLoaded) validates name/email(regex `^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$`)/phone(7-15 digits)/password(min 8)/confirm on `input`+`blur` and blocks submit when invalid. `form-container` height raised 600→680px and register panel given `overflow-y-auto` to fit the meter. Rebuilt `main.css` via `mvnw -o compile`; verified `/register` renders HTTP 200 with all new elements.
 
 ### 3.3 Booking Page — Slot Grid Uses `grid-cols-6` Without Mobile Responsiveness
 - **File:** `customer/booking.html:27-36`
@@ -343,7 +344,7 @@ This document catalogues frontend issues, inconsistencies, and improvement oppor
 | 2.4 | CSS Bug | `nav.html` | Low | ✅ Done
 | 2.5 | UX | `script.js` | Low | ✅ Done
 | 3.1 | UX | `register.html` | Low | ✅ Done
-| 3.2 | UX | `register.html` | Medium |
+| 3.2 | UX | `register.html` | Medium | ✅ Done
 | 3.3 | Responsive | `booking.html` | Low |
 | 3.4 | UX | `booking.html` | Low |
 | 3.5 | Bug | `edit-appointment.html` | High |

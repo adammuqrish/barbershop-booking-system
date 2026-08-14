@@ -163,7 +163,7 @@
     <main class="flex flex-col items-center mx-3 my-4 flex-grow justify-center">
       <div
         class="form-container bg-white rounded-2xl shadow-xl w-full max-w-3xl mx-4 md:mx-auto overflow-hidden"
-        style="height: 600px"
+        style="height: 680px"
       >
         <div class="flex w-full h-full relative">
           <div
@@ -251,7 +251,7 @@
           </div>
           <div
             id="register-form-container"
-            class="panel inactive bg-gray-100 p-8 flex flex-col justify-center absolute top-0 right-0 h-full"
+            class="panel inactive bg-gray-100 p-8 flex flex-col justify-center absolute top-0 right-0 h-full overflow-y-auto"
           >
             <h2 class="text-2xl font-bold mb-6">Register</h2>
             <form
@@ -266,27 +266,33 @@
                 <input
                   type="text"
                   name="name"
+                  id="registerName"
                   class="w-full p-2 border border-gray-300 rounded"
                   required
                 />
+                <span class="field-error hidden block text-sm text-red-600 mt-1" data-error-for="registerName"></span>
               </div>
               <div>
                 <label class="block text-gray-700 mb-1">Email</label>
                 <input
                   type="email"
                   name="email"
+                  id="registerEmail"
                   class="w-full p-2 border border-gray-300 rounded"
                   required
                 />
+                <span class="field-error hidden block text-sm text-red-600 mt-1" data-error-for="registerEmail"></span>
               </div>
               <div>
                 <label class="block text-gray-700 mb-1">Phone Number</label>
                 <input
                   type="tel"
                   name="phone"
+                  id="registerPhone"
                   class="w-full p-2 border border-gray-300 rounded"
                   required
                 />
+                <span class="field-error hidden block text-sm text-red-600 mt-1" data-error-for="registerPhone"></span>
               </div>
               <div>
                 <label class="block text-gray-700 mb-1">Password</label>
@@ -341,6 +347,17 @@
                     </svg>
                   </button>
                 </div>
+                <span class="field-error hidden block text-sm text-red-600 mt-1" data-error-for="registerPassword"></span>
+              </div>
+              <div>
+                <p class="text-xs text-gray-500 mt-2 mb-1">Password strength</p>
+                <div class="flex gap-1" id="passwordStrength">
+                  <div class="strength-bar h-1.5 flex-1 rounded bg-gray-200 transition-colors"></div>
+                  <div class="strength-bar h-1.5 flex-1 rounded bg-gray-200 transition-colors"></div>
+                  <div class="strength-bar h-1.5 flex-1 rounded bg-gray-200 transition-colors"></div>
+                  <div class="strength-bar h-1.5 flex-1 rounded bg-gray-200 transition-colors"></div>
+                </div>
+                <p id="strengthText" class="text-xs mt-1 text-gray-500"></p>
               </div>
               <div>
                 <label class="block text-gray-700 mb-1">Confirm Password</label>
@@ -395,6 +412,7 @@
                     </svg>
                   </button>
                 </div>
+                <span id="passwordMatch" class="field-error hidden block text-sm mt-1"></span>
               </div>
               <button
                 type="submit"
@@ -520,5 +538,219 @@
           });
       });
     </script>
+
+    <script>
+      // 3.2 Client-side validation for the registration form
+      document.addEventListener("DOMContentLoaded", function () {
+        const form = document.getElementById("register-form");
+        if (!form) return;
+
+        const nameInput = document.getElementById("registerName");
+        const emailInput = document.getElementById("registerEmail");
+        const phoneInput = document.getElementById("registerPhone");
+        const passwordInput = document.getElementById("registerPassword");
+        const confirmInput = document.getElementById("registerConfirmPassword");
+        const matchSpan = document.getElementById("passwordMatch");
+
+        const emailRegex = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
+        const MIN_PASSWORD_LENGTH = 8;
+
+        function setError(fieldId, message) {
+          const span = document.querySelector(
+            '[data-error-for="' + fieldId + '"]',
+          );
+          const input = document.getElementById(fieldId);
+          if (span) {
+            span.textContent = message;
+            span.classList.remove("hidden");
+          }
+          if (input) {
+            input.classList.add("border-red-500");
+            input.classList.remove("border-gray-300");
+          }
+        }
+
+        function clearError(fieldId) {
+          const span = document.querySelector(
+            '[data-error-for="' + fieldId + '"]',
+          );
+          const input = document.getElementById(fieldId);
+          if (span) {
+            span.textContent = "";
+            span.classList.add("hidden");
+          }
+          if (input) {
+            input.classList.remove("border-red-500");
+            input.classList.add("border-gray-300");
+          }
+        }
+
+        function validateName() {
+          const value = nameInput.value.trim();
+          if (!value) {
+            setError("registerName", "Name is required.");
+            return false;
+          }
+          if (value.length < 2) {
+            setError("registerName", "Name must be at least 2 characters.");
+            return false;
+          }
+          clearError("registerName");
+          return true;
+        }
+
+        function validateEmail() {
+          const value = emailInput.value.trim();
+          if (!value) {
+            setError("registerEmail", "Email is required.");
+            return false;
+          }
+          if (!emailRegex.test(value)) {
+            setError("registerEmail", "Please enter a valid email address.");
+            return false;
+          }
+          clearError("registerEmail");
+          return true;
+        }
+
+        function validatePhone() {
+          const value = phoneInput.value.trim();
+          if (!value) {
+            setError("registerPhone", "Phone number is required.");
+            return false;
+          }
+          if (!/^\d{7,15}$/.test(value)) {
+            setError("registerPhone", "Enter 7-15 digits only.");
+            return false;
+          }
+          clearError("registerPhone");
+          return true;
+        }
+
+        function validatePassword() {
+          const value = passwordInput.value;
+          if (!value) {
+            setError("registerPassword", "Password is required.");
+            return false;
+          }
+          if (value.length < MIN_PASSWORD_LENGTH) {
+            setError(
+              "registerPassword",
+              "Password must be at least " +
+                MIN_PASSWORD_LENGTH +
+                " characters.",
+            );
+            return false;
+          }
+          clearError("registerPassword");
+          return true;
+        }
+
+        function validateConfirm() {
+          const value = confirmInput.value;
+          const ok = value && value === passwordInput.value;
+          if (!value) {
+            confirmInput.classList.remove("border-red-500");
+            confirmInput.classList.add("border-gray-300");
+            if (matchSpan) {
+              matchSpan.textContent = "";
+              matchSpan.classList.add("hidden");
+            }
+            return false;
+          }
+          if (value !== passwordInput.value) {
+            confirmInput.classList.add("border-red-500");
+            confirmInput.classList.remove("border-gray-300");
+            if (matchSpan) {
+              matchSpan.textContent = "Passwords do not match.";
+              matchSpan.classList.remove("hidden", "text-green-600");
+              matchSpan.classList.add("text-red-600");
+            }
+            return false;
+          }
+          confirmInput.classList.remove("border-red-500");
+          confirmInput.classList.add("border-gray-300");
+          if (matchSpan) {
+            matchSpan.textContent = "Passwords match.";
+            matchSpan.classList.remove("hidden", "text-red-600");
+            matchSpan.classList.add("text-green-600");
+          }
+          return true;
+        }
+
+        function scorePassword(value) {
+          let score = 0;
+          if (value.length >= MIN_PASSWORD_LENGTH) score++;
+          if (/[a-z]/.test(value) && /[A-Z]/.test(value)) score++;
+          if (/\d/.test(value)) score++;
+          if (/[^A-Za-z0-9]/.test(value)) score++;
+          return score;
+        }
+
+        function updateStrength() {
+          const value = passwordInput.value;
+          const bars = document.querySelectorAll(
+            "#passwordStrength .strength-bar",
+          );
+          const text = document.getElementById("strengthText");
+          if (!value) {
+            bars.forEach(function (b) {
+              b.style.backgroundColor = "";
+            });
+            if (text) text.textContent = "";
+            return;
+          }
+          const score = scorePassword(value);
+          const colors = [
+            "#ef4444",
+            "#f97316",
+            "#eab308",
+            "#22c55e",
+            "#22c55e",
+          ];
+          const labels = [
+            "Very weak",
+            "Weak",
+            "Fair",
+            "Strong",
+            "Very strong",
+          ];
+          const filled = Math.max(1, Math.min(4, score));
+          bars.forEach(function (b, i) {
+            b.style.backgroundColor =
+              i < filled ? colors[score] : "#e5e7eb";
+          });
+          if (text) {
+            text.textContent = "Strength: " + labels[Math.min(score, 4)];
+            text.style.color = colors[score];
+          }
+        }
+
+        nameInput.addEventListener("input", validateName);
+        nameInput.addEventListener("blur", validateName);
+        emailInput.addEventListener("input", validateEmail);
+        emailInput.addEventListener("blur", validateEmail);
+        phoneInput.addEventListener("input", validatePhone);
+        phoneInput.addEventListener("blur", validatePhone);
+        passwordInput.addEventListener("input", function () {
+          validatePassword();
+          updateStrength();
+          if (confirmInput.value) validateConfirm();
+        });
+        passwordInput.addEventListener("blur", validatePassword);
+        confirmInput.addEventListener("input", validateConfirm);
+        confirmInput.addEventListener("blur", validateConfirm);
+
+        form.addEventListener("submit", function (e) {
+          const ok =
+            validateName() &
+            validateEmail() &
+            validatePhone() &
+            validatePassword() &
+            validateConfirm();
+          if (!ok) e.preventDefault();
+        });
+      });
+    </script>
   </body>
-</html>
+  </html>
