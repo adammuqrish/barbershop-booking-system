@@ -81,76 +81,48 @@ document.addEventListener("DOMContentLoaded", function() {
 	});
 });
 
-// Desktop Appointment Dropdown Toggle
-document.addEventListener('DOMContentLoaded', function() {
-	const trigger = document.getElementById('appointment-desktop-trigger');
-	const menu = document.getElementById('appointment-dropdown-menu');
-	const loginMenu = document.getElementById('loginDropdown'); // Reference to login menu
+// Generic dropdown toggles driven by [data-dropdown] (works for both desktop and mobile).
+// A single delegated handler replaces the previous per-trigger listeners and the fragile
+// `.dropdown-toggle.md\:hidden` selector. Only one dropdown is open at a time.
+document.addEventListener('DOMContentLoaded', function () {
+	const triggers = document.querySelectorAll('[data-dropdown]');
 
-	if (trigger && menu) {
-		trigger.addEventListener('click', function(e) {
-			e.stopPropagation();
-			// Close login menu if open
-			if (loginMenu && !loginMenu.classList.contains('hidden')) {
-				loginMenu.classList.add('hidden');
-			}
-			menu.classList.toggle('hidden');
-		});
-		// Hide dropdown when clicking outside
-		document.addEventListener('click', function(e) {
-			if (!trigger.contains(e.target) && !menu.contains(e.target)) {
+	function closeAllDropdowns(exceptId) {
+		triggers.forEach(function (trigger) {
+			const menu = document.getElementById(trigger.getAttribute('data-dropdown'));
+			if (menu && menu.id !== exceptId) {
 				menu.classList.add('hidden');
+				trigger.setAttribute('aria-expanded', 'false');
 			}
 		});
 	}
-});
 
-// Mobile Appointment Dropdown Toggle
-document.addEventListener('DOMContentLoaded', function() {
-	const mobileBtn = document.querySelector('.dropdown-toggle.md\\:hidden, .dropdown-toggle.md\\:block.md\\:hidden');
-	const dropdownMenu = document.getElementById('appointment-dropdown-menu');
-	const loginMenu = document.getElementById('loginDropdown'); // Reference to login menu
+	triggers.forEach(function (trigger) {
+		const menu = document.getElementById(trigger.getAttribute('data-dropdown'));
+		if (!menu) return;
 
-	if (mobileBtn && dropdownMenu) {
-		mobileBtn.addEventListener('click', function(e) {
+		trigger.addEventListener('click', function (e) {
 			e.stopPropagation();
-			// Close login menu if open
-			if (loginMenu && !loginMenu.classList.contains('hidden')) {
-				loginMenu.classList.add('hidden');
-			}
-			dropdownMenu.classList.toggle('hidden');
+			const isHidden = menu.classList.contains('hidden');
+			closeAllDropdowns(menu.id);
+			menu.classList.toggle('hidden', !isHidden);
+			trigger.setAttribute('aria-expanded', isHidden ? 'true' : 'false');
 		});
-		// Hide dropdown when clicking outside (mobile)
-		document.addEventListener('click', function(e) {
-			if (!mobileBtn.contains(e.target) && !dropdownMenu.contains(e.target)) {
-				dropdownMenu.classList.add('hidden');
-			}
-		});
-	}
-});
+	});
 
-// Login Dropdown Toggle
-document.addEventListener('DOMContentLoaded', function() {
-	const loginBtn = document.getElementById('loginToggleBtn');
-	const loginMenu = document.getElementById('loginDropdown');
-	const apptMenu = document.getElementById('appointment-dropdown-menu'); // Reference to appointment menu
-
-	if (loginBtn && loginMenu) {
-		loginBtn.addEventListener('click', function(e) {
-			e.stopPropagation();
-			// Close appointment menu if open
-			if (apptMenu && !apptMenu.classList.contains('hidden')) {
-				apptMenu.classList.add('hidden');
-			}
-			loginMenu.classList.toggle('hidden');
-		});
-		// Hide dropdown when clicking outside
-		document.addEventListener('click', function(e) {
-			if (!loginBtn.contains(e.target) && !loginMenu.contains(e.target)) {
-				loginMenu.classList.add('hidden');
+	// Close all dropdowns when clicking outside any trigger or menu
+	document.addEventListener('click', function (e) {
+		let clickedInside = false;
+		triggers.forEach(function (trigger) {
+			const menu = document.getElementById(trigger.getAttribute('data-dropdown'));
+			if (trigger.contains(e.target) || (menu && menu.contains(e.target))) {
+				clickedInside = true;
 			}
 		});
-	}
+		if (!clickedInside) {
+			closeAllDropdowns(null);
+		}
+	});
 });
 
 

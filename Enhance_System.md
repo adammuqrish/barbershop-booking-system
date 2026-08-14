@@ -78,10 +78,14 @@ This document catalogues frontend issues, inconsistencies, and improvement oppor
   - `fragments/footer.html`: address, phone (`tel:` link), and email (`mailto:` link) now use `barbershop.address`, `barbershop.phone`, `barbershop.email`. **Note:** the footer previously hardcoded a different phone number (`012-7678776`) than the nav (`0127865132`); both now read the single `barbershop.phone` property, so they are unified — set `barbershop.phone` to the correct value if one of the originals was a typo.
   - `mvn -o compile` → **BUILD SUCCESS**. ✅
 
-### 2.2 Appointment Dropdown — Conflicting Desktop & Mobile Logic
+### 2.2 Appointment Dropdown — Conflicting Desktop & Mobile Logic ✅ [COMPLETED]
 - **File:** `fragments/nav.html:35-65` + `static/resources/js/script.js:84-130`
-- **Issue:** The nav has **two separate triggers** for the Appointment dropdown: `appointment-desktop-trigger` (a `<span>` shown on desktop via `hidden md:flex`) and `dropdown-toggle` (a `<button>` shown on mobile). The JS handles both with separate listeners. The barber dropdown button also uses `dropdown-toggle` class which the mobile script targets via a fragile selector: `.dropdown-toggle.md\\:hidden, .dropdown-toggle.md\\:block.md\\:hidden`. This is fragile and could break if class names change.
-- **Enhancement:** Simplify to a single dropdown trigger pattern. Use a consistent `data-dropdown` attribute or Flowbite's built-in dropdown component instead of custom JS.
+- **Issue:** The nav had **two separate triggers** for the Appointment dropdown: `appointment-desktop-trigger` (a `<span>` shown on desktop via `hidden md:flex`) and `dropdown-toggle` (a `<button>` shown on mobile). The JS handled both with separate listeners. The mobile script targeted the button via a fragile selector: `.dropdown-toggle.md\\:hidden, .dropdown-toggle.md\\:block.md\\:hidden`. This was fragile and could break if class names changed.
+- **Enhancement:** Simplify to a single dropdown trigger pattern. Use a consistent `data-dropdown` attribute instead of custom per-trigger JS.
+- **Change made:**
+  - `fragments/nav.html`: replaced the two Appointment triggers with a **single** `<button data-dropdown="appointment-dropdown-menu">` (works on desktop and mobile, no `hidden md:flex` / `md:hidden` split). Also added `data-dropdown="loginDropdown"` to the Login button. Removed the now-unused `appointment-desktop-trigger` / `loginToggleBtn` IDs and the `dropdown-toggle` class from nav markup. Changed the dropdown `<li>` wrappers from `relative group` to `relative` (the dropdown menus are `absolute`, so they anchor to the `<li>`).
+  - `static/resources/js/script.js`: deleted the three separate dropdown handlers (desktop appt, mobile appt with the fragile selector, login) and replaced them with one delegated handler bound to `[data-dropdown]`. It toggles the referenced menu, ensures only one dropdown is open at a time, syncs `aria-expanded`, and closes all dropdowns on outside click. No fragile class selectors remain.
+  - `mvn -o compile` → **BUILD SUCCESS**. (Flowbite is unaffected — it only reacts to `data-dropdown-toggle`, not our `data-dropdown`.) ✅
 
 ### 2.3 Nav Active-Link Highlighting is Broken
 - **File:** `static/resources/js/script.js:56-82`
@@ -301,7 +305,7 @@ This document catalogues frontend issues, inconsistencies, and improvement oppor
 | 1.4 | Performance | `fragments/header.html` | High | ✅ Done
 | 1.5 | Cleanup | `nav.html`, `footer.html` | Low | ✅ Done
 | 2.1 | Config | `nav.html` | Low | ✅ Done
-| 2.2 | Responsiveness | `nav.html`, `script.js` | Medium |
+| 2.2 | Responsiveness | `nav.html`, `script.js` | Medium | ✅ Done
 | 2.3 | UX | `script.js` | Medium |
 | 2.4 | CSS Bug | `nav.html` | Low |
 | 2.5 | UX | `script.js` | Low |
