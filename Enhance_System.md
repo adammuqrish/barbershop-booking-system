@@ -122,6 +122,8 @@ This document catalogues frontend issues, inconsistencies, and improvement oppor
   - Added a small, generic script that binds every `.password-toggle`: toggles the input `type` between `password`/`text`, swaps the eye/eye-off icons, and updates the `aria-label`.
   - Regenerated `main.css` to include the new utilities (`inset-y-0`, `right-0`, `pr-10`, `px-3`, `items-center`). `mvn -o compile` → **BUILD SUCCESS**. ✅
 
+  **Follow-up:** The customer `register.html` sliding form already had the toggle, but the admin staff register page (`admin/registerStaff.html`) — a separate "Register" page with its own `Password` / `Confirm Password` fields — had **no** visibility toggle. Added eye/eye-slash Font Awesome toggles to both password fields there (Bootstrap `position-relative` wrapper + absolute button, `padding-right` on the input so text isn't hidden), plus an inline script that swaps `.eye-icon` / `.eye-off-icon` (`d-none`) and toggles `input.type` and `aria-label`. No new Thymeleaf expressions, so no `mvn compile` required. ✅
+
 ### 3.2 Registration Form Lacks Client-Side Validation
 - **File:** `customer/register.html:166-214`
 - **Issue:** The form has `required` attributes and server-side validation, but no client-side validation feedback. The phone field strips non-numeric chars (good), but there's no email format validation, no password strength check, and no match indicator for confirm password.

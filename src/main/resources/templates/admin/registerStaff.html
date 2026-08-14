@@ -101,7 +101,17 @@
                                                 <label class="form-label">
                                                     Password <span class="text-danger">*</span>
                                                 </label>
-                                                <input type="password" name="password" class="form-control" placeholder="Enter password" required>
+                                                <div class="position-relative">
+                                                    <input type="password" name="password" id="staffPassword"
+                                                        class="form-control" placeholder="Enter password" required
+                                                        style="padding-right: 2.5rem;">
+                                                    <button type="button" data-target="staffPassword"
+                                                        class="btn btn-link position-absolute top-50 translate-middle-y end-0 text-muted password-toggle p-2"
+                                                        tabindex="-1" aria-label="Show password">
+                                                        <i class="fas fa-eye eye-icon"></i>
+                                                        <i class="fas fa-eye-slash eye-off-icon d-none"></i>
+                                                    </button>
+                                                </div>
                                             </div>
 
                                             <!-- Confirm Password -->
@@ -109,7 +119,17 @@
                                                 <label class="form-label">
                                                     Confirm Password <span class="text-danger">*</span>
                                                 </label>
-                                                <input type="password" name="confirmPassword" class="form-control" placeholder="Confirm password" required>
+                                                <div class="position-relative">
+                                                    <input type="password" name="confirmPassword" id="staffConfirmPassword"
+                                                        class="form-control" placeholder="Confirm password" required
+                                                        style="padding-right: 2.5rem;">
+                                                    <button type="button" data-target="staffConfirmPassword"
+                                                        class="btn btn-link position-absolute top-50 translate-middle-y end-0 text-muted password-toggle p-2"
+                                                        tabindex="-1" aria-label="Show password">
+                                                        <i class="fas fa-eye eye-icon"></i>
+                                                        <i class="fas fa-eye-slash eye-off-icon d-none"></i>
+                                                    </button>
+                                                </div>
                                             </div>
 
                                             <!-- Description -->
@@ -144,6 +164,28 @@
     </div>
 
     <div th:replace="~{fragments/adminScripts :: adminJs}"></div>
+
+    <script>
+        // Password visibility toggle (works for every .password-toggle button)
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.password-toggle').forEach(function (button) {
+                button.addEventListener('click', function () {
+                    var input = document.getElementById(button.getAttribute('data-target'));
+                    if (!input) return;
+
+                    var isPassword = input.type === 'password';
+                    input.type = isPassword ? 'text' : 'password';
+
+                    var eyeIcon = button.querySelector('.eye-icon');
+                    var eyeOffIcon = button.querySelector('.eye-off-icon');
+                    if (eyeIcon) eyeIcon.classList.toggle('d-none', !isPassword);
+                    if (eyeOffIcon) eyeOffIcon.classList.toggle('d-none', isPassword);
+
+                    button.setAttribute('aria-label', isPassword ? 'Hide password' : 'Show password');
+                });
+            });
+        });
+    </script>
 
 </body>
 
