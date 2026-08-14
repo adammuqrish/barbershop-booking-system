@@ -5,9 +5,22 @@
     <th:block th:fragment="head_tags">
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title th:text="${title != null ? title : 'Barbershop Landing Page'}">Barbershop Landing Page</title>
+        <title th:text="${title != null ? title : 'Hugi Barbershop'}">Hugi Barbershop</title>
+        <meta name="description"
+              th:content="${description ?: 'Hugi Barbershop - premium grooming and barbering services. Book your appointment online.'}">
+        <meta name="author" content="Hugi Barbershop">
+        <meta name="theme-color" content="#2dc58c">
+        <link rel="icon" th:href="@{/resources/uploads/favicon.png}" type="image/png">
+        <!-- Compiled Tailwind (built from tailwind-input.css via Maven / npm) -->
+        <link rel="stylesheet" th:href="@{/css/main.css}">
+        <!-- Open Graph / social sharing -->
+        <meta property="og:type" content="website">
+        <meta property="og:title" th:content="${title != null ? title : 'Hugi Barbershop'}">
+        <meta property="og:description"
+              content="Hugi Barbershop - premium grooming and barbering services. Book your appointment online.">
+        <meta property="og:image" th:href="@{/resources/uploads/favicon.png}">
+        <meta name="twitter:card" content="summary">
         <script th:src="@{/resources/js/script.js}"></script>
-        <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
         <script src="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.js"></script>
     </th:block>
 </head>

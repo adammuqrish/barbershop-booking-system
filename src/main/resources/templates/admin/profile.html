@@ -162,9 +162,7 @@
             </div>
         </div>
     </div>
-    <script th:src="@{/resources/assetsAdmin/js/bundle.js}"></script>
-    <script th:src="@{/resources/assetsAdmin/js/scripts.js}"></script>
-    <script th:src="@{/resources/assetsAdmin/js/demo-init.js}"></script>
+    <div th:replace="~{fragments/adminScripts :: adminJs}"></div>
 </body>
 
 </html>

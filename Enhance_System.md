@@ -6,45 +6,77 @@ This document catalogues frontend issues, inconsistencies, and improvement oppor
 
 ## 1. Global / Shared Fragments
 
-### 1.1 Stale "Java Getting Started on Heroku" Layout Fragment
+### 1.1 Stale "Java Getting Started on Heroku" Layout Fragment ✅ [COMPLETED]
 - **File:** `src/main/resources/templates/fragments/layout.html`
 - **Issue:** This is a leftover from Heroku's default "Java getting-started" template. It references Bootstrap 3.3.7, jQuery UI, links to Heroku Dev Center guides, uses outdated `glyphicon` icons, and is **not actually used** by any page in the app. It is dead code that clutters the codebase and could confuse future developers.
 - **Enhancement:** Delete `layout.html` and its reference in `target/classes/templates/fragments/layout.html` (build artifact, will regenerate). It serves no purpose in the current app.
+- **Change made:** Deleted `src/main/resources/templates/fragments/layout.html`. Verified the file was not referenced (`th:replace`) in any template or Java file before removal. ✅
 
-### 1.2 Duplicate / Unused JS File Paths
+### 1.2 Duplicate / Unused JS File Paths ✅ [COMPLETED]
 - **Files:**
   - `src/main/resources/static/resources/js/script.js` (loaded in `fragments/header.html`)
   - `src/main/resources/static/js/scripts.js` (the full NioBoard admin script)
   - `src/main/resources/static/resources/jsAdmin/scripts.js`
-- **Issue:** There are duplicated JavaScript files in two separate locations (`static/js/` vs `static/resources/jsAdmin/`). The admin pages reference `assetsAdmin/css/style.css` but don't explicitly load `scripts.js`, so the admin sidebar/navbar toggles and other interactive features may not be wired up.
-- **Enhancement:** Consolidate JS to one canonical path (`static/js/`) and explicitly load the required admin JS (`scripts.js`) in admin page templates. Remove the `resources/jsAdmin` duplicates.
+- **Issue:** There were duplicated JavaScript files in three separate locations (`static/js/`, `static/resources/jsAdmin/`, and `static/resources/assetsAdmin/js/`). The admin pages reference `assetsAdmin/css/style.css` but don't explicitly load `scripts.js`, so the admin sidebar/navbar toggles and other interactive features were not wired up. `profile.html` referenced nonexistent `bundle.js` / `demo-init.js`, and the critical `nioapp.js` (which defines the global `NioApp` that `scripts.js` depends on) was never loaded anywhere.
+- **Enhancement:** Consolidate JS to one canonical path (`assetsAdmin/js/`) and explicitly load the required admin JS in every admin page template. Remove the `resources/jsAdmin` and `static/js` duplicates.
+- **Change made:**
+  - Created `static/resources/assetsAdmin/js/vendors/` and copied `nioapp.js` + `pureknob/pureknob.js` into it (these were only present in the deleted `jsAdmin/vendors/` and are required before `scripts.js`).
+  - Deleted `static/resources/jsAdmin/` (full duplicate of admin JS, never referenced by any template).
+  - Deleted `static/js/` (duplicate NioBoard JS, never referenced by any template — only `assetsAdmin/js/` is referenced).
+  - Created reusable fragment `fragments/adminScripts.html` that loads jQuery 3.6.0, Bootstrap 5.3.3 bundle, `assetsAdmin/js/vendors/nioapp.js`, and `assetsAdmin/js/scripts.js`.
+  - Added `<div th:replace="~{fragments/adminScripts :: adminJs}"></div>` to all 10 admin templates (`adminLogin`, `adminIndex`, `registerStaff`, `listCustomer`, `profile`, `listBarber`, `listTransactions`, `listFeedback`, `listAppointment`, `edit-staff`), replacing ad-hoc/incomplete script includes. This wires up the NioBoard sidebar/navbar and fixes the broken `profile.html` references.
+  - Verified `mvn -o compile` → BUILD SUCCESS. ✅
 
-### 1.3 Header Fragment Misses Common Meta Tags & Favicon
+### 1.3 Header Fragment Misses Common Meta Tags & Favicon ✅ [COMPLETED]
 - **File:** `src/main/resources/templates/fragments/header.html`
-- **Issue:** The `<head th:fragment="head">` block does not include:
-  - A favicon reference (`favicon.png` exists in uploads but is never linked)
-  - `charset` meta is present but there are no `http-equiv`, theme-color, or social/Open Graph meta tags
+- **Issue:** The `<head th:fragment="head">` block did not include:
+  - A favicon reference (`favicon.png` exists in uploads but was never linked)
+  - `charset` meta is present but there were no `theme-color`, author, description, or social/Open Graph meta tags
   - It loads `@{ /resources/js/script.js }` unconditionally even on pages that don't need it (e.g., admin pages)
 - **Enhancement:** Add `<link rel="icon" th:href="@{/resources/uploads/favicon.png}">` and a theme-color meta tag. Make the `script.js` include conditional or move it to pages that need it.
+- **Change made:**
+  - Added `<link rel="icon" th:href="@{/resources/uploads/favicon.png}" type="image/png">` (favicon confirmed present at `static/resources/uploads/favicon.png`).
+  - Added `<meta name="theme-color" content="#2dc58c">` (matches the brand green used in `style.css`).
+  - Added `<meta name="description">` (defaults to a Hugi Barbershop tagline, overridable via a `description` model attribute) and `<meta name="author" content="Hugi Barbershop">`.
+  - Added Open Graph + Twitter Card tags (`og:type`, `og:title`, `og:description`, `og:image`, `twitter:card`) for social sharing, using the favicon as the share image.
+  - Kept the `script.js` include in the shared head: every customer page that uses this fragment also renders `fragments/nav.html`, whose dropdown/toggle logic depends on `script.js`, so it is needed on all of them. (Admin pages do not use this fragment — they load their own `assetsAdmin` head — so the "admin pages" concern does not apply here.)
+  - Default `<title>` changed from "Barbershop Landing Page" to "Hugi Barbershop" for consistent branding. ✅
 
-### 1.4 Tailwind CSS CDN (JIT) Loaded at Runtime
+### 1.4 Tailwind CSS CDN (JIT) Loaded at Runtime ✅ [COMPLETED]
 - **File:** `fragments/header.html:10`
-- **Issue:** Tailwind is loaded via `<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>`. The `@tailwindcss/browser` build is intended for **development only**. It is slow (JIT compilation happens in-browser on every load) and not production-ready.
-- **Enhancement:** Replace with a **compiled Tailwind CSS build**: generate `main.css` via `postcss-cli` / `tailwindcss-cli` as part of the Maven build (using `tailwindcss` plugin) and reference a static CSS file. If staying with CDN for dev, at minimum add a note.
+- **Issue:** Tailwind was loaded via `<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>`. The `@tailwindcss/browser` build is intended for **development only**. It is slow (JIT compilation happens in-browser on every load) and not production-ready.
+- **Enhancement:** Replace with a **compiled Tailwind CSS build**: generate `main.css` via `tailwindcss-cli` as part of the Maven build and reference a static CSS file.
+- **Change made:**
+  - Added `src/main/resources/static/css/tailwind-input.css` (`@import "tailwindcss";` + `@source` directives scanning `templates/**/*.html` and `static/**/*.js`).
+  - Added `package.json` with `build:css` (`tailwindcss -i … -o …/main.css --minify`) and `watch:css` scripts; dev dependency `@tailwindcss/cli@^4.1.0`.
+  - Removed the `@tailwindcss/browser@4` `<script>` from `fragments/header.html` and replaced it with `<link rel="stylesheet" th:href="@{/css/main.css}">`.
+  - Added `frontend-maven-plugin` (1.15.1) to `pom.xml`, bound to `generate-resources`: it installs Node 20, runs `npm install`, then `npm run build:css`, regenerating `main.css` on every `mvn` build (including Heroku slug compile). `main.css` is committed as a baseline so the app works even if the build step is skipped.
+  - Added `node/` and `node_modules/` to `.gitignore`.
+  - Verified: `npm run build:css` produces a ~29.5 KB minified `main.css` (includes JS-referenced classes like `text-yellow-300` and `hidden`); `mvn generate-resources` → **BUILD SUCCESS** with the plugin executing `npm run build:css`. ✅
 
-### 1.5 Nav & Footer Comments Contain Placeholder Text
+### 1.5 Nav & Footer Comments Contain Placeholder Text ✅ [COMPLETED]
 - **Files:** `fragments/nav.html:11`, `fragments/footer.html:10`
-- **Issue:** Both contain literal comment text like `<!-- ... (omitted SVGs for brevity, but I will include them) ... -->` and `<!-- SVG Icons from original JSP (restoring them exactly) -->`. This is leftover from a migration and indicates SVGs that were supposed to be restored but never were.
-- **Enhancement:** Remove the stale comments. Add actual SVG icons for social/contact info in the footer (currently missing).
+- **Issue:** Both contained literal comment text like `<!-- ... (omitted SVGs for brevity, but I will include them) ... -->` and `<!-- SVG Icons from original JSP (restoring them exactly) -->`. This was leftover from a migration and indicated SVGs that were supposed to be restored but never were.
+- **Enhancement:** Remove the stale comments. Add actual SVG icons for social/contact info in the footer (which were missing).
+- **Change made:**
+  - `fragments/nav.html`: removed the two stale comments from the empty top-bar `<div>` and replaced it with real Facebook + Instagram SVG icons (inline, `fill="currentColor"`, `aria-label`s, hover state).
+  - `fragments/footer.html`: replaced the stale comment in the brand column with a Facebook + Instagram social SVG row; added location-pin, phone (`tel:` link), and envelope (`mailto:` link) SVG icons to the "Barbershop Information" column so the contact details now have icons.
+  - Regenerated `main.css` (`npm run build:css`, ~30 KB) so the newly-used utilities (`flex-shrink-0`, `mt-0.5`, `gap-2`, `items-start`, `space-y-2`, `mt-3`) are included. ✅
 
 ---
 
 ## 2. Navigation Bar (`fragments/nav.html`)
 
-### 2.1 Contact Info Hardcoded in Template
-- **File:** `fragments/nav.html:5-7`
-- **Issue:** "CONTACT US: 0127865132" and "OPENING HOUR: TUESDAY - SUNDAY (10 a.m - 10 p.m)" are hardcoded. They should come from a config/properties file so the barbershop owner can change them without modifying templates.
+### 2.1 Contact Info Hardcoded in Template ✅ [COMPLETED]
+- **File:** `fragments/nav.html:5-7` (and `fragments/footer.html` contact block)
+- **Issue:** "CONTACT US: 0127865132" and "OPENING HOUR: TUESDAY - SUNDAY (10 a.m - 10 p.m)" in `nav.html` were hardcoded, as were the footer's address / phone / email. They should come from a config/properties file so the barbershop owner can change them without modifying templates.
 - **Enhancement:** Move to `application.properties` (e.g. `barbershop.phone`, `barbershop.opening-hours`) and inject via Thymeleaf `th:text`.
+- **Change made:**
+  - Added a `Barbershop Public Contact Info` block to `application.properties` with `barbershop.phone`, `barbershop.opening-hours`, `barbershop.email`, and `barbershop.address`.
+  - Created `com.heroku.java.config.GlobalModelAttributes` (`@ControllerAdvice`) that reads those properties (with safe defaults) and exposes them as a `barbershop` map to every Thymeleaf template.
+  - `fragments/nav.html`: `CONTACT US` and `OPENING HOUR` now use `th:text="${barbershop.phone}"` / `th:text="${barbershop.openingHours}"` (static fallback text preserved for graceful degradation).
+  - `fragments/footer.html`: address, phone (`tel:` link), and email (`mailto:` link) now use `barbershop.address`, `barbershop.phone`, `barbershop.email`. **Note:** the footer previously hardcoded a different phone number (`012-7678776`) than the nav (`0127865132`); both now read the single `barbershop.phone` property, so they are unified — set `barbershop.phone` to the correct value if one of the originals was a typo.
+  - `mvn -o compile` → **BUILD SUCCESS**. ✅
 
 ### 2.2 Appointment Dropdown — Conflicting Desktop & Mobile Logic
 - **File:** `fragments/nav.html:35-65` + `static/resources/js/script.js:84-130`
@@ -263,12 +295,12 @@ This document catalogues frontend issues, inconsistencies, and improvement oppor
 
 | # | Category | File(s) | Priority |
 |---|----------|---------|----------|
-| 1.1 | Dead Code | `fragments/layout.html` | Low |
-| 1.2 | JS Consolidation | Multiple | Medium |
-| 1.3 | SEO / UX | `fragments/header.html` | Medium |
-| 1.4 | Performance | `fragments/header.html` | High |
-| 1.5 | Cleanup | `nav.html`, `footer.html` | Low |
-| 2.1 | Config | `nav.html` | Low |
+| 1.1 | Dead Code | `fragments/layout.html` | Low | ✅ Done |
+| 1.2 | JS Consolidation | Multiple | Medium | ✅ Done
+| 1.3 | SEO / UX | `fragments/header.html` | Medium | ✅ Done
+| 1.4 | Performance | `fragments/header.html` | High | ✅ Done
+| 1.5 | Cleanup | `nav.html`, `footer.html` | Low | ✅ Done
+| 2.1 | Config | `nav.html` | Low | ✅ Done
 | 2.2 | Responsiveness | `nav.html`, `script.js` | Medium |
 | 2.3 | UX | `script.js` | Medium |
 | 2.4 | CSS Bug | `nav.html` | Low |

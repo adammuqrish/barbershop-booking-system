@@ -31,3 +31,7 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Node / frontend build (Tailwind) ###
+node/
+node_modules/

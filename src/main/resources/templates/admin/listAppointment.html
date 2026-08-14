@@ -247,6 +247,7 @@
                 </div>
             </div>
         </div>
+    <div th:replace="~{fragments/adminScripts :: adminJs}"></div>
         <script th:inline="javascript">
             document.addEventListener('DOMContentLoaded', function () {
                 const today = new Date().toISOString().split('T')[0];
