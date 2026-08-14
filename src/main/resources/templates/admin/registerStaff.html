@@ -101,15 +101,16 @@
                                                 <label class="form-label">
                                                     Password <span class="text-danger">*</span>
                                                 </label>
-                                                <div class="position-relative">
+                                                <div style="position:relative;">
                                                     <input type="password" name="password" id="staffPassword"
                                                         class="form-control" placeholder="Enter password" required
-                                                        style="padding-right: 2.5rem;">
+                                                        style="padding-right:2.5rem;">
                                                     <button type="button" data-target="staffPassword"
-                                                        class="btn btn-link position-absolute top-50 translate-middle-y end-0 text-muted password-toggle p-2"
-                                                        tabindex="-1" aria-label="Show password">
+                                                        class="btn btn-link password-toggle"
+                                                        tabindex="-1" aria-label="Show password"
+                                                        style="position:absolute;top:50%;right:0;transform:translateY(-50%);padding:0.3rem 0.5rem;text-decoration:none;color:#6c757d;">
                                                         <i class="fas fa-eye eye-icon"></i>
-                                                        <i class="fas fa-eye-slash eye-off-icon d-none"></i>
+                                                        <i class="fas fa-eye-slash eye-off-icon" style="display:none;"></i>
                                                     </button>
                                                 </div>
                                             </div>
@@ -119,15 +120,16 @@
                                                 <label class="form-label">
                                                     Confirm Password <span class="text-danger">*</span>
                                                 </label>
-                                                <div class="position-relative">
+                                                <div style="position:relative;">
                                                     <input type="password" name="confirmPassword" id="staffConfirmPassword"
                                                         class="form-control" placeholder="Confirm password" required
-                                                        style="padding-right: 2.5rem;">
+                                                        style="padding-right:2.5rem;">
                                                     <button type="button" data-target="staffConfirmPassword"
-                                                        class="btn btn-link position-absolute top-50 translate-middle-y end-0 text-muted password-toggle p-2"
-                                                        tabindex="-1" aria-label="Show password">
+                                                        class="btn btn-link password-toggle"
+                                                        tabindex="-1" aria-label="Show password"
+                                                        style="position:absolute;top:50%;right:0;transform:translateY(-50%);padding:0.3rem 0.5rem;text-decoration:none;color:#6c757d;">
                                                         <i class="fas fa-eye eye-icon"></i>
-                                                        <i class="fas fa-eye-slash eye-off-icon d-none"></i>
+                                                        <i class="fas fa-eye-slash eye-off-icon" style="display:none;"></i>
                                                     </button>
                                                 </div>
                                             </div>
@@ -178,8 +180,8 @@
 
                     var eyeIcon = button.querySelector('.eye-icon');
                     var eyeOffIcon = button.querySelector('.eye-off-icon');
-                    if (eyeIcon) eyeIcon.classList.toggle('d-none', !isPassword);
-                    if (eyeOffIcon) eyeOffIcon.classList.toggle('d-none', isPassword);
+                    if (eyeIcon) eyeIcon.style.display = isPassword ? 'none' : 'inline-block';
+                    if (eyeOffIcon) eyeOffIcon.style.display = isPassword ? 'inline-block' : 'none';
 
                     button.setAttribute('aria-label', isPassword ? 'Hide password' : 'Show password');
                 });
