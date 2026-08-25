@@ -35,7 +35,10 @@ public class HomeController {
     }
 
     @GetMapping({ "/", "/index" })
-    public String index() {
+    public String index(org.springframework.ui.Model model) {
+        // Barbers shown on the landing page (BARBER role only, admin excluded)
+        model.addAttribute("barbers",
+                staffRepository.findByStaffRole("BARBER"));
         return "index";
     }
 }

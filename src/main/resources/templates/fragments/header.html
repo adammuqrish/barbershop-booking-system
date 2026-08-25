@@ -9,10 +9,15 @@
         <meta name="description"
               th:content="${description ?: 'Hugi Barbershop - premium grooming and barbering services. Book your appointment online.'}">
         <meta name="author" content="Hugi Barbershop">
-        <meta name="theme-color" content="#2dc58c">
+        <meta name="theme-color" content="#1a1714">
         <link rel="icon" th:href="@{/resources/uploads/favicon.png}" type="image/png">
         <!-- Compiled Tailwind (built from tailwind-input.css via Maven / npm) -->
         <link rel="stylesheet" th:href="@{/css/main.css}">
+        <!-- Heritage theme (public pages) -->
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+        <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+        <link rel="stylesheet" th:href="@{/css/heritage.css}">
         <!-- Open Graph / social sharing -->
         <meta property="og:type" content="website">
         <meta property="og:title" th:content="${title != null ? title : 'Hugi Barbershop'}">

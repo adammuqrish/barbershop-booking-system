@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hugi Barbershop — Classic Cuts, Modern Standards</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1a1714;          /* near-black warm charcoal */
+  --ink-2:#241f1b;
+  --cream:#f5efe4;
+  --cream-2:#ece3d2;
+  --brass:#c9a227;
+  --brass-dark:#a5851d;
+  --oxblood:#7a2e2e;
+  --oxblood-dark:#612424;
+  --muted:#8a8073;
+  --line:rgba(26,23,20,.18);
+  --line-light:rgba(245,239,228,.22);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Inter',system-ui,sans-serif;
+  font-size:16px;line-height:1.65;
+  color:var(--ink);background:var(--cream);
+}
+.display{font-family:'Bebas Neue',Impact,sans-serif;font-weight:400;letter-spacing:.04em;line-height:.95;text-transform:uppercase}
+.wrap{max-width:1120px;margin:0 auto;padding:0 24px}
+a{color:inherit}
+
+/* ---------- top bar ---------- */
+.topbar{background:var(--oxblood);color:var(--cream);font-size:.85rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase}
+.topbar .wrap{display:flex;justify-content:space-between;gap:16px;padding-top:8px;padding-bottom:8px}
+.topbar span+span::before{content:"★";color:var(--brass);margin-right:14px}
+@media(max-width:640px){.topbar .wrap span:nth-child(3){display:none}}
+
+/* ---------- nav ---------- */
+.nav{background:var(--ink);color:var(--cream);position:sticky;top:0;z-index:50;border-bottom:3px solid var(--brass)}
+.nav .wrap{display:flex;align-items:center;justify-content:space-between;height:72px}
+.brand{display:flex;align-items:center;gap:12px;text-decoration:none}
+.brand-mark{width:44px;height:44px;background:var(--brass);color:var(--ink);display:grid;place-items:center;font-family:'Bebas Neue';font-size:26px;border-radius:50%;border:2px solid var(--cream)}
+.brand-name{font-family:'Bebas Neue';font-size:28px;letter-spacing:.08em;color:var(--cream)}
+.brand-name em{color:var(--brass);font-style:normal}
+.nav-links{display:flex;gap:32px;list-style:none;align-items:center}
+.nav-links a{text-decoration:none;font-weight:600;font-size:.95rem;color:var(--cream);opacity:.85}
+.nav-links a:hover{opacity:1;color:var(--brass)}
+.btn{display:inline-block;text-decoration:none;text-align:center;font-family:'Bebas Neue';font-size:20px;letter-spacing:.1em;padding:10px 26px;border-radius:4px;transition:all .2s ease;cursor:pointer;border:2px solid transparent}
+.btn-brass{background:var(--brass);color:var(--ink)}
+.btn-brass:hover{background:var(--cream)}
+.btn-outline{border-color:var(--brass);color:var(--brass)}
+.btn-outline:hover{background:var(--brass);color:var(--ink)}
+.btn-blood{background:var(--oxblood);color:var(--cream)}
+.btn-blood:hover{background:var(--oxblood-dark)}
+@media(max-width:860px){.nav-links li:not(.nav-cta){display:none}}
+
+/* ---------- hero ---------- */
+.hero{position:relative;min-height:78vh;display:flex;align-items:center;background:
+  linear-gradient(rgba(26,23,20,.82),rgba(26,23,20,.62)),
+  url('https://images.unsplash.com/photo-1503951914875-452162b0f3f1?q=80&w=1920&auto=format&fit=crop') center/cover;
+  color:var(--cream)}
+.hero .wrap{padding-top:96px;padding-bottom:110px;width:100%}
+.kicker{display:inline-flex;align-items:center;gap:12px;font-size:.85rem;font-weight:700;letter-spacing:.28em;text-transform:uppercase;color:var(--brass);margin-bottom:22px}
+.kicker::before,.kicker::after{content:"";height:2px;width:38px;background:var(--brass)}
+.hero h1{font-size:clamp(64px,11vw,148px);max-width:12ch}
+.hero h1 .gold{color:var(--brass)}
+.hero p.sub{max-width:52ch;margin-top:22px;font-size:1.15rem;color:rgba(245,239,228,.88)}
+.hero-actions{display:flex;gap:16px;margin-top:38px;flex-wrap:wrap}
+.hero-actions .btn{font-size:24px;padding:14px 40px}
+.hero-strip{position:absolute;left:0;right:0;bottom:0;background:rgba(26,23,20,.86);border-top:1px solid var(--line-light)}
+.hero-strip .wrap{display:flex;justify-content:space-around;padding-top:14px;padding-bottom:14px;flex-wrap:wrap;gap:8px 32px}
+.hero-strip b{font-family:'Bebas Neue';font-size:22px;letter-spacing:.06em;color:var(--brass);font-weight:400}
+.hero-strip span{font-size:.85rem;letter-spacing:.12em;text-transform:uppercase;opacity:.85}
+
+/* ---------- section scaffolding ---------- */
+.section{padding:88px 0}
+.section.dark{background:var(--ink);color:var(--cream)}
+.sec-head{margin-bottom:52px}
+.sec-head .tag{font-size:.85rem;font-weight:700;letter-spacing:.28em;text-transform:uppercase;color:var(--oxblood)}
+.section.dark .sec-head .tag{color:var(--brass)}
+.sec-head h2{font-size:clamp(42px,6vw,68px);margin-top:6px}
+.sec-head h2 em{font-style:normal;color:var(--oxblood)}
+.section.dark .sec-head h2 em{color:var(--brass)}
+.sec-head p.lead{margin-top:12px;max-width:56ch;color:var(--muted)}
+.section.dark .sec-head p.lead{color:rgba(245,239,228,.75)}
+
+/* ---------- services menu ---------- */
+.menu-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 72px}
+@media(max-width:800px){.menu-grid{grid-template-columns:1fr}}
+.menu-item{display:flex;align-items:baseline;gap:12px;padding:20px 0;border-bottom:2px dotted var(--line)}
+.menu-item .name{font-family:'Bebas Neue';font-size:26px;letter-spacing:.05em}
+.menu-item .dots{flex:1;border-bottom:2px dotted var(--line);transform:translateY(-6px)}
+.menu-item .price{font-family:'Bebas Neue';font-size:28px;color:var(--oxblood);white-space:nowrap}
+.menu-item .desc{display:block;font-family:'Inter';font-size:.9rem;color:var(--muted);letter-spacing:0;margin-top:2px}
+.menu-note{margin-top:34px;display:flex;gap:14px;align-items:center;font-size:.92rem;color:var(--muted)}
+.badge{display:inline-block;background:var(--brass);color:var(--ink);font-weight:700;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;padding:3px 10px;border-radius:3px}
+
+/* ---------- barbers ---------- */
+.barber-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:28px}
+@media(max-width:860px){.barber-grid{grid-template-columns:1fr}}
+.barber-card{background:var(--cream);color:var(--ink);border-radius:6px;overflow:hidden;border:1px solid rgba(245,239,228,.15)}
+.barber-card img{width:100%;aspect-ratio:4/5;object-fit:cover;display:block;filter:saturate(.92)}
+.barber-info{padding:20px 22px 24px;border-top:4px solid var(--brass)}
+.barber-info h3{font-family:'Bebas Neue';font-size:30px;letter-spacing:.05em}
+.barber-info .spec{color:var(--oxblood);font-weight:600;font-size:.9rem;text-transform:uppercase;letter-spacing:.1em}
+.barber-info p{margin-top:10px;font-size:.93rem;color:var(--muted)}
+
+/* ---------- hours / visit ---------- */
+.visit{background:var(--ink-2);color:var(--cream)}
+.visit-grid{display:grid;grid-template-columns:1.2fr 1fr;gap:64px;align-items:start}
+@media(max-width:860px){.visit-grid{grid-template-columns:1fr}}
+.hours-table{width:100%;border-collapse:collapse}
+.hours-table td{padding:13px 4px;border-bottom:1px solid var(--line-light);font-size:1.02rem}
+.hours-table td:last-child{text-align:right;font-family:'Bebas Neue';font-size:21px;letter-spacing:.06em;color:var(--brass)}
+.hours-table tr.today td{color:var(--cream);font-weight:700}
+.hours-table tr.today td:last-child::after{content:" · OPEN";color:var(--brass);font-size:.8rem}
+.signboard{background:var(--cream);color:var(--ink);border:2px solid var(--brass);border-radius:6px;padding:30px;box-shadow:8px 8px 0 rgba(201,162,39,.25)}
+.signboard h3{font-family:'Bebas Neue';font-size:32px;margin-bottom:14px}
+.signboard p{margin-bottom:10px;font-size:.97rem}
+.signboard .row{display:flex;gap:12px;align-items:baseline}
+.signboard .lbl{font-size:.75rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--oxblood);min-width:74px}
+
+/* ---------- testimonials ---------- */
+.quote-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:28px}
+@media(max-width:860px){.quote-grid{grid-template-columns:1fr}}
+.quote{position:relative;background:#fff;border:1px solid var(--line);border-radius:4px;padding:28px 26px 22px;box-shadow:4px 4px 0 var(--cream-2)}
+.quote::before{content:"“";position:absolute;top:-14px;left:18px;font-family:Georgia,serif;font-size:72px;color:var(--brass);line-height:1}
+.quote p{font-size:.97rem;color:var(--ink-2)}
+.quote .who{margin-top:16px;padding-top:14px;border-top:2px dotted var(--line);display:flex;justify-content:space-between;align-items:center}
+.quote .who b{font-weight:700}
+.stars{color:var(--brass);letter-spacing:2px}
+
+/* ---------- CTA band ---------- */
+.cta-band{background:var(--oxblood);color:var(--cream);text-align:center;padding:76px 0}
+.cta-band h2{font-size:clamp(44px,7vw,84px)}
+.cta-band p{margin:14px auto 30px;max-width:46ch;color:rgba(245,239,228,.9)}
+.cta-band .btn{background:var(--cream);color:var(--ink);font-size:24px;padding:14px 44px}
+.cta-band .btn:hover{background:var(--brass)}
+
+/* ---------- footer ---------- */
+footer{background:var(--ink);color:rgba(245,239,228,.7);padding:44px 0;border-top:3px solid var(--brass)}
+footer .wrap{display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap;font-size:.9rem}
+footer .brand-name{font-size:24px}
+
+@media (prefers-reduced-motion: no-preference){
+  .btn,.menu-item{transition:transform .18s ease}
+  .btn:hover{transform:translateY(-2px)}
+}
+:focus-visible{outline:3px solid var(--brass);outline-offset:2px}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="wrap">
+    <span>Open Tue–Sun · 10am–10pm</span>
+    <span>Walk-ins welcome</span>
+    <span>Call 012-786 5132</span>
+  </div>
+</div>
+
+<nav class="nav">
+  <div class="wrap">
+    <a class="brand" href="#">
+      <span class="brand-mark">H</span>
+      <span class="brand-name">Hugi<em>.</em></span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="#aboutUs">About</a></li>
+      <li><a href="#services">Services &amp; Prices</a></li>
+      <li><a href="#barbers">Barbers</a></li>
+      <li><a href="#visit">Visit Us</a></li>
+      <li><a href="#">Login</a></li>
+      <li class="nav-cta"><a class="btn btn-brass" href="/booking">Book Now</a></li>
+    </ul>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <span class="kicker">Est. Klang · Gents' grooming</span>
+    <h1>Classic cuts.<br><span class="gold">Modern standards.</span></h1>
+    <p class="sub">Fades, beard sculpting and hot-towel shaves from barbers who treat it like a craft — not a chore. Book online, skip the wait.</p>
+    <div class="hero-actions">
+      <a class="btn btn-blood" href="/booking">Book an appointment</a>
+      <a class="btn btn-outline" href="#services">See the price list</a>
+    </div>
+  </div>
+  <div class="hero-strip">
+    <div class="wrap">
+      <span><b>15+</b>&nbsp;&nbsp;Years of craft</span>
+      <span><b>4.9★</b>&nbsp;&nbsp;Customer rating</span>
+      <span><b>10am–10pm</b>&nbsp;&nbsp;Tue to Sun</span>
+      <span><b>Palm Garden</b>&nbsp;&nbsp;Bandar Baru Klang</span>
+    </div>
+  </div>
+</header>
+
+<section class="section" id="aboutUs">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="tag">About us</span>
+      <h2>More than a haircut — <em>a ritual.</em></h2>
+    </div>
+    <p style="max-width:66ch;font-size:1.08rem">At Hugi Barbershop we combine the classic art of barbering with contemporary technique. Our barbers specialise in modern fades, sharp beard trims and clean precision cuts — with the hot towel, the small talk and the careful finish that make a barbershop worth returning to. Whether it's a quick touch-up or a full grooming session, you leave looking sharper than you arrived.</p>
+  </div>
+</section>
+
+<section class="section dark" id="services">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="tag">Services &amp; prices</span>
+      <h2>The <em>menu.</em></h2>
+      <p class="lead">Straightforward services, honest prices. No surprises at the till.</p>
+    </div>
+    <div class="menu-grid">
+      <div>
+        <div class="menu-item"><span class="name">Signature Haircut</span><span class="dots"></span><span class="price">RM15</span><span class="desc">Consultation, cut, wash &amp; style finish</span></div>
+        <div class="menu-item"><span class="name">Skin Fade <span class="badge">Popular</span></span><span class="dots"></span><span class="price">RM18</span><span class="desc">Razor-sharp fade blended to your head shape</span></div>
+        <div class="menu-item"><span class="name">Kids' Cut (under 12)</span><span class="dots"></span><span class="price">RM10</span><span class="desc">Patient, friendly cuts for young gents</span></div>
+      </div>
+      <div>
+        <div class="menu-item"><span class="name">Beard Trim &amp; Shape</span><span class="dots"></span><span class="price">RM10</span><span class="desc">Sculpted lines, hot towel finish</span></div>
+        <div class="menu-item"><span class="name">Hot Towel Shave</span><span class="dots"></span><span class="price">RM12</span><span class="desc">Traditional straight-razor shave</span></div>
+        <div class="menu-item"><span class="name">Cut + Beard Combo</span><span class="dots"></span><span class="price">RM22</span><span class="desc">The full works — save RM3</span></div>
+      </div>
+    </div>
+    <div class="menu-note"><span class="badge">Note</span> Senior citizens enjoy 10% off all services, every day. Loyalty members earn points toward a free signature cut.</div>
+  </div>
+</section>
+
+<section class="section" id="barbers" style="background:var(--cream-2)">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="tag">The team</span>
+      <h2>Meet your <em>barbers.</em></h2>
+    </div>
+    <div class="barber-grid">
+      <article class="barber-card">
+        <img src="https://images.unsplash.com/photo-1583195763986-0231686dcd43?q=80&w=800&auto=format&fit=crop" alt="Portrait of Hugi, master barber">
+        <div class="barber-info"><h3>Hugi</h3><span class="spec">Master barber · Founder</span><p>Fades and classic scissor work. Fifteen years behind the chair and still obsessed with the perfect blend.</p></div>
+      </article>
+      <article class="barber-card">
+        <img src="https://images.unsplash.com/photo-1618077360395-f3068be8e001?q=80&w=800&auto=format&fit=crop" alt="Portrait of Zul, fade specialist">
+        <div class="barber-info"><h3>Zul</h3><span class="spec">Fade specialist</span><p>Skin fades, tapers and razor line-ups. If it needs to be sharp, it goes through Zul.</p></div>
+      </article>
+      <article class="barber-card">
+        <img src="https://images.unsplash.com/photo-1622286342621-4bd786c2447c?q=80&w=800&auto=format&fit=crop" alt="Portrait of Dan, beard sculptor">
+        <div class="barber-info"><h3>Dan</h3><span class="spec">Beard sculptor · Shaves</span><p>Beard shaping and traditional hot-towel shaves. Patient with first-timers and kids alike.</p></div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="section visit" id="visit">
+  <div class="wrap">
+    <div class="visit-grid">
+      <div>
+        <div class="sec-head">
+          <span class="tag">Visit us</span>
+          <h2>Opening <em>hours.</em></h2>
+        </div>
+        <table class="hours-table">
+          <tr class="today"><td>Tuesday</td><td>10:00 – 22:00</td></tr>
+          <tr><td>Wednesday</td><td>10:00 – 22:00</td></tr>
+          <tr><td>Thursday</td><td>10:00 – 22:00</td></tr>
+          <tr><td>Friday</td><td>10:00 – 22:00</td></tr>
+          <tr><td>Saturday</td><td>10:00 – 22:00</td></tr>
+          <tr><td>Sunday</td><td>10:00 – 22:00</td></tr>
+          <tr><td>Monday</td><td>Closed</td></tr>
+        </table>
+      </div>
+      <aside class="signboard">
+        <h3>Find the shop</h3>
+        <div class="row"><span class="lbl">Address</span><span>LOT-A-G9, Palm Garden, Bandar Baru Klang, 41150 Klang, Selangor</span></div>
+        <div class="row"><span class="lbl">Phone</span><span><strong>012-786 5132</strong></span></div>
+        <div class="row"><span class="lbl">Email</span><span>hugibarbershop@gmail.com</span></div>
+        <p style="margin-top:18px;font-size:.9rem;color:var(--muted)">Free parking in the Palm Garden lot. Walk-ins welcome, but weekends fill up fast — booking ahead is smarter.</p>
+        <a class="btn btn-blood" style="margin-top:14px" href="/booking">Book your slot</a>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="tag">Word on the street</span>
+      <h2>Customers <em>talking.</em></h2>
+    </div>
+    <div class="quote-grid">
+      <figure class="quote">
+        <p>Best fade I've had in Klang, hands down. They actually take time to ask what you want instead of rushing you out the chair.</p>
+        <figcaption class="who"><b>Aiman R.</b><span class="stars">★★★★★</span></figcaption>
+      </figure>
+      <figure class="quote">
+        <p>Brought my 7-year-old for his first proper haircut. The barber was so patient with him he didn't want to leave. We're regulars now.</p>
+        <figcaption class="who"><b>Puan Siti</b><span class="stars">★★★★★</span></figcaption>
+      </figure>
+      <figure class="quote">
+        <p>The hot towel shave is worth every sen. Old-school service with a proper cup of coffee while you wait.</p>
+        <figcaption class="who"><b>Encik Rahim</b><span class="stars">★★★★★</span></figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<section class="cta-band">
+  <div class="wrap">
+    <h2 class="display">Ready for the chair?</h2>
+    <p>Pick your barber, choose your time, walk in like you own the place. Booking takes less than two minutes.</p>
+    <a class="btn" href="/booking">Book Now — It's Easy</a>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span class="brand-name">Hugi<em style="color:var(--brass);font-style:normal">.</em> Barbershop</span>
+    <span>LOT-A-G9, Palm Garden, Bandar Baru Klang · 012-786 5132</span>
+    <span>© 2026 Hugi Barbershop. Open Tue–Sun, 10am–10pm.</span>
+  </div>
+</footer>
+
+</body>
+</html>
