@@ -38,3 +38,6 @@ node_modules/
 
 # External user upload storage (runtime-written, not source)
 /uploads/
+
+# Local dev profile (contains local DB creds)
+src/main/resources/application-local.properties
