@@ -99,13 +99,24 @@ public class BookingController {
         if (custId == null)
             return "redirect:/register";
 
-        // ✅ VALIDASI AVAILABILITY (Boleh ke check dalam service ke? Kalau tak, abaikan
-        // buat masa ni)
-        // if (!bookingService.isBarberAvailable(barber, date, slot)) {
-        // model.addAttribute("error", "Selected barber is already booked for this
-        // slot.");
-        // return "customer/booking";
-        // }
+        // ✅ SERVER-SIDE VALIDATION: barber must be free for this exact date+slot
+        if (!bookingService.isBarberAvailable(barber, date, slot)) {
+            model.addAttribute("barbers", bookingService.getAllBarbers());
+            model.addAttribute("slots", SLOTS);
+            model.addAttribute("selectedDate", date);
+            model.addAttribute("unavailableBarbersBySlot",
+                    bookingService.getUnavailableBarbersBySlot(date, SLOTS));
+            model.addAttribute("bookingError",
+                    "That barber is already booked for " + slot + " on " + date
+                            + ". Please pick another barber or time.");
+            return "customer/booking";
+        }
+
+        // ✅ SERVER-SIDE VALIDATION: no bookings in the past / same-day cutoff
+        LocalDate chosen = LocalDate.parse(date);
+        if (chosen.isBefore(LocalDate.now())) {
+            return "redirect:/booking";
+        }
 
         // ✅ BUAT OBJEK APPOINTMENT
         Appointment appointment = new Appointment();

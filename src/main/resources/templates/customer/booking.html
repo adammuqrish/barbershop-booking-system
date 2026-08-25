@@ -32,9 +32,19 @@
     .slot-grid input[type=radio]{position:absolute;opacity:0;pointer-events:none}
     .slot-btn{display:block;text-align:center;padding:14px 8px;border:2px solid var(--line);border-radius:5px;background:#fff;font-family:'Bebas Neue';font-size:21px;letter-spacing:.06em;cursor:pointer;transition:all .15s ease;user-select:none}
     .slot-btn:hover{border-color:var(--brass)}
-    input.slot-radio:checked + .slot-btn{background:var(--ink);border-color:var(--ink);color:var(--brass)}
+    input.slot-radio:checked + label .slot-btn,
+    input.slot-radio:checked + .slot-btn{background:var(--oxblood);border-color:var(--oxblood);color:#fff;font-size:19px}
+    input.slot-radio:checked + label .slot-btn::after,
+    input.slot-radio:checked + .slot-btn::after{content:" ✓ SELECTED";display:block;font-family:'Inter';font-size:.62rem;font-weight:700;letter-spacing:.18em;color:var(--brass);margin-top:3px}
+    input.slot-radio:focus-visible + label .slot-btn,
     input.slot-radio:focus-visible + .slot-btn{outline:3px solid var(--brass);outline-offset:2px}
+    input.slot-radio:disabled + label .slot-btn,
     input.slot-radio:disabled + .slot-btn{background:var(--cream-2);color:var(--muted);border-color:var(--cream-2);cursor:not-allowed;text-decoration:line-through;text-decoration-thickness:2px}
+
+    /* selection summary strip */
+    .bk-summary{display:flex;gap:22px;margin-top:20px;padding:14px 18px;background:var(--ink);border-radius:5px;color:var(--cream);font-size:.95rem;flex-wrap:wrap;align-items:center}
+    .bk-summary b{color:var(--brass);font-family:'Bebas Neue';font-weight:400;font-size:20px;letter-spacing:.05em}
+    .bk-summary .unset{opacity:.5}
 
     /* barber picker cards */
     .barber-pick{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:16px}
@@ -45,8 +55,13 @@
     .barber-opt .fallback{display:grid;place-items:center;font-family:'Bebas Neue';font-size:34px;color:var(--brass);background:var(--ink)}
     .barber-opt .bname{font-family:'Bebas Neue';font-size:22px;letter-spacing:.05em}
     .barber-opt .bspec{font-size:.75rem;color:var(--muted);text-align:center;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+    input.barber-radio:checked + label .barber-opt,
     input.barber-radio:checked + .barber-opt{border-color:var(--oxblood);box-shadow:0 0 0 2px var(--oxblood)}
+    input.barber-radio:checked + label .barber-opt::after,
+    input.barber-radio:checked + .barber-opt::after{content:"✓ YOUR BARBER";display:block;margin-top:8px;font-size:.68rem;font-weight:700;letter-spacing:.14em;color:#fff;background:var(--oxblood);padding:3px 10px;border-radius:3px}
+    input.barber-radio:checked + label .barber-opt img,
     input.barber-radio:checked + .barber-opt img,
+    input.barber-radio:checked + label .barber-opt .fallback,
     input.barber-radio:checked + .barber-opt .fallback{border-color:var(--brass)}
     input.barber-radio:focus-visible + .barber-opt{outline:3px solid var(--brass);outline-offset:2px}
     input.barber-radio:disabled + .barber-opt{opacity:.38;cursor:not-allowed}
@@ -55,9 +70,13 @@
     /* category pills */
     .cat-row{display:flex;gap:12px;flex-wrap:wrap}
     .cat-row input[type=radio]{position:absolute;opacity:0;pointer-events:none}
-    .cat-pill{padding:11px 26px;border:2px solid var(--line);border-radius:999px;background:#fff;font-weight:600;cursor:pointer;transition:all .15s ease}
+    .cat-pill{padding:11px 26px;border:2px solid var(--line);border-radius:999px;background:#fff;font-weight:600;cursor:pointer;transition:all .15s ease;display:inline-block}
     .cat-pill:hover{border-color:var(--brass)}
-    input.cat-radio:checked + .cat-pill{background:var(--brass);border-color:var(--brass);color:var(--ink)}
+    input.cat-radio:checked + label .cat-pill,
+    input.cat-radio:checked + .cat-pill{background:var(--oxblood);border-color:var(--oxblood);color:#fff}
+    input.cat-radio:checked + label .cat-pill::after,
+    input.cat-radio:checked + .cat-pill::after{content:" ✓";color:var(--brass)}
+    input.cat-radio:focus-visible + label .cat-pill,
     input.cat-radio:focus-visible + .cat-pill{outline:3px solid var(--brass);outline-offset:2px}
 
     .bk-submit-row{margin-top:36px;display:flex;align-items:center;gap:20px;flex-wrap:wrap}
@@ -82,6 +101,12 @@
         </div>
 
         <form th:action="@{/booking}" method="post">
+            <!-- Server-side validation error -->
+            <div th:if="${bookingError}" role="alert"
+                 style="background:#fdeaea;border:2px solid var(--oxblood);color:var(--oxblood);border-radius:5px;padding:14px 18px;margin-bottom:24px;font-weight:600">
+                ⚠ <span th:text="${bookingError}">Error</span>
+            </div>
+
             <!-- STEP 1: date & time -->
             <section class="bk-card">
                 <h2>Pick a date &amp; time</h2>
@@ -111,6 +136,14 @@
                             <span class="slot-btn" th:text="${slot}">10:00 am</span>
                         </label>
                     </th:block>
+                </div>
+
+                <!-- Live selection summary -->
+                <div class="bk-summary" id="bk-summary">
+                    <span>Date: <b id="sum-date" class="unset">—</b></span>
+                    <span>Time: <b id="sum-time" class="unset">—</b></span>
+                    <span>Category: <b id="sum-cat" class="unset">Adult</b></span>
+                    <span>Barber: <b id="sum-barber" class="unset">—</b></span>
                 </div>
             </section>
 
@@ -180,11 +213,42 @@
             const match = Array.from(select.options).find(o => o.value === checked.value);
             if (match && !match.disabled) select.value = checked.value;
         }
+        updateSummary();
     }
     document.querySelectorAll('input.barber-radio').forEach(r =>
         r.addEventListener('change', syncBarberSelect));
 
+    // Category pills -> summary
+    document.querySelectorAll('input.cat-radio').forEach(r =>
+        r.addEventListener('change', updateSummary));
+
+    function updateSummary() {
+        const set = (id, val) => {
+            const el = document.getElementById(id);
+            el.textContent = val;
+            el.classList.toggle('unset', !val || val === '—');
+        };
+        const dateVal = document.getElementById('date').value;
+        const timeVal = document.getElementById('selected-time').value;
+        const catChecked = document.querySelector('input.cat-radio:checked');
+        const barberChecked = document.querySelector('input.barber-radio:checked');
+
+        set('sum-date', dateVal ? formatDate(dateVal) : '');
+        set('sum-time', timeVal && timeVal !== '--:-- --' ? timeVal : '');
+        set('sum-cat', catChecked ? catChecked.value : '');
+        if (barberChecked) {
+            const b = barbersList.find(x => x.staffId.toString() === barberChecked.value);
+            set('sum-barber', b ? b.staffName : '');
+        } else {
+            set('sum-barber', '');
+        }
+    }
+    function formatDate(iso) {
+        const d = new Date(iso + 'T00:00:00');
+        return d.toLocaleDateString('en-MY', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+    }
     document.getElementById('date').addEventListener('change', function () {
+        updateSummary();
         const selectedDate = this.value;
         fetch('/booking/unavailable?date=' + selectedDate)
             .then(r => r.json())
@@ -194,17 +258,34 @@
             });
     });
 
+    // Convert "10:00 am" / "01:30 pm" to 24h decimal hours
+    function slotToHours(slotStr) {
+        const parts = slotStr.trim().split(' ');
+        const hm = parts[0].split(':');
+        let h = parseInt(hm[0]);
+        const m = parseInt(hm[1] || 0);
+        const ampm = (parts[1] || '').toLowerCase();
+        if (ampm === 'pm' && h !== 12) h += 12;
+        else if (ampm === 'am' && h === 12) h = 0;
+        return h + m / 60;
+    }
+
+    function isSlotPast(selectedDate, slotStr) {
+        // A slot is past if its date is before today, OR it's today and the
+        // slot start (+ nothing - you can't book a cut that already began)
+        // is earlier than right now.
+        const todayStr = new Date().toLocaleDateString('sv-SE'); // local YYYY-MM-DD
+        if (selectedDate < todayStr) return true;
+        if (selectedDate > todayStr) return false;
+        const now = new Date();
+        return slotToHours(slotStr) < (now.getHours() + now.getMinutes() / 60);
+    }
+
+    let cachedTotalBarbers = /*[[${barbers.size()}]]*/0;
+
     function updateSlotStatus(selectedDate, totalBarbers) {
+        cachedTotalBarbers = totalBarbers;
         const radios = document.querySelectorAll('.slot-radio');
-        const today = new Date().toISOString().split('T')[0];
-        const isToday = (selectedDate === today);
-
-        let currentTimeVal = 0;
-        if (isToday) {
-            const now = new Date();
-            currentTimeVal = now.getHours() + (now.getMinutes() / 60);
-        }
-
         radios.forEach(radio => {
             radio.checked = false;
             const labelBtn = radio.nextElementSibling ? radio.nextElementSibling.querySelector('.slot-btn') : null;
@@ -218,24 +299,14 @@
                 labelBtn.removeAttribute('data-reason');
             }
 
-            // 2. Time already passed today (with 30-min buffer)
-            let isTimePassed = false;
-            if (isToday) {
-                const timeParts = radio.value.trim().split(' ');
-                const hm = timeParts[0].split(':');
-                let slotHour = parseInt(hm[0]);
-                const slotMin = parseInt(hm[1] || 0);
-                const ampm = timeParts[1];
-                let slotVal = slotHour;
-                if (ampm.toLowerCase() === 'pm' && slotHour !== 12) slotVal += 12;
-                else if (ampm.toLowerCase() === 'am' && slotHour === 12) slotVal = 0;
-                slotVal += slotMin / 60;
-                if (slotVal < (currentTimeVal + 0.5)) isTimePassed = true;
-            }
+            // 2. Time already passed (live check, no buffer on the slot itself:
+            //    a 3:00 pm slot stays bookable at 2:59 pm but dies at 3:00 pm)
+            const isTimePassed = isSlotPast(selectedDate, radio.value);
 
             radio.disabled = isFull || isTimePassed;
         });
         resetSelections();
+        updateSummary();
     }
 
     function resetSelections() {
@@ -267,7 +338,47 @@
                 r.disabled = isUnavailable;
                 r.checked = false;
             });
+            updateSummary();
         });
+    });
+
+    // Live guard: re-check past slots every 30s so a page left open doesn't
+    // keep stale bookable times, and block submit if anything is missing/past.
+    setInterval(() => {
+        const dateVal = document.getElementById('date').value;
+        if (!dateVal) return;
+        let changed = false;
+        document.querySelectorAll('.slot-radio').forEach(radio => {
+            const shouldDisable = radio.disabled ||
+                (unavailableBarbersBySlot[radio.value] || []).length >= cachedTotalBarbers ||
+                isSlotPast(dateVal, radio.value);
+            if (shouldDisable !== radio.disabled) {
+                radio.disabled = shouldDisable;
+                if (shouldDisable && radio.checked) {
+                    radio.checked = false;
+                    resetSelections();
+                }
+                changed = true;
+            }
+        });
+        if (changed) updateSummary();
+    }, 30000);
+
+    document.querySelector('form').addEventListener('submit', function (e) {
+        const dateVal = document.getElementById('date').value;
+        const slotRadio = document.querySelector('input.slot-radio:checked');
+        let problem = '';
+        if (!dateVal) problem = 'Please pick a date.';
+        else if (!slotRadio) problem = 'Please pick a time slot.';
+        else if (isSlotPast(dateVal, slotRadio.value)) problem =
+            'That time has already passed. Pick a later slot or another day.';
+        else if (slotRadio.disabled) problem = 'That slot is no longer available.';
+        else if (!document.querySelector('input.barber-radio:checked')) problem =
+            'Please choose your barber.';
+        if (problem) {
+            e.preventDefault();
+            alert(problem);
+        }
     });
 
     window.addEventListener('DOMContentLoaded', () => {
