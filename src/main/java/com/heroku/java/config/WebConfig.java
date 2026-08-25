@@ -22,8 +22,10 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        String location = fileStorageService.getUploadDir().toUri().toString();
+        // Serve from the external storage directory FIRST, then fall back to
+        // the bundled assets committed under src/main/resources/static.
+        String external = fileStorageService.getUploadDir().toUri().toString();
         registry.addResourceHandler("/resources/uploads/**")
-                .addResourceLocations(location);
+                .addResourceLocations(external, "classpath:/static/resources/uploads/");
     }
 }
