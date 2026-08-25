@@ -19,11 +19,14 @@ public class ProfileController {
 
     private final CustomerRepository customerRepository;
     private final CustomerService customerService;
+    private final com.heroku.java.service.FileStorageService fileStorageService;
 
     @Autowired
-    public ProfileController(CustomerRepository customerRepository, CustomerService customerService) {
+    public ProfileController(CustomerRepository customerRepository, CustomerService customerService,
+            com.heroku.java.service.FileStorageService fileStorageService) {
         this.customerRepository = customerRepository;
         this.customerService = customerService;
+        this.fileStorageService = fileStorageService;
     }
 
     @GetMapping("/profile")
@@ -108,26 +111,17 @@ public class ProfileController {
             customer.setCustEmail(email);
             customer.setCustPhoneNumber(phone);
 
-            // Handle Image Upload (Kod Asal)
+            // Handle Image Upload (validated, stored in external upload dir)
             if (image != null && !image.isEmpty()) {
                 try {
-                    String fileName = java.util.UUID.randomUUID().toString() + "_" + image.getOriginalFilename();
-                    java.nio.file.Path uploadPath = java.nio.file.Paths
-                            .get("src/main/resources/static/resources/uploads");
-
-                    if (!java.nio.file.Files.exists(uploadPath)) {
-                        java.nio.file.Files.createDirectories(uploadPath);
-                    }
-
-                    java.nio.file.Path filePath = uploadPath.resolve(fileName);
-                    java.nio.file.Files.copy(image.getInputStream(), filePath,
-                            java.nio.file.StandardCopyOption.REPLACE_EXISTING);
-
+                    String fileName = fileStorageService.storeImage(image);
                     customer.setCustPicture(fileName);
+                } catch (IllegalArgumentException e) {
+                    redirectAttributes.addFlashAttribute("error", e.getMessage());
+                    return "redirect:/edit-profile";
                 } catch (java.io.IOException e) {
-                    e.printStackTrace();
                     redirectAttributes.addFlashAttribute("error", "Failed to upload image.");
-                    return "redirect:/edit-profile"; // <<<< Tambah redirect ni jika upload gagal
+                    return "redirect:/edit-profile";
                 }
             }
 

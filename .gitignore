@@ -35,3 +35,6 @@ build/
 ### Node / frontend build (Tailwind) ###
 node/
 node_modules/
+
+# External user upload storage (runtime-written, not source)
+/uploads/

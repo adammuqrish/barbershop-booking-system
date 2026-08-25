@@ -48,6 +48,7 @@ public class AdminController {
     private final com.heroku.java.repository.FeedbackRepository feedbackRepository;
     private final BookingService bookingService;
     private final StaffService staffService;
+    private final com.heroku.java.service.FileStorageService fileStorageService;
 
     @Autowired
     public AdminController(CustomerRepository customerRepository,
@@ -56,7 +57,8 @@ public class AdminController {
             PaymentRepository paymentRepository,
             com.heroku.java.repository.FeedbackRepository feedbackRepository,
             BookingService bookingService,
-            StaffService staffService) {
+            StaffService staffService,
+            com.heroku.java.service.FileStorageService fileStorageService) {
         this.customerRepository = customerRepository;
         this.staffRepository = staffRepository;
         this.appointmentRepository = appointmentRepository;
@@ -64,6 +66,7 @@ public class AdminController {
         this.feedbackRepository = feedbackRepository;
         this.bookingService = bookingService;
         this.staffService = staffService;
+        this.fileStorageService = fileStorageService;
     }
 
     // Helper method untuk dapatkan Staff yang sedang login
@@ -357,15 +360,12 @@ public class AdminController {
         // Handle Image
         if (staffPicture != null && !staffPicture.isEmpty()) {
             try {
-                String fileName = System.currentTimeMillis() + "_" + staffPicture.getOriginalFilename();
-                String uploadDir = System.getProperty("user.dir") + "/src/main/resources/static/resources/uploads/";
-                java.nio.file.Path uploadPath = java.nio.file.Paths.get(uploadDir);
-                if (!java.nio.file.Files.exists(uploadPath))
-                    java.nio.file.Files.createDirectories(uploadPath);
-                java.nio.file.Files.write(uploadPath.resolve(fileName), staffPicture.getBytes());
+                String fileName = fileStorageService.storeImage(staffPicture);
                 barber.setStaffPicture(fileName);
+            } catch (IllegalArgumentException e) {
+                redirectAttributes.addFlashAttribute("error", e.getMessage());
+                return "redirect:/barber/profile";
             } catch (Exception e) {
-                e.printStackTrace();
                 redirectAttributes.addFlashAttribute("error", "Failed to upload picture");
                 return "redirect:/barber/profile";
             }
@@ -1067,8 +1067,6 @@ public class AdminController {
 
             // 4. Handle Password Update
             if (staffPassword != null && !staffPassword.isEmpty()) {
-                com.heroku.java.service.StaffService staffService = new com.heroku.java.service.StaffService(
-                        staffRepository);
                 staff.setStaffPassword(staffPassword);
                 staffService.saveStaff(staff);
             }
@@ -1076,17 +1074,12 @@ public class AdminController {
             // 5. Handle Image
             if (staffPicture != null && !staffPicture.isEmpty()) {
                 try {
-                    String fileName = System.currentTimeMillis() + "_" + staffPicture.getOriginalFilename();
-                    String uploadDir = System.getProperty("user.dir") + "/src/main/resources/static/resources/uploads/";
-                    java.nio.file.Path uploadPath = java.nio.file.Paths.get(uploadDir);
-                    if (!java.nio.file.Files.exists(uploadPath)) {
-                        java.nio.file.Files.createDirectories(uploadPath);
-                    }
-                    java.nio.file.Path path = uploadPath.resolve(fileName);
-                    java.nio.file.Files.write(path, staffPicture.getBytes());
+                    String fileName = fileStorageService.storeImage(staffPicture);
                     staff.setStaffPicture(fileName);
+                } catch (IllegalArgumentException e) {
+                    redirectAttributes.addFlashAttribute("error", e.getMessage());
+                    return "redirect:/admin/profile";
                 } catch (Exception e) {
-                    e.printStackTrace();
                     redirectAttributes.addFlashAttribute("error", "Failed to upload picture");
                     return "redirect:/admin/profile";
                 }
