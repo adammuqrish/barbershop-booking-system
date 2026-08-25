@@ -44,11 +44,7 @@ public class SecurityConfig {
                                                 .logoutSuccessUrl("/index")
                                                 .invalidateHttpSession(true)
                                                 .deleteCookies("JSESSIONID")
-                                                .permitAll())
-                                .csrf(csrf -> csrf
-                                                .ignoringRequestMatchers("/staffAuth", "/auth")
-                                                .ignoringRequestMatchers("/payment/**", "/booking/**", "/feedback/**")
-                                                .ignoringRequestMatchers("/admin/**"));
+                                                .permitAll());
 
                 return http.build();
         }
