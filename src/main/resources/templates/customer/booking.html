@@ -46,6 +46,12 @@
     .bk-summary b{color:var(--brass);font-family:'Bebas Neue';font-weight:400;font-size:20px;letter-spacing:.05em}
     .bk-summary .unset{opacity:.5}
 
+    /* inline field errors */
+    .field-error{display:none;color:#b3122f;background:#fdeaea;border-left:4px solid #b3122f;font-size:.9rem;font-weight:600;padding:8px 14px;margin-top:10px;border-radius:0 4px 4px 0}
+    .field-error.show{display:block;animation:err-in .25s ease}
+    @keyframes err-in{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+    .field-error.show ~ * .slot-btn, .bk-card:has(.field-error.show) .slot-btn{outline:none}
+
     /* barber picker cards */
     .barber-pick{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:16px}
     .barber-pick input[type=radio]{position:absolute;opacity:0;pointer-events:none}
@@ -100,7 +106,7 @@
             <div class="bk-step"><span class="n">3</span> Confirm &amp; Pay</div>
         </div>
 
-        <form th:action="@{/booking}" method="post">
+        <form th:action="@{/booking}" method="post" novalidate>
             <!-- Server-side validation error -->
             <div th:if="${bookingError}" role="alert"
                  style="background:#fdeaea;border:2px solid var(--oxblood);color:var(--oxblood);border-radius:5px;padding:14px 18px;margin-bottom:24px;font-weight:600">
@@ -121,6 +127,7 @@
                 <input id="date" name="date" type="date" required
                        th:value="${selectedDate}"
                        th:min="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}" class="bk-input" />
+                <p class="field-error" id="err-date"></p>
 
                 <div style="height:22px"></div>
                 <span class="bk-label">Available times</span>
@@ -146,6 +153,7 @@
                     <span>Category: <b id="sum-cat" class="unset">Adult</b></span>
                     <span>Barber: <b id="sum-barber" class="unset">—</b></span>
                 </div>
+                <p class="field-error" id="err-summary"></p>
             </section>
 
             <!-- STEP 2: category & barber -->
@@ -189,6 +197,7 @@
                         </label>
                     </th:block>
                 </div>
+                <p class="field-error" id="err-barber"></p>
             </section>
 
             <!-- Submit -->
@@ -365,22 +374,68 @@
         if (changed) updateSummary();
     }, 30000);
 
+    // ---- Inline validation: show a message next to each missing field ----
+    function setFieldError(id, message) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.textContent = message ? '⚠ ' + message : '';
+        el.classList.toggle('show', !!message);
+    }
+    function clearAllFieldErrors() {
+        ['err-date', 'err-summary', 'err-barber'].forEach(id => setFieldError(id, ''));
+    }
+
     document.querySelector('form').addEventListener('submit', function (e) {
+        clearAllFieldErrors();
         const dateVal = document.getElementById('date').value;
         const slotRadio = document.querySelector('input.slot-radio:checked');
-        let problem = '';
-        if (!dateVal) problem = 'Please pick a date.';
-        else if (!slotRadio) problem = 'Please pick a time slot.';
-        else if (isSlotPast(dateVal, slotRadio.value)) problem =
-            'That time has already passed. Pick a later slot or another day.';
-        else if (slotRadio.disabled) problem = 'That slot is no longer available.';
-        else if (!document.querySelector('input.barber-radio:checked')) problem =
-            'Please choose your barber.';
-        if (problem) {
+        const barberChecked = document.querySelector('input.barber-radio:checked');
+        let firstBad = null;
+
+        if (!dateVal) {
+            setFieldError('err-date', 'Please pick a date for your appointment.');
+            firstBad = firstBad || document.getElementById('date');
+        }
+        if (!slotRadio) {
+            setFieldError('err-summary',
+                dateVal && isSlotPast(dateVal, '') === false
+                    ? 'Please select an available time slot.'
+                    : 'Please select an available time slot.');
+            firstBad = firstBad || document.getElementById('bk-summary');
+        } else if (isSlotPast(dateVal, slotRadio.value)) {
+            setFieldError('err-summary',
+                'That time (' + slotRadio.value + ') has already passed. Pick a later slot or another day.');
+            slotRadio.checked = false;
+            resetSelections();
+            updateSummary();
+            firstBad = firstBad || document.getElementById('bk-summary');
+        } else if (slotRadio.disabled) {
+            setFieldError('err-summary', 'That slot is no longer available. Please pick another.');
+            firstBad = firstBad || document.getElementById('bk-summary');
+        }
+        if (!barberChecked) {
+            setFieldError('err-barber', 'Please choose your barber before confirming.');
+            firstBad = firstBad || document.getElementById('barber-pick');
+        }
+
+        if (firstBad) {
             e.preventDefault();
-            alert(problem);
+            firstBad.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return;
+        }
+
+        // Final safety net: server would reject; also re-check past at click time
+        if (isSlotPast(dateVal, document.querySelector('input.slot-radio:checked').value)) {
+            e.preventDefault();
         }
     });
+
+    // Live-clear errors as soon as the user fixes them
+    document.querySelectorAll('input.slot-radio').forEach(r =>
+        r.addEventListener('change', () => setFieldError('err-summary', '')));
+    document.querySelectorAll('input.barber-radio').forEach(r =>
+        r.addEventListener('change', () => setFieldError('err-barber', '')));
+    document.getElementById('date').addEventListener('input', () => setFieldError('err-date', ''));
 
     window.addEventListener('DOMContentLoaded', () => {
         const dateInput = document.getElementById('date');
