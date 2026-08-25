@@ -129,6 +129,11 @@
 .hb-cta-band .hb-btn:hover{background:var(--brass)}
 
 .hb-footer{background:var(--ink);color:rgba(245,239,228,.7);padding:44px 0;border-top:3px solid var(--brass)}
-.hb-footer-inner{max-width:1120px;margin:0 auto;padding:0 24px;display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap;font-size:.9rem}
+.hb-footer-inner{max-width:1120px;margin:0 auto;padding:0 24px;display:flex;flex-direction:column;gap:18px;font-size:.9rem;text-align:center;align-items:center}
+@media(min-width:800px){
+  .hb-footer-inner{flex-direction:row;justify-content:space-between;align-items:center;text-align:left}
+}
+.hb-footer-inner a{color:var(--brass);text-decoration:none}
+.hb-footer-inner a:hover{text-decoration:underline}
 
 :focus-visible{outline:3px solid var(--brass);outline-offset:2px}

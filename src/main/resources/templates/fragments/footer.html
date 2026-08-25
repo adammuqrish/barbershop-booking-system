@@ -1,12 +1,12 @@
 <footer xmlns:th="http://www.thymeleaf.org" th:fragment="footer" class="hb-footer">
     <div class="hb-footer-inner">
         <span class="hb-brand-name">Hugi<em style="color:var(--brass);font-style:normal">.</em> Barbershop</span>
-        <span th:text="${barbershop.address}">LOT-A-G9, Palm Garden, Bandar Baru Klang, 41150 Klang, Selangor.</span>
-        <span>
-            <a th:href="${'tel:' + barbershop.phone}" th:text="${barbershop.phone}" style="text-decoration:none">012-7865132</a>
-            &nbsp;·&nbsp;
-            Tue–Sun, 10am–10pm
+        <span style="max-width:340px" th:text="${barbershop.address}">LOT-A-G9, Palm Garden, Bandar Baru Klang, 41150 Klang, Selangor.</span>
+        <span style="white-space:nowrap">
+            <a th:href="${'tel:' + barbershop.phone}" th:text="${barbershop.phone}">012-7865132</a>
+            &nbsp;&middot;&nbsp;
+            Tue&ndash;Sun, 10am&ndash;10pm
         </span>
-        <span>© 2026 Hugi Barbershop. All Rights Reserved.</span>
+        <span>&copy; 2026 Hugi Barbershop. All Rights Reserved.</span>
     </div>
 </footer>
