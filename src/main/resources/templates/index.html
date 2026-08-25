@@ -5,9 +5,7 @@
 
 <body class="flex flex-col min-h-screen" style="font-family:'Inter',system-ui,sans-serif;background:var(--cream);color:var(--ink);margin:0">
 
-<nav th:replace="~{fragments/nav :: nav}"></nav>
-
-<!-- Topbar -->
+<!-- Topbar (above nav) -->
 <div class="hb-topbar">
     <div class="hb-topbar-inner">
         <span th:text="'Open ' + ${barbershop.openingHours}">Open TUESDAY - SUNDAY (10 a.m - 10 p.m)</span>
@@ -15,6 +13,8 @@
         <span th:text="'Call ' + ${barbershop.phone}">Call 012-7865132</span>
     </div>
 </div>
+
+<nav th:replace="~{fragments/nav :: nav}"></nav>
 
 <main style="flex:1">
 
@@ -73,25 +73,33 @@
             <div class="hb-menu-grid">
                 <div>
                     <div class="hb-menu-item">
-                        <span class="name">Adult Signature Cut <span class="hb-badge">Popular</span></span>
-                        <span class="dots"></span><span class="price">RM15</span>
+                        <div class="hb-menu-row">
+                            <span class="name">Adult Signature Cut <span class="hb-badge">Popular</span></span>
+                            <span class="dots"></span><span class="price">RM15</span>
+                        </div>
                         <span class="desc">Consultation, precision cut, wash &amp; style finish</span>
                     </div>
                     <div class="hb-menu-item">
-                        <span class="name">Teen Cut (13&ndash;17)</span>
-                        <span class="dots"></span><span class="price">RM13</span>
+                        <div class="hb-menu-row">
+                            <span class="name">Teen Cut (13&ndash;17)</span>
+                            <span class="dots"></span><span class="price">RM13</span>
+                        </div>
                         <span class="desc">Same craft, sized for school and college styles</span>
                     </div>
                 </div>
                 <div>
                     <div class="hb-menu-item">
-                        <span class="name">Child Cut (under 12)</span>
-                        <span class="dots"></span><span class="price">RM10</span>
+                        <div class="hb-menu-row">
+                            <span class="name">Child Cut (under 12)</span>
+                            <span class="dots"></span><span class="price">RM10</span>
+                        </div>
                         <span class="desc">Patient, friendly cuts for young gents</span>
                     </div>
                     <div class="hb-menu-item">
-                        <span class="name">Senior Cut (60+)</span>
-                        <span class="dots"></span><span class="price">RM12</span>
+                        <div class="hb-menu-row">
+                            <span class="name">Senior Cut (60+)</span>
+                            <span class="dots"></span><span class="price">RM12</span>
+                        </div>
                         <span class="desc">Unhurried, classic &mdash; with extra care</span>
                     </div>
                 </div>
