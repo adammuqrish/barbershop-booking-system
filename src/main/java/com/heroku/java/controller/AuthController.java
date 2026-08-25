@@ -238,10 +238,7 @@ public class AuthController {
         return "admin/adminLogin";
     }
 
-    @GetMapping("/logout")
-    public String logout(HttpSession session) {
-        session.invalidate();
-        SecurityContextHolder.clearContext(); // Pastikan ini ada
-        return "redirect:/index";
-    }
+    // Logout handled by Spring Security's logout filter (POST /logout) -
+    // see SecurityConfig.logout(). A GET logout link was removed so a
+    // malicious page cannot log users out via a simple image/link request.
 }

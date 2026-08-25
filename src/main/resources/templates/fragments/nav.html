@@ -73,9 +73,13 @@
                         About Us </a></li>
 
                 <th:block th:if="${session.customer != null}">
-                    <li><a th:href="@{/logout}"
-                            class="block py-2 pl-3 pr-4 !text-white rounded lg:hover:bg-transparent lg:border-0 lg:hover:!text-white lg:p-0 transition duration-300 ease-in-out">
-                            Logout </a></li>
+                    <li>
+                        <form th:action="@{/logout}" method="post" class="d-inline">
+                            <button type="submit"
+                                    class="block py-2 pl-3 pr-4 !text-white rounded lg:hover:bg-transparent lg:border-0 lg:hover:!text-white lg:p-0 transition duration-300 ease-in-out bg-transparent border-0">
+                                Logout </button>
+                        </form>
+                    </li>
                     <li>
                         <div class="relative w-10 h-10 overflow-hidden bg-gray-100 rounded-full hidden md:block">
                             <a th:href="@{/profile}">
