@@ -87,17 +87,36 @@ public class BookingController {
     }
 
     @PostMapping("/booking")
-    public String handleBooking(@RequestParam("booking-for") String bookingFor,
-            @RequestParam String date,
-            @RequestParam String slot,
-            @RequestParam String category,
-            @RequestParam Long barber,
+    public String handleBooking(@RequestParam(value = "booking-for", required = false) String bookingFor,
+            @RequestParam(value = "date", required = false) String date,
+            @RequestParam(value = "slot", required = false) String slot,
+            @RequestParam(value = "category", required = false) String category,
+            @RequestParam(value = "barber", required = false) Long barber,
             HttpSession session,
             Model model) {
 
         Long custId = (Long) session.getAttribute("custId");
         if (custId == null)
             return "redirect:/register";
+
+        // ✅ SERVER-SIDE VALIDATION: all required fields presence checked here
+        String missingField = null;
+        if (bookingFor == null || bookingFor.trim().isEmpty()) missingField = "Booking for";
+        else if (date == null || date.trim().isEmpty()) missingField = "date";
+        else if (slot == null || slot.trim().isEmpty()) missingField = "time slot";
+        else if (barber == null) missingField = "barber";
+        else if (category == null || category.trim().isEmpty()) missingField = "category";
+
+        if (missingField != null) {
+            model.addAttribute("barbers", bookingService.getAllBarbers());
+            model.addAttribute("slots", SLOTS);
+            model.addAttribute("selectedDate", date != null ? date : LocalDate.now().format(DateTimeFormatter.ISO_DATE));
+            model.addAttribute("unavailableBarbersBySlot",
+                    bookingService.getUnavailableBarbersBySlot(date != null ? date : LocalDate.now().format(DateTimeFormatter.ISO_DATE), SLOTS));
+            model.addAttribute("bookingError",
+                    "Please complete the entire form before confirming your booking. Missing: " + missingField + ".");
+            return "customer/booking";
+        }
 
         // ✅ SERVER-SIDE VALIDATION: barber must be free for this exact date+slot
         if (!bookingService.isBarberAvailable(barber, date, slot)) {
@@ -113,7 +132,13 @@ public class BookingController {
         }
 
         // ✅ SERVER-SIDE VALIDATION: no bookings in the past / same-day cutoff
-        LocalDate chosen = LocalDate.parse(date);
+        LocalDate chosen;
+        try {
+            chosen = LocalDate.parse(date);
+        } catch (Exception e) {
+            model.addAttribute("bookingError", "Invalid date selected. Please pick a valid date.");
+            return "customer/booking";
+        }
         if (chosen.isBefore(LocalDate.now())) {
             return "redirect:/booking";
         }

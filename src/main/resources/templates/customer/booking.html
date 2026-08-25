@@ -132,7 +132,8 @@
                                th:id="'slot-' + ${slotStat.index}" class="slot-radio"
                                th:disabled="${unavailableBarbersBySlot[slot] != null && unavailableBarbersBySlot[slot].size() == barbers.size()}"
                                required />
-                        <label th:for="'slot-' + ${slotStat.index}">
+                        <label th:for="'slot-' + ${slotStat.index}"
+                               th:class="'slot-label' + (${unavailableBarbersBySlot[slot] != null && unavailableBarbersBySlot[slot].size() == barbers.size()} ? ' fully-booked' : '')">
                             <span class="slot-btn" th:text="${slot}">10:00 am</span>
                         </label>
                     </th:block>

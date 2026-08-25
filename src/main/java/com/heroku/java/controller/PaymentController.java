@@ -13,6 +13,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
 import java.util.Optional;
@@ -41,12 +42,23 @@ public class PaymentController {
     @GetMapping("/payment")
     public String paymentPage(@RequestParam(required = false) Long appointmentId,
             HttpSession session,
-            Model model) {
+            Model model,
+            RedirectAttributes redirectAttributes) {
 
-        // ✅ 1. AMBIL APPOINTMENT DARI SESSION
+        // ✅ 1. Consume any flash error from a failed submission
+        String flashError = (String) redirectAttributes.getFlashAttributes().get("bookingError");
+        if (flashError == null) {
+            flashError = (String) session.getAttribute("flashError");
+            if (flashError != null) {
+                session.removeAttribute("flashError");
+            }
+        }
+        if (flashError != null) model.addAttribute("bookingError", flashError);
+
+        // ✅ 2. AMBIL APPOINTMENT DARI SESSION
         Appointment appointment = (Appointment) session.getAttribute("pendingAppointment");
 
-        // 2. Jika tak ada dalam session, redirect ke Booking
+        // 3. Jika tak ada dalam session, redirect ke booking
         if (appointment == null) {
             return "redirect:/booking";
         }
@@ -99,17 +111,37 @@ public class PaymentController {
     }
 
     @PostMapping("/processPayment")
-    public String processPayment(@RequestParam String paymentMethod,
+    public String processPayment(@RequestParam(value = "paymentMethod", required = false) String paymentMethod,
             @RequestParam(required = false) String bankName,
             @RequestParam(required = false) String bankHolderName,
-            HttpSession session) {
+            HttpSession session,
+            RedirectAttributes redirectAttributes) {
 
         // ✅ 1. AMBIL APPOINTMENT DARI SESSION
         Appointment appointment = (Appointment) session.getAttribute("pendingAppointment");
 
-        // 2. Jika session hilang/tak ada, redirect ke booking
+        // 2. Jika tak ada dalam session, redirect ke booking
         if (appointment == null) {
             return "redirect:/booking";
+        }
+
+        // ✅ 3. VALIDATE paymentMethod
+        if (paymentMethod == null || paymentMethod.trim().isEmpty()) {
+            redirectAttributes.addFlashAttribute("bookingError", "Please select a payment method before continuing.");
+            return "redirect:/payment";
+        }
+        if (!"cash".equals(paymentMethod) && !"online".equals(paymentMethod)) {
+            redirectAttributes.addFlashAttribute("bookingError", "Invalid payment method. Please choose cash or online.");
+            return "redirect:/payment";
+        }
+
+        // ✅ 4. Validate bank details if online payment
+        if ("online".equals(paymentMethod)) {
+            if (bankName == null || bankName.trim().isEmpty()
+                    || bankHolderName == null || bankHolderName.trim().isEmpty()) {
+                redirectAttributes.addFlashAttribute("bookingError", "Please fill in all bank details for online payment.");
+                return "redirect:/payment";
+            }
         }
 
         // ✅ 3. PASTIKAN ID KOSONG (Supaya JPA create new record)
