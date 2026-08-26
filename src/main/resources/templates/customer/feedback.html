@@ -3,11 +3,25 @@
 
 <head th:replace="~{fragments/header :: head}"></head>
 
-<body class="flex flex-col h-screen justify-between bg-yellow-100">
-    <nav th:replace="~{fragments/nav :: nav}"></nav>
-    <main class="flex flex-col items-center mx-3 my-4 flex-grow">
-        <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-5xl mx-auto">
-            <h1 class="text-2xl font-semibold mb-4">Feedback</h1>
+<body class="flex flex-col min-h-screen" style="font-family:'Inter',system-ui,sans-serif;background:var(--cream);color:var(--ink);margin:0">
+<style>
+    .fb-card{background:#fff;border:2px solid var(--line,#e2d9c8);border-radius:6px;padding:30px;max-width:560px;margin:40px auto}
+    .fb-title{font-family:'Bebas Neue';font-size:42px;line-height:1.05;letter-spacing:.03em;margin:0 0 20px;color:#1c1a17}
+    .fb-label{display:block;font-weight:600;font-size:.9rem;margin:18px 0 8px;color:#1c1a17}
+    .star{font-size:2rem !important;color:#d9d0bf !important;transition:color .12s ease,transform .12s ease}
+    .star:hover{transform:scale(1.15)}
+    .star.active,.star.text-yellow-400{color:var(--brass,#b08d57) !important}
+    textarea[name=feedback]{width:100%;min-height:130px;padding:13px;border:2px solid var(--line,#e2d9c8);border-radius:5px;background:#fff;font-family:'Inter';font-size:.95rem;resize:none}
+    textarea[name=feedback]:focus{outline:none;border-color:var(--brass,#b08d57)}
+    .fb-submit{background:var(--oxblood,#7d1f2e);color:#fff;border:none;border-radius:5px;padding:13px 28px;font-family:'Bebas Neue';font-size:21px;letter-spacing:.09em;cursor:pointer}
+    .fb-submit:hover{filter:brightness(1.12)}
+    .fb-delete{background:transparent;color:#b3122f;border:2px solid #b3122f;border-radius:5px;padding:11px 22px;font-weight:700;font-size:.9rem;cursor:pointer}
+    .fb-error{background:#fdeaea;border-left:4px solid #b3122f;color:#b3122f;padding:10px 14px;border-radius:0 4px 4px 0;font-weight:600;font-size:.92rem;margin-bottom:18px}
+</style>
+<nav th:replace="~{fragments/nav :: nav}"></nav>
+<main style="flex:1;width:100%;max-width:680px;margin:0 auto;padding:40px 24px 72px">
+    <div class="fb-card">
+        <h1 class="fb-title">Share your feedback</h1>
             <div th:if="${error}" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4"
                 role="alert">
                 <div class="flex items-center">
@@ -41,19 +55,18 @@
                     <input type="hidden" name="rating" id="rating-input" th:value="${existingFeedback?.rating ?: 0}"
                         required />
                 </div>
-                <div class="mb-6">
-                    <label class="block text-sm font-medium mb-2">Your Feedback:</label>
-                    <textarea name="feedback" class="w-full h-32 p-3 border rounded shadow-sm resize-none"
+                <div>
+                    <label class="fb-label">Your feedback:</label>
+                    <textarea name="feedback"
                         th:text="${existingFeedback?.comments}" required></textarea>
                 </div>
-                <div class="flex space-x-4">
-                    <button type="submit"
-                        class="bg-blue-500 text-white font-semibold py-2 px-6 rounded-full hover:bg-blue-600">
+                <div style="display:flex;gap:14px;margin-top:24px">
+                    <button type="submit" class="fb-submit">
                         Submit Feedback
                     </button>
                     <button type="button" th:if="${existingFeedback != null}"
                         onclick="document.getElementById('deleteForm').submit()"
-                        class="bg-red-500 text-white font-semibold py-2 px-6 rounded-full hover:bg-red-600 hidden">
+                        class="fb-delete hidden">
                         Delete Feedback
                     </button>
                 </div>

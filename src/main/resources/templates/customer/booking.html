@@ -70,8 +70,14 @@
     input.barber-radio:checked + label .barber-opt .fallback,
     input.barber-radio:checked + .barber-opt .fallback{border-color:var(--brass)}
     input.barber-radio:focus-visible + .barber-opt{outline:3px solid var(--brass);outline-offset:2px}
-    input.barber-radio:disabled + .barber-opt{opacity:.38;cursor:not-allowed}
-    input.barber-radio:disabled + .barber-opt::after{content:"Booked";font-size:.7rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--oxblood)}
+    input.barber-radio:disabled + label .barber-opt,
+    input.barber-radio:disabled + .barber-opt{opacity:.45;cursor:not-allowed;background:var(--cream-2);border-color:var(--cream-2)}
+    input.barber-radio:disabled + label .barber-opt img,
+    input.barber-radio:disabled + label .barber-opt .fallback,
+    input.barber-radio:disabled + .barber-opt img,
+    input.barber-radio:disabled + .barber-opt .fallback{filter:grayscale(1);border-color:var(--line)}
+    input.barber-radio:disabled + label .barber-opt::before,
+    input.barber-radio:disabled + .barber-opt::before{content:"✕ BOOKED";display:block;margin-top:8px;font-size:.68rem;font-weight:700;letter-spacing:.14em;color:#fff;background:#b3122f;padding:3px 10px;border-radius:3px}
 
     /* category pills */
     .cat-row{display:flex;gap:12px;flex-wrap:wrap}

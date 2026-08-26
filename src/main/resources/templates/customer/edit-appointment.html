@@ -3,15 +3,34 @@
 
 <head th:replace="~{fragments/header :: head}"></head>
 
-<body class="flex flex-col h-screen justify-between bg-yellow-100">
-    <nav th:replace="~{fragments/nav :: nav}"></nav>
-    <main class="flex flex-col items-center mx-3 my-12 flex-grow">
-        <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-5xl mx-auto">
-            <h1 class="text-3xl font-bold mb-6">Edit Appointment</h1>
-            
-            <div th:if="${error}" class="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
-                <span th:text="${error}"></span>
-            </div>
+<body class="flex flex-col min-h-screen" style="font-family:'Inter',system-ui,sans-serif;background:var(--cream);color:var(--ink);margin:0">
+<style>
+    .ed-card{background:#fff;border:2px solid var(--line,#e2d9c8);border-radius:6px;padding:30px;max-width:640px;margin:40px auto}
+    .ed-title{font-family:'Bebas Neue';font-size:42px;line-height:1.05;letter-spacing:.03em;margin:0 0 24px;color:#1c1a17}
+    .ed-label{display:block;font-weight:600;font-size:.88rem;margin:18px 0 6px;color:#1c1a17}
+    .ed-input,.ed-select{width:100%;padding:11px 13px;border:2px solid var(--line,#e2d9c8);border-radius:5px;background:#fff;font-size:.95rem;transition:border-color .15s ease}
+    .ed-input:focus,.ed-select:focus{outline:none;border-color:var(--brass,#b08d57)}
+    .ed-input[readonly]{background:#f5efe4;color:#7a736a}
+    .slot-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:10px;margin-top:8px}
+    .slot-grid input[type=radio]{position:absolute;opacity:0;pointer-events:none}
+    .slot-btn{display:block;text-align:center;padding:12px 6px;border:2px solid var(--line,#e2d9c8);border-radius:5px;background:#fff;font-family:'Bebas Neue';font-size:20px;letter-spacing:.06em;cursor:pointer;user-select:none}
+    .slot-btn:hover{border-color:var(--brass,#b08d57)}
+    input.slot-radio:checked + label .slot-btn,input.slot-radio:checked + .slot-btn{background:var(--oxblood,#7d1f2e);border-color:var(--oxblood,#7d1f2e);color:#fff}
+    input.slot-radio:checked + label .slot-btn::after,input.slot-radio:checked + .slot-btn::after{content:" ✓ SELECTED";display:block;font-family:'Inter';font-size:.62rem;font-weight:700;letter-spacing:.16em;color:var(--brass,#b08d57)}
+    input.slot-radio:disabled + label .slot-btn,input.slot-radio:disabled + .slot-btn{background:#efe9dd;color:#9a938a;border-color:#e2d9c8;cursor:not-allowed;text-decoration:line-through}
+    .ed-actions{display:flex;gap:12px;margin-top:28px}
+    .ed-back{display:inline-block;background:transparent;color:var(--oxblood,#7d1f2e);border:2px solid var(--oxblood,#7d1f2e);border-radius:5px;padding:11px 24px;font-weight:700;font-size:.92rem;text-decoration:none}
+    .ed-save{background:var(--oxblood,#7d1f2e);color:#fff;border:none;border-radius:5px;padding:13px 28px;font-family:'Bebas Neue';font-size:21px;letter-spacing:.09em;cursor:pointer}
+    .ed-error{background:#fdeaea;border-left:4px solid #b3122f;color:#b3122f;padding:10px 14px;border-radius:0 4px 4px 0;font-weight:600;font-size:.92rem;margin-bottom:18px}
+</style>
+<nav th:replace="~{fragments/nav :: nav}"></nav>
+<main style="flex:1;width:100%;max-width:720px;margin:0 auto;padding:40px 24px 72px">
+    <div class="ed-card">
+        <h1 class="ed-title">Edit appointment</h1>
+
+        <div th:if="${error}" class="ed-error" role="alert">
+            ⚠ <span th:text="${error}"></span>
+        </div>
 
             <!-- Form action diubah kepada mapping update -->
             <form th:action="@{/update-appointment}" method="post">
@@ -20,45 +39,45 @@
                 <input type="hidden" name="appointmentId" th:value="${appointment.appointmentId}" />
 
                 <!-- Booking For (Read Only) -->
-                <div class="mb-6">
-                    <label class="block mb-1 font-semibold" for="booking-for">Booking For:</label>
-                    <input id="booking-for" name="booking-for" type="text" 
-                        class="w-full border rounded px-3 py-2 shadow bg-gray-100" 
+                <div>
+                    <label class="ed-label" for="booking-for">Booking for:</label>
+                    <input id="booking-for" name="booking-for" type="text"
+                        class="ed-input"
                         th:value="${appointment.custBookFor}" readonly />
                 </div>
 
                 <!-- Date Picker -->
-                <div class="mb-6">
-                    <label class="block font-semibold mb-2">Select Date:</label>
-                    <input id="date" name="appointmentDate" type="date" 
-                        class="w-full border rounded px-3 py-2 shadow" 
-                        th:value="${appointment.appointmentDate}" 
+                <div>
+                    <label class="ed-label">Select date:</label>
+                    <input id="date" name="appointmentDate" type="date"
+                        class="ed-input"
+                        th:value="${appointment.appointmentDate}"
                         th:min="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}" required />
                 </div>
 
                 <!-- Time Slots -->
-                <div class="mb-6">
-                    <label class="block mb-1 font-semibold">Booking Time:</label>
-                    <input id="selected-time" name="selected-time" type="text" 
-                        class="w-full border rounded px-3 py-2 shadow mb-2 bg-gray-100" 
+                <div>
+                    <label class="ed-label">Booking time:</label>
+                    <input id="selected-time" name="selected-time" type="text"
+                        class="ed-input" style="display:none"
                         value="--:-- --" readonly />
-                    
-                    <div class="grid grid-cols-6 gap-2">
+
+                    <div class="slot-grid">
                         <th:block th:each="slot : ${slots}">
-                            <label class="flex items-center space-x-1">
-                                <input type="radio" name="slot" th:value="${slot}" class="slot-radio" 
-                                    th:checked="${slot == appointment.appointmentTime}"
-                                    required />
-                                <span th:text="${slot}"></span>
+                            <input type="radio" name="slot" th:value="${slot}" th:id="'eslot-' + ${slotStat.index}" class="slot-radio"
+                                th:checked="${slot == appointment.appointmentTime}"
+                                required />
+                            <label th:for="'eslot-' + ${slotStat.index}">
+                                <span class="slot-btn" th:text="${slot}"></span>
                             </label>
                         </th:block>
                     </div>
                 </div>
 
                 <!-- Customer Category -->
-                <div class="mb-6">
-                    <label class="block mb-1 font-semibold" for="category">Customer Category:</label>
-                    <select id="category" name="custType" class="w-full border rounded px-3 py-2 shadow">
+                <div>
+                    <label class="ed-label" for="category">Customer category:</label>
+                    <select id="category" name="custType" class="ed-select">
                         <option value="Child" th:selected="${appointment.custType == 'Child'}">Child</option>
                         <option value="Teen" th:selected="${appointment.custType == 'Teen'}">Teen</option>
                         <option value="Adult" th:selected="${appointment.custType == 'Adult'}">Adult</option>
@@ -67,9 +86,9 @@
                 </div>
 
                 <!-- Barber Selection -->
-                <div class="mb-6">
-                    <label class="block mb-1 font-semibold" for="barber">Select Barber:</label>
-                    <select id="barber" name="staffId" class="w-full border rounded px-3 py-2 shadow" required>
+                <div>
+                    <label class="ed-label" for="barber">Select barber:</label>
+                    <select id="barber" name="staffId" class="ed-select" required>
                         <option value="" selected disabled>-- Select Barber --</option>
                         <th:block th:each="barber : ${barbers}">
                             <option th:value="${barber.staffId}" th:text="${barber.staffName}"
@@ -81,15 +100,9 @@
                 </div>
 
                 <!-- Action Buttons -->
-                <div class="flex gap-2">
-                    <!-- Back Button ( assuming user returns to history or details) -->
-                    <a th:href="@{/view-appointment}" class="bg-gray-500 text-white px-5 py-2 rounded shadow hover:bg-gray-600 transition">
-                        Cancel
-                    </a>
-                    <button type="submit" 
-                        class="bg-blue-500 text-white px-5 py-2 rounded shadow hover:bg-blue-600 transition">
-                        Update Appointment
-                    </button>
+                <div class="ed-actions">
+                    <a th:href="@{/view-appointment}" class="ed-back">Cancel</a>
+                    <button type="submit" class="ed-save">Update Appointment</button>
                 </div>
             </form>
         </div>
