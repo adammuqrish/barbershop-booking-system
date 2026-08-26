@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:fragment="layout(title, content)">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title th:text="${title != null ? title + ' — Hugi Barbershop' : 'Hugi Barbershop — Admin'}">Hugi Barbershop — Admin</title>
+    <link rel="stylesheet" th:href="@{/resources/assetsAdmin/css/style.css}"/>
+    <link rel="stylesheet" th:href="@{/resources/assetsAdmin/css/theme.css}"/>
+    <link rel="stylesheet" th:href="@{/resources/assetsAdmin/css/fontawesome/css/all.min.css}"/>
+</head>
+<body class="nk-body" data-sidebar-collapse="lg" data-navbar-collapse="lg">
+<div class="nk-app-root">
+    <div class="nk-main">
+        <div th:replace="~{fragments/adminFragments :: sidebar}"></div>
+        <div class="nk-wrap">
+            <div th:replace="~{fragments/adminFragments :: header}"></div>
+            <div class="nk-content">
+                <div class="container-fluid">
+                    <!-- Breadcrumb slot -->
+                    <div th:if="${breadcrumbTitle != null}" class="nk-block-head">
+                        <div class="nk-block-head-content">
+                            <h3 class="nk-block-title page-title" th:text="${breadcrumbTitle}">Page</h3>
+                            <div th:if="${breadcrumbSubtitle != null}" class="nk-block-des text-soft">
+                                <p th:text="${breadcrumbSubtitle}"></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div th:replace="${content}"></div>
+                </div>
+            </div>
+            <div class="nk-footer">
+                <div class="container-fluid">
+                    <div class="nk-footer-wrap">
+                        <div class="nk-footer-copyright">© 2026 Hugi Barbershop. All rights reserved.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div th:replace="~{fragments/adminScripts :: adminJs}"></div>
+<!-- Global toast container -->
+<div id="adminToastContainer" class="toast-container position-fixed top-0 end-0 p-3" style="z-index:1080"></div>
+<script>
+    // Global toast helper (Bootstrap 5)
+    window.adminToast = function(message, type) {
+        type = type || 'success';
+        const bg = type === 'error' ? 'bg-danger' : type === 'warning' ? 'bg-warning text-dark' : 'bg-primary';
+        const id = 'toast-' + Date.now();
+        const html = '<div id="'+id+'" class="toast align-items-center text-white '+bg+' border-0" role="alert" aria-live="assertive" aria-atomic="true">'
+            + '<div class="d-flex"><div class="toast-body">'+ message +'</div>'
+            + '<button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div></div>';
+        const c = document.getElementById('adminToastContainer');
+        if (!c) return;
+        c.insertAdjacentHTML('beforeend', html);
+        const el = document.getElementById(id);
+        if (el && window.bootstrap) new bootstrap.Toast(el, {delay: 3500}).show();
+    };
+    // Auto-show flash success/error as toast if present
+    document.addEventListener('DOMContentLoaded', function() {
+        const flash = document.querySelector('[data-flash-toast]');
+        if (flash) window.adminToast(flash.getAttribute('data-flash-toast'), flash.getAttribute('data-flash-type') || 'success');
+    });
+</script>
+</body>
+</html>

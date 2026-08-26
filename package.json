@@ -5,7 +5,9 @@
   "description": "Frontend asset build for Hugi Barbershop (compiled Tailwind CSS)",
   "scripts": {
     "build:css": "tailwindcss -i ./src/main/resources/static/css/tailwind-input.css -o ./src/main/resources/static/css/main.css --minify",
-    "watch:css": "tailwindcss -i ./src/main/resources/static/css/tailwind-input.css -o ./src/main/resources/static/css/main.css --watch"
+    "watch:css": "tailwindcss -i ./src/main/resources/static/css/tailwind-input.css -o ./src/main/resources/static/css/main.css --watch",
+    "dev": "cmd /c \"mvnw.cmd spring-boot:run -Dspring-boot.run.profiles=local\"",
+    "dev:ps": "powershell -ExecutionPolicy Bypass -File dev.ps1"
   },
   "devDependencies": {
     "@tailwindcss/cli": "^4.1.0"

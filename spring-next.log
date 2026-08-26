@@ -1,0 +1,130 @@
+WARNING: A restricted method in java.lang.System has been called
+WARNING: java.lang.System::load has been called by org.fusesource.jansi.internal.JansiLoader in an unnamed module (file:/C:/Users/Adam/.m2/wrapper/dists/apache-maven-3.8.7-bin/678cc9d4/apache-maven-3.8.7/lib/jansi-2.4.0.jar)
+WARNING: Use --enable-native-access=ALL-UNNAMED to avoid a warning for callers in this module
+WARNING: Restricted methods will be blocked in a future release unless native access is enabled
+
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by com.google.common.util.concurrent.AbstractFuture$UnsafeAtomicHelper (file:/C:/Users/Adam/.m2/wrapper/dists/apache-maven-3.8.7-bin/678cc9d4/apache-maven-3.8.7/lib/guava-25.1-android.jar)
+WARNING: Please consider reporting this to the maintainers of class com.google.common.util.concurrent.AbstractFuture$UnsafeAtomicHelper
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ------------------< com.heroku:java-getting-started >-------------------
+[INFO] Building java-getting-started 1.0.0-SNAPSHOT
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] >>> spring-boot-maven-plugin:3.4.1:run (default-cli) > test-compile @ java-getting-started >>>
+[INFO] 
+[INFO] --- frontend-maven-plugin:1.15.1:install-node-and-npm (install-node-and-npm) @ java-getting-started ---
+[INFO] Node v20.18.1 is already installed.
+[INFO] 
+[INFO] --- frontend-maven-plugin:1.15.1:npm (npm-install) @ java-getting-started ---
+[INFO] Running 'npm install' in C:\Users\Adam\Documents\Degree\Sem 4\ancient-plains-60976
+[INFO] 
+[INFO] up to date, audited 34 packages in 990ms
+[INFO] 
+[INFO] 6 packages are looking for funding
+[INFO]   run `npm fund` for details
+[INFO] 
+[INFO] found 0 vulnerabilities
+[INFO] 
+[INFO] --- frontend-maven-plugin:1.15.1:npm (build-tailwind-css) @ java-getting-started ---
+[INFO] Running 'npm run build:css' in C:\Users\Adam\Documents\Degree\Sem 4\ancient-plains-60976
+[INFO] 
+[INFO] > hugi-barbershop-frontend@1.0.0 build:css
+[INFO] > tailwindcss -i ./src/main/resources/static/css/tailwind-input.css -o ./src/main/resources/static/css/main.css --minify
+[INFO] 
+[INFO] ≈ tailwindcss v4.3.3
+[INFO] 
+[INFO] Done in 209ms
+[INFO] 
+[INFO] --- maven-resources-plugin:3.3.1:resources (default-resources) @ java-getting-started ---
+[INFO] Copying 2 resources from src\main\resources to target\classes
+[INFO] Copying 183 resources from src\main\resources to target\classes
+[INFO] 
+[INFO] --- maven-compiler-plugin:3.13.0:compile (default-compile) @ java-getting-started ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- maven-resources-plugin:3.3.1:testResources (default-testResources) @ java-getting-started ---
+[INFO] skip non existing resourceDirectory C:\Users\Adam\Documents\Degree\Sem 4\ancient-plains-60976\src\test\resources
+[INFO] 
+[INFO] --- maven-compiler-plugin:3.13.0:testCompile (default-testCompile) @ java-getting-started ---
+[INFO] No sources to compile
+[INFO] 
+[INFO] <<< spring-boot-maven-plugin:3.4.1:run (default-cli) < test-compile @ java-getting-started <<<
+[INFO] 
+[INFO] 
+[INFO] --- spring-boot-maven-plugin:3.4.1:run (default-cli) @ java-getting-started ---
+[INFO] Attaching agents: []
+  _    _                _
+ | |  | |              | |
+ | |__| | ___ _ __ ___ | | ___   _
+ |  __  |/ _ \ '__/ _ \| |/ / | | |
+ | |  | |  __/ | | (_) |   <| |_| |
+ |_|  |_|\___|_|  \___/|_|\_\\__,_|
+
+:: Built with Spring Boot :: 3.4.1
+
+2026-08-26T18:51:40.035+08:00  INFO 2360 --- [  restartedMain] c.heroku.java.GettingStartedApplication  : Starting GettingStartedApplication using Java 24 with PID 2360 (C:\Users\Adam\Documents\Degree\Sem 4\ancient-plains-60976\target\classes started by Adam in C:\Users\Adam\Documents\Degree\Sem 4\ancient-plains-60976)
+2026-08-26T18:51:40.040+08:00 DEBUG 2360 --- [  restartedMain] c.heroku.java.GettingStartedApplication  : Running with Spring Boot v3.4.1, Spring v6.2.1
+2026-08-26T18:51:40.041+08:00  INFO 2360 --- [  restartedMain] c.heroku.java.GettingStartedApplication  : The following 1 profile is active: "local"
+2026-08-26T18:51:40.084+08:00  INFO 2360 --- [  restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2026-08-26T18:51:40.084+08:00  INFO 2360 --- [  restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2026-08-26T18:51:40.618+08:00  INFO 2360 --- [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-08-26T18:51:40.685+08:00  INFO 2360 --- [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 59 ms. Found 6 JPA repository interfaces.
+WARNING: A restricted method in java.lang.System has been called
+WARNING: java.lang.System::load has been called by org.apache.tomcat.jni.Library in an unnamed module (file:/C:/Users/Adam/.m2/repository/org/apache/tomcat/embed/tomcat-embed-core/10.1.34/tomcat-embed-core-10.1.34.jar)
+WARNING: Use --enable-native-access=ALL-UNNAMED to avoid a warning for callers in this module
+WARNING: Restricted methods will be blocked in a future release unless native access is enabled
+
+2026-08-26T18:51:41.194+08:00  INFO 2360 --- [  restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2026-08-26T18:51:41.212+08:00  INFO 2360 --- [  restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-08-26T18:51:41.212+08:00  INFO 2360 --- [  restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.34]
+2026-08-26T18:51:41.266+08:00  INFO 2360 --- [  restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-08-26T18:51:41.267+08:00  INFO 2360 --- [  restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1183 ms
+2026-08-26T18:51:41.588+08:00  INFO 2360 --- [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-08-26T18:51:41.774+08:00  INFO 2360 --- [  restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@e663872
+2026-08-26T18:51:41.776+08:00  INFO 2360 --- [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-08-26T18:51:41.808+08:00  INFO 2360 --- [  restartedMain] org.flywaydb.core.FlywayExecutor         : Database: jdbc:postgresql://localhost:5432/barbershop (PostgreSQL 17.5)
+2026-08-26T18:51:41.884+08:00  INFO 2360 --- [  restartedMain] o.f.core.internal.command.DbValidate     : Successfully validated 5 migrations (execution time 00:00.036s)
+2026-08-26T18:51:42.051+08:00  INFO 2360 --- [  restartedMain] o.f.core.internal.command.DbMigrate      : Current version of schema "public": 5
+2026-08-26T18:51:42.053+08:00  INFO 2360 --- [  restartedMain] o.f.core.internal.command.DbMigrate      : Schema "public" is up to date. No migration necessary.
+2026-08-26T18:51:42.134+08:00  INFO 2360 --- [  restartedMain] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-08-26T18:51:42.187+08:00  INFO 2360 --- [  restartedMain] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.4.Final
+2026-08-26T18:51:42.220+08:00  INFO 2360 --- [  restartedMain] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-08-26T18:51:42.520+08:00  INFO 2360 --- [  restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-08-26T18:51:42.584+08:00  WARN 2360 --- [  restartedMain] org.hibernate.orm.deprecation            : HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-08-26T18:51:42.595+08:00  INFO 2360 --- [  restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+	Database driver: undefined/unknown
+	Database version: 17.5
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-08-26T18:51:43.443+08:00  INFO 2360 --- [  restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-08-26T18:51:43.527+08:00  INFO 2360 --- [  restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-08-26T18:51:43.723+08:00  INFO 2360 --- [  restartedMain] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-08-26T18:51:44.481+08:00  WARN 2360 --- [  restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-08-26T18:51:44.498+08:00  INFO 2360 --- [  restartedMain] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name customUserDetailsService
+2026-08-26T18:51:44.558+08:00  INFO 2360 --- [  restartedMain] o.s.b.a.w.s.WelcomePageHandlerMapping    : Adding welcome page template: index
+2026-08-26T18:51:44.953+08:00  INFO 2360 --- [  restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
+2026-08-26T18:51:44.982+08:00  INFO 2360 --- [  restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
+2026-08-26T18:51:44.988+08:00  INFO 2360 --- [  restartedMain] c.heroku.java.GettingStartedApplication  : Started GettingStartedApplication in 5.272 seconds (process running for 5.603)
+2026-08-26T18:52:04.927+08:00  INFO 2360 --- [nio-8080-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-08-26T18:52:04.927+08:00  INFO 2360 --- [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-08-26T18:52:04.928+08:00  INFO 2360 --- [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
+STAFF AUTH HIT - Role: ADMIN
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  03:59 min
+[INFO] Finished at: 2026-08-26T18:55:35+08:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.springframework.boot:spring-boot-maven-plugin:3.4.1:run (default-cli) on project java-getting-started: Process terminated with exit code: 1 -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoExecutionException

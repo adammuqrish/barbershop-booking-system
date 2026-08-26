@@ -10,13 +10,20 @@
 <nav th:replace="~{fragments/nav :: nav}"></nav>
 
 <main style="flex:1;display:flex;align-items:center;justify-content:center;padding:60px 24px">
-    <div style="text-align:center;max-width:480px">
-        <p style="font-family:'Bebas Neue';font-size:120px;line-height:1;color:var(--brass);margin:0">404</p>
-        <h1 style="font-family:'Bebas Neue';font-size:34px;letter-spacing:.06em;margin:6px 0 12px;color:var(--ink)">This page got a close shave.</h1>
-        <p style="color:var(--muted);font-size:.98rem;line-height:1.6;margin:0 0 28px">
-            The page you're looking for doesn't exist or may have moved.
-            Let's get you back to something sharp.
+    <div style="text-align:center;max-width:560px">
+        <p style="font-family:'Bebas Neue';font-size:96px;line-height:1;color:var(--brass);margin:0" th:text="${status != null ? status : '404'}">404</p>
+        <h1 style="font-family:'Bebas Neue';font-size:34px;letter-spacing:.06em;margin:6px 0 12px;color:var(--ink)"
+            th:text="${status == 403 ? 'Access denied.' : (status == 500 ? 'Something went wrong.' : 'This page got a close shave.')}">This page got a close shave.</h1>
+        <p style="color:var(--muted);font-size:.98rem;line-height:1.6;margin:0 0 16px"
+           th:text="${message} != null ? ${message} : (${error} != null ? ${error} : 'The page you are looking for does not exist or may have moved.')">
+            The page you are looking for does not exist or may have moved.
         </p>
+        <div th:if="${status == 500}" class="text-start mx-auto mb-3" style="max-width:560px;background:#fff;border:1px solid var(--line);border-radius:6px;padding:12px 14px;font-size:.82rem;color:#6b5d4f;overflow:auto">
+            <div><strong>Status:</strong> <span th:text="${status}">500</span> — <span th:text="${error}">Internal Server Error</span></div>
+            <div><strong>Path:</strong> <span th:text="${path}">/adminIndex</span></div>
+            <div th:if="${trace}" style="white-space:pre-wrap;margin-top:8px;font-family:monospace;font-size:.78rem" th:text="${trace}">trace</div>
+        </div>
+        <p th:if="${status == 403}" style="color:var(--muted);font-size:.88rem;margin:0 0 16px">Your role does not permit this page. Try logging in with the correct account.</p>
         <div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap">
             <a th:href="@{/index}" class="hb-btn hb-btn-blood">Back to Home</a>
             <a th:href="@{/booking}" class="hb-btn hb-btn-outline">Book an Appointment</a>

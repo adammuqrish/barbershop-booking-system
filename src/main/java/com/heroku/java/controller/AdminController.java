@@ -11,6 +11,7 @@ import com.heroku.java.repository.StaffRepository;
 import com.heroku.java.service.BookingService;
 import com.heroku.java.service.StaffService;
 
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,8 +31,11 @@ import com.heroku.java.model.Payment;
 import com.heroku.java.dto.TransactionDTO;
 import com.heroku.java.dto.FeedbackDTO;
 
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -50,6 +54,7 @@ public class AdminController {
     private final StaffService staffService;
     private final com.heroku.java.service.FileStorageService fileStorageService;
     private final com.heroku.java.service.CustomerService customerService;
+    private final com.heroku.java.service.AdminHeaderService adminHeaderService;
 
     @Autowired
     public AdminController(CustomerRepository customerRepository,
@@ -60,7 +65,8 @@ public class AdminController {
             BookingService bookingService,
             StaffService staffService,
             com.heroku.java.service.FileStorageService fileStorageService,
-            com.heroku.java.service.CustomerService customerService) {
+            com.heroku.java.service.CustomerService customerService,
+            com.heroku.java.service.AdminHeaderService adminHeaderService) {
         this.customerRepository = customerRepository;
         this.staffRepository = staffRepository;
         this.appointmentRepository = appointmentRepository;
@@ -70,6 +76,7 @@ public class AdminController {
         this.staffService = staffService;
         this.fileStorageService = fileStorageService;
         this.customerService = customerService;
+        this.adminHeaderService = adminHeaderService;
     }
 
     // Helper method untuk dapatkan Staff yang sedang login
@@ -275,6 +282,60 @@ public class AdminController {
 
         model.addAttribute("transactions", transactions);
         return "admin/listTransactions";
+    }
+
+    // --- CSV Export (barber-scoped vs admin) ---
+    @GetMapping("/admin/export-transactions")
+    @PreAuthorize("hasRole('ADMIN')")
+    public void exportAdminTransactions(HttpServletResponse response) throws IOException {
+        Iterable<Payment> payments = paymentRepository.findAll();
+        writeTransactionsCsv(payments, response, "transactions_all");
+    }
+
+    @GetMapping("/barber/export-transactions")
+    public void exportBarberTransactions(HttpServletResponse response) throws IOException {
+        Staff barber = getLoggedInStaff();
+        if (barber == null) {
+            response.sendRedirect("/adminLogin");
+            return;
+        }
+        Iterable<Payment> payments = paymentRepository.findAllByStaffId(barber.getStaffId());
+        writeTransactionsCsv(payments, response, "transactions_" + barber.getStaffId());
+    }
+
+    private void writeTransactionsCsv(Iterable<Payment> payments, HttpServletResponse response, String baseName) throws IOException {
+        List<TransactionDTO> transactions = new ArrayList<>();
+        for (Payment p : payments) {
+            appointmentRepository.findById(p.getAppointmentId()).ifPresent(appt -> {
+                customerRepository.findById(appt.getCustId()).ifPresent(cust -> {
+                    TransactionDTO dto = new TransactionDTO();
+                    dto.setPaymentId(p.getPaymentId());
+                    dto.setCustomerName(cust.getCustName());
+                    dto.setAmount(p.getAmount());
+                    dto.setPaymentMethod(p.getPaymentMethod());
+                    dto.setPaymentDate(p.getPaymentDate());
+                    dto.setPaymentStatus(appt.getPaymentStatus());
+                    transactions.add(dto);
+                });
+            });
+        }
+        String filename = baseName + "_" + LocalDate.now().format(DateTimeFormatter.BASIC_ISO_DATE) + ".csv";
+        response.setContentType("text/csv");
+        response.setHeader("Content-Disposition", "attachment; filename=\"" + filename + "\"");
+        response.setCharacterEncoding("UTF-8");
+        PrintWriter writer = response.getWriter();
+        writer.println("Payment ID,Customer Name,Amount (RM),Payment Method,Payment Date,Status");
+        DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        for (TransactionDTO t : transactions) {
+            writer.printf("%s,\"%s\",%.2f,%s,%s,%s%n",
+                    t.getPaymentId(),
+                    t.getCustomerName() != null ? t.getCustomerName().replace("\"", "\"\"") : "",
+                    t.getAmount() != null ? t.getAmount().doubleValue() : 0.0,
+                    t.getPaymentMethod() != null ? t.getPaymentMethod() : "",
+                    t.getPaymentDate() != null ? t.getPaymentDate().format(df) : "",
+                    t.getPaymentStatus() != null ? t.getPaymentStatus() : "");
+        }
+        writer.flush();
     }
 
     // 5. BARBER FEEDBACK LIST
@@ -778,24 +839,7 @@ public class AdminController {
     @GetMapping("/admin/list-transactions")
     @PreAuthorize("hasRole('ADMIN')")
     public String listTransactions(Model model) {
-        // Load staff role
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth != null && !auth.getName().equals("anonymousUser")) {
-            String email = auth.getName();
-            Optional<Staff> staffOpt = staffRepository.findByStaffEmail(email);
-            if (staffOpt.isPresent()) {
-                Staff staff = staffOpt.get();
-                model.addAttribute("staffName", staff.getStaffName());
-                model.addAttribute("staffRole", staff.getStaffRole());
-                model.addAttribute("staff", staff);
-            } else {
-                model.addAttribute("staffName", "Staff");
-                model.addAttribute("staffRole", null);
-            }
-        } else {
-            model.addAttribute("staffName", "Staff");
-            model.addAttribute("staffRole", null);
-        }
+        adminHeaderService.populate(model);
 
         Iterable<Payment> payments = paymentRepository.findAll();
 
@@ -823,24 +867,7 @@ public class AdminController {
     @GetMapping("/admin/list-feedback")
     @PreAuthorize("hasRole('ADMIN')")
     public String listFeedback(Model model) {
-        // Load staff role
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth != null && !auth.getName().equals("anonymousUser")) {
-            String email = auth.getName();
-            Optional<Staff> staffOpt = staffRepository.findByStaffEmail(email);
-            if (staffOpt.isPresent()) {
-                Staff staff = staffOpt.get();
-                model.addAttribute("staffName", staff.getStaffName());
-                model.addAttribute("staffRole", staff.getStaffRole());
-                model.addAttribute("staff", staff);
-            } else {
-                model.addAttribute("staffName", "Staff");
-                model.addAttribute("staffRole", null);
-            }
-        } else {
-            model.addAttribute("staffName", "Staff");
-            model.addAttribute("staffRole", null);
-        }
+        adminHeaderService.populate(model);
 
         Iterable<com.heroku.java.model.Feedback> feedbacks = feedbackRepository.findAll();
 
