@@ -1,353 +1,235 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-
 <head>
-    <meta charset="UTF-8">
-    <title>Hugi Barbershop System - Appointments</title>
-    <link rel="stylesheet" th:href="@{/resources/assetsAdmin/css/style.css}">
-    <link rel="stylesheet" th:href="@{/resources/assetsAdmin/css/fontawesome/css/all.min.css}">
+    <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <title th:text="${staffRole == 'BARBER' ? 'My Schedule - Hugi Barbershop' : 'Appointments - Hugi Barbershop'}">Appointments - Hugi</title>
+    <link rel="stylesheet" th:href="@{/resources/assetsAdmin/css/style.css}"/>
+    <link rel="stylesheet" th:href="@{/resources/assetsAdmin/css/theme.css}"/>
+    <link rel="stylesheet" th:href="@{/resources/assetsAdmin/css/fontawesome/css/all.min.css}"/>
 </head>
-
 <body class="nk-body" data-sidebar-collapse="lg" data-navbar-collapse="lg">
-    <div class="nk-app-root">
-        <div class="nk-main">
-            <div th:replace="~{fragments/adminFragments :: sidebar}"></div>
-            <div class="nk-wrap">
-                <div th:replace="~{fragments/adminFragments :: header}"></div>
-                <div class="nk-content text-left">
-                    <div class="container">
-                        <div class="nk-block-head">
-                            <h2 class="nk-block-title">Appointment List</h2>
+<div class="nk-app-root"><div class="nk-main">
+    <div th:replace="~{fragments/adminFragments :: sidebar}"></div>
+    <div class="nk-wrap">
+        <div th:replace="~{fragments/adminFragments :: header}"></div>
+        <div class="nk-content"><div class="container-fluid">
+            <div class="nk-block-head">
+                <div class="nk-block-between">
+                    <div class="nk-block-head-content">
+                        <h3 class="nk-block-title page-title" th:text="${staffRole == 'BARBER' ? 'My Schedule' : 'Appointments'}">Appointments</h3>
+                        <div class="nk-block-des text-soft"><p th:text="${staffRole == 'BARBER' ? 'Your appointments — view only. Contact an admin to reschedule.' : 'All bookings — manage schedule, payments and service status.'}">Subtitle</p></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filters -->
+            <div class="card mb-3">
+                <div class="card-inner">
+                    <div class="row g-2 align-items-end">
+                        <div class="col-md-4">
+                            <label class="form-label small text-soft">Search</label>
+                            <input type="text" id="apptSearch" class="form-control form-control-sm" placeholder="Customer, date or barber…"/>
                         </div>
-                        <div class="nk-block">
-                            <div style="display:flex; gap:20px; align-items:flex-start;">
-
-                                <!-- ================= TABLE ================= -->
-                                <div style="flex:2;">
-                                    <div class="card">
-                                        <table class="table">
-                                            <thead class="table-light">
-                                                <tr>
-                                                    <th>Customer Name</th>
-                                                    <th>Date/Time</th>
-                                                    <th>Customer Category</th>
-                                                    <th>Payment Method</th>
-                                                    <th>Payment</th>
-                                                    <th>Service</th>
-
-                                                    <!-- ✅ ACTION HEADER: Hanya Admin nampak -->
-                                                    <th th:if="${staffRole == 'ADMIN'}">Action</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <tr th:each="a : ${appointmentList}">
-                                                    <td th:text="${a.customerName}"></td>
-                                                    <td th:text="${a.appointmentDate + ' ' + a.appointmentTime}"></td>
-                                                    <td th:text="${a.custType}"></td>
-                                                    <td th:text="${a.paymentMethod}"></td>
-
-                                                    <td>
-                                                        <!-- =========================================
-                                                            PAYMENT COLUMN LOGIC
-                                                        ========================================= -->
-
-                                                        <!-- SCENARIO 1: ONLINE (View Only untuk kedua-dua) -->
-                                                        <span th:if="${a.paymentMethod == 'ONLINE'}"
-                                                            class="badge bg-success">
-                                                            Completed
-                                                        </span>
-
-                                                        <!-- SCENARIO 2: CASH - ADMIN VIEW (Boleh Update) -->
-                                                        <form
-                                                            th:if="${a.paymentMethod == 'CASH' and staffRole == 'ADMIN'}"
-                                                            th:action="@{/admin/update-payment-status}" method="post"
-                                                            class="d-inline">
-                                                            <input type="hidden" name="appointmentId"
-                                                                th:value="${a.appointmentId}" />
-
-                                                            <!-- Button: COMPLETED -->
-                                                            <button th:if="${a.paymentStatus == 'completed'}"
-                                                                type="submit" class="btn btn-success btn-sm">
-                                                                Completed
-                                                            </button>
-
-                                                            <!-- Button: PENDING -->
-                                                            <button th:if="${a.paymentStatus == 'pending'}"
-                                                                type="submit" name="status" value="completed"
-                                                                class="btn btn-warning btn-sm">
-                                                                Pending
-                                                            </button>
-                                                        </form>
-
-                                                        <!-- SCENARIO 3: CASH - BARBER VIEW (Disabled/Badge Sahaja) -->
-                                                        <!-- Barber tak boleh update, jadi kita tunjuk badge status je -->
-                                                        <div
-                                                            th:if="${a.paymentMethod == 'CASH' and staffRole == 'BARBER'}">
-                                                            <span th:if="${a.paymentStatus == 'completed'}"
-                                                                class="badge bg-success">Completed</span>
-                                                            <span th:if="${a.paymentStatus == 'pending'}"
-                                                                class="badge bg-warning">Pending</span>
-                                                        </div>
-
-                                                        <!-- SCENARIO 4: FALLBACK -->
-                                                        <span th:if="${a.paymentMethod == null}"
-                                                            class="badge bg-secondary">No Payment</span>
-                                                    </td>
-
-                                                    <td>
-                                                        <!-- =========================================
-                                                        SERVICE COLUMN LOGIC
-                                                        ========================================= -->
-
-                                                        <!-- SCENARIO 1: SERVICE STATUS - ADMIN VIEW (Boleh Update) -->
-                                                        <form th:if="${staffRole == 'ADMIN'}"
-                                                            th:action="@{/admin/update-service-status}" method="post"
-                                                            class="d-inline">
-                                                            <input type="hidden" name="appointmentId"
-                                                                th:value="${a.appointmentId}" />
-
-                                                            <!-- Button: DONE -->
-                                                            <button th:if="${a.serviceStatus == 'done'}" type="submit"
-                                                                name="status" value="cancelled"
-                                                                class="btn btn-success btn-sm">
-                                                                Done
-                                                            </button>
-
-                                                            <!-- Button: PENDING -->
-                                                            <button th:if="${a.serviceStatus == 'pending'}"
-                                                                type="submit" name="status" value="done"
-                                                                class="btn btn-warning btn-sm">
-                                                                Pending
-                                                            </button>
-
-                                                            <!-- Button: CANCELLED -->
-                                                            <button th:if="${a.serviceStatus == 'cancelled'}"
-                                                                type="submit" name="status" value="pending"
-                                                                class="btn btn-danger btn-sm">
-                                                                Cancelled
-                                                            </button>
-                                                        </form>
-
-                                                        <!-- SCENARIO 2: SERVICE STATUS - BARBER VIEW (Disabled/Badge Sahaja) -->
-                                                        <!-- Barber tak boleh update status service -->
-                                                        <div th:if="${staffRole == 'BARBER'}">
-                                                            <span th:if="${a.serviceStatus == 'done'}"
-                                                                class="badge bg-success">Done</span>
-                                                            <span th:if="${a.serviceStatus == 'pending'}"
-                                                                class="badge bg-warning">Pending</span>
-                                                            <span th:if="${a.serviceStatus == 'cancelled'}"
-                                                                class="badge bg-danger">Cancelled</span>
-                                                        </div>
-                                                    </td>
-
-                                                    <!-- ✅ ACTION COLUMN: Hanya Admin nampak -->
-                                                    <td th:if="${staffRole == 'ADMIN'}">
-                                                        <a th:href="@{/listAppointment(appointmentId=${a.appointmentId})}"
-                                                            class="btn btn-sm btn-icon">
-                                                            <i class="fas fa-edit"></i>
-                                                        </a>
-                                                    </td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-
-                                <!-- ================= EDIT PANEL ================= -->
-                                <div style="flex:1; min-width:350px;">
-                                    <div th:if="${appointment}" class="card" style="padding:30px;">
-                                        <h5 class="mb-3">
-                                            <i class="fas fa-edit me-2"></i>
-                                            Edit Appointment
-                                        </h5>
-
-                                        <div th:if="${success}" class="alert alert-success alert-dismissible fade show"
-                                            role="alert">
-                                            <span th:text="${success}"></span>
-                                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                                        </div>
-
-                                        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show"
-                                            role="alert">
-                                            <span th:text="${error}"></span>
-                                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                                        </div>
-
-                                        <form th:action="@{/admin/update-appointment}" method="post">
-
-                                            <!-- HIDDEN ID -->
-                                            <input type="hidden" name="appointmentId"
-                                                th:value="${appointment.appointmentId}" />
-
-                                            <!-- INFO SAHAJA (Readonly - Tak perlu hantar ke server sebab tak nak update) -->
-                                            <div class="mb-3">
-                                                <label class="form-label">Booking For</label>
-                                                <input type="text" class="form-control"
-                                                    th:value="${appointment.custBookFor}" readonly>
-                                            </div>
-
-                                            <div class="mb-3">
-                                                <label class="form-label">Customer Category</label>
-                                                <input type="text" class="form-control"
-                                                    th:value="${appointment.custType}" readonly>
-                                            </div>
-
-                                            <!-- YANG BOLEH DIUBAH -->
-
-                                            <!-- 1. Date -->
-                                            <div class="form-group mb-3">
-                                                <label class="form-label">Date</label>
-                                                <input type="date" class="form-control" id="editDate"
-                                                    name="appointmentDate" th:value="${appointment.appointmentDate}"
-                                                    onchange="updateAvailableTimes()">
-                                            </div>
-
-                                            <!-- 2. Time -->
-                                            <div class="form-group mb-3">
-                                                <label class="form-label">Time</label>
-                                                <select class="form-select" id="editTime" name="appointmentTime"
-                                                    required>
-                                                    <option value="">Select Time</option>
-                                                </select>
-                                                <input type="hidden" id="originalTime"
-                                                    th:value="${appointment.appointmentTime}">
-                                            </div>
-
-                                            <!-- 3. Barber -->
-                                            <div class="form-group mb-3">
-                                                <label class="form-label">Barber</label>
-                                                <select class="form-select" id="editBarber" name="barberId"
-                                                    onchange="updateAvailableTimes()">
-                                                    <option th:each="b : ${barberList}" th:value="${b.staffId}"
-                                                        th:text="${b.staffName}" th:selected="${appointment != null && appointment.barberId ==
-                                                        b.staffId}">
-                                                    </option>
-                                                </select>
-                                            </div>
-
-                                            <!-- BUTTON -->
-                                            <div class="d-flex justify-content-end gap-2 mt-4">
-                                                <a th:href="@{/listAppointment}" class="btn btn-light btn-sm">Cancel</a>
-                                                <button type="submit" class="btn btn-primary btn-sm">
-                                                    <i class="fas fa-save me-1"></i>Save
-                                                </button>
-                                            </div>
-
-                                        </form>
-                                    </div>
-
-                                    <div th:if="${param.appointmentId != null and appointment == null}"
-                                        class="alert alert-danger mt-3">
-                                        Appointment not found.
-                                    </div>
-                                </div>
-                            </div>
+                        <div class="col-md-3">
+                            <label class="form-label small text-soft">Service</label>
+                            <select id="serviceFilter" class="form-select form-select-sm">
+                                <option value="">All services</option>
+                                <option value="pending">Pending</option>
+                                <option value="done">Done</option>
+                                <option value="cancelled">Cancelled</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small text-soft">Payment</label>
+                            <select id="paymentFilter" class="form-select form-select-sm">
+                                <option value="">All payments</option>
+                                <option value="completed">Completed</option>
+                                <option value="pending">Pending</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2 text-end">
+                            <span class="badge bg-outline-gray" th:text="${appointmentList != null ? #lists.size(appointmentList) + ' total' : '0 total'}">0 total</span>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-    <div th:replace="~{fragments/adminScripts :: adminJs}"></div>
-        <script th:inline="javascript">
-            document.addEventListener('DOMContentLoaded', function () {
-                const today = new Date().toISOString().split('T')[0];
-                const dateInput = document.getElementById('editDate');
-                if (dateInput) {
-                    dateInput.setAttribute('min', today);
-                    // Add change listener to validate past dates
-                    dateInput.addEventListener('change', function() {
-                        if (this.value && this.value < today) {
-                            this.value = '';
-                            alert('Cannot select a past date.');
-                        }
-                    });
-                }
 
-                // ✅ PENTING: Panggil updateAvailableTimes() sekali pada load
-                // ini akan isi dropdown masa dengan data yang betul bila edit panel dibuka
-                updateAvailableTimes();
-            });
-
-            function isTimeInPast(dateStr, timeStr) {
-                if (!dateStr || !timeStr) return false;
-                
-                try {
-                    // Convert time format (e.g., "02:00 pm" -> "14:00")
-                    const timeParts = timeStr.split(' ');
-                    const [hour, minute] = timeParts[0].split(':');
-                    let h = parseInt(hour);
-                    const ampm = timeParts[1].toLowerCase();
-                    
-                    if (ampm === 'pm' && h !== 12) h += 12;
-                    if (ampm === 'am' && h === 12) h = 0;
-                    
-                    const appointmentDateTime = new Date(dateStr + ' ' + String(h).padStart(2, '0') + ':' + minute);
-                    const now = new Date();
-                    
-                    return appointmentDateTime < now;
-                } catch (e) {
-                    return false;
-                }
-            }
-
-            function updateAvailableTimes() {
-                const date = document.getElementById('editDate').value;
-                const barberId = document.getElementById('editBarber').value;
-                const timeSelect = document.getElementById('editTime');
-                const appointmentId = document.querySelector('input[name="appointmentId"]')?.value;
-                const currentlySelectedTime = timeSelect.value;
-
-                // Kosongkan dropdown dulu
-                timeSelect.innerHTML = '<option value="">Select Time</option>';
-
-                // SYARAT BARU: Tarikh mesti ada. Barber OPTIONAL (boleh null).
-                if (!date) {
-                    return;
-                }
-
-                // Bina URL
-                let url = `/api/available-times?date=${date}`;
-
-                // Hanya append barberId jika user memilih barber
-                if (barberId) {
-                    url += `&barberId=${barberId}`;
-                }
-
-                // Hantar exclude ID jika ada
-                if (appointmentId) {
-                    url += `&excludeAppointmentId=${appointmentId}`;
-                }
-
-                fetch(url)
-                    .then(response => response.json())
-                    .then(times => {
-                        times.forEach(time => {
-                            // Filter out past times for today
-                            const today = new Date().toISOString().split('T')[0];
-                            if (date === today && isTimeInPast(date, time)) {
-                                // Skip past times
-                                return;
-                            }
-                            
-                            const option = document.createElement('option');
-                            option.value = time;
-                            option.textContent = time;
-                            timeSelect.appendChild(option);
-                        });
-
-                        // Auto-Select Logic (sama seperti sebelum ini)
-                        const originalTime = document.getElementById('originalTime')?.value;
-                        if (originalTime && Array.from(timeSelect.options).some(o => o.value === originalTime)) {
-                            timeSelect.value = originalTime;
-                        } else if (currentlySelectedTime && Array.from(timeSelect.options).some(o => o.value === currentlySelectedTime)) {
-                            timeSelect.value = currentlySelectedTime;
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                    });
-            }
-        </script>
+            <div class="row g-gs">
+                <div class="col-lg-8">
+                    <div class="card">
+                        <div class="card-inner p-0">
+                            <div class="table-responsive">
+                                <table class="table" id="appointmentTable">
+                                    <thead><tr class="nk-tb-head">
+                                        <th class="nk-tb-col">Customer</th>
+                                        <th class="nk-tb-col">Date / Time</th>
+                                        <th class="nk-tb-col">Category</th>
+                                        <th class="nk-tb-col">Payment</th>
+                                        <th class="nk-tb-col">Service</th>
+                                        <th th:if="${staffRole == 'ADMIN'}" class="nk-tb-col nk-tb-col-tools text-end">Action</th>
+                                    </tr></thead>
+                                    <tbody>
+                                        <tr th:each="a : ${appointmentList}" class="nk-tb-item" th:data-service="${a.serviceStatus}" th:data-payment="${a.paymentStatus}" th:classappend="${appointment != null and appointment.appointmentId == a.appointmentId} ? 'table-active'">
+                                            <td class="nk-tb-col"><span class="tb-lead small" th:text="${a.customerName}">Name</span></td>
+                                            <td class="nk-tb-col"><span class="small" th:text="${a.appointmentDate}">2026-01-01</span> <span class="text-soft small" th:text="${a.appointmentTime}">10:00 am</span></td>
+                                            <td class="nk-tb-col"><span class="badge bg-outline-gray" th:text="${a.custType}">Adult</span></td>
+                                            <td class="nk-tb-col">
+                                                <div th:if="${a.paymentMethod == 'ONLINE'}"><span class="badge badge-dot bg-success">Completed</span> <span class="text-soft small ms-1">Online</span></div>
+                                                <div th:if="${a.paymentMethod == 'CASH' and staffRole == 'ADMIN'}">
+                                                    <form th:action="@{/admin/update-payment-status}" method="post" class="d-inline">
+                                                        <input type="hidden" name="appointmentId" th:value="${a.appointmentId}"/>
+                                                        <button th:if="${a.paymentStatus == 'completed'}" type="button" class="badge badge-dot bg-success border-0" disabled>Completed</button>
+                                                        <button th:if="${a.paymentStatus == 'pending'}" type="submit" name="status" value="completed" class="badge badge-dot bg-warning border-0" style="cursor:pointer">Pending → Complete</button>
+                                                    </form>
+                                                </div>
+                                                <div th:if="${a.paymentMethod == 'CASH' and staffRole == 'BARBER'}">
+                                                    <span th:if="${a.paymentStatus == 'completed'}" class="badge badge-dot bg-success">Completed</span>
+                                                    <span th:if="${a.paymentStatus == 'pending'}" class="badge badge-dot bg-warning">Pending</span>
+                                                </div>
+                                                <span th:if="${a.paymentMethod == null}" class="badge badge-dot bg-gray">No Payment</span>
+                                            </td>
+                                            <td class="nk-tb-col">
+                                                <div th:if="${staffRole == 'ADMIN'}">
+                                                    <form th:action="@{/admin/update-service-status}" method="post" class="d-inline">
+                                                        <input type="hidden" name="appointmentId" th:value="${a.appointmentId}"/>
+                                                        <button th:if="${a.serviceStatus == 'done'}" type="submit" name="status" value="cancelled" class="badge badge-dot bg-success border-0" style="cursor:pointer" title="Click to cancel">Done</button>
+                                                        <button th:if="${a.serviceStatus == 'pending'}" type="submit" name="status" value="done" class="badge badge-dot bg-warning border-0" style="cursor:pointer" title="Mark as done">Pending → Done</button>
+                                                        <button th:if="${a.serviceStatus == 'cancelled'}" type="submit" name="status" value="pending" class="badge badge-dot bg-danger border-0" style="cursor:pointer" title="Reopen">Cancelled</button>
+                                                    </form>
+                                                </div>
+                                                <div th:if="${staffRole == 'BARBER'}">
+                                                    <span th:if="${a.serviceStatus == 'done'}" class="badge badge-dot bg-success">Done</span>
+                                                    <span th:if="${a.serviceStatus == 'pending'}" class="badge badge-dot bg-warning">Pending</span>
+                                                    <span th:if="${a.serviceStatus == 'cancelled'}" class="badge badge-dot bg-danger">Cancelled</span>
+                                                </div>
+                                            </td>
+                                            <td th:if="${staffRole == 'ADMIN'}" class="nk-tb-col nk-tb-col-tools text-end">
+                                                <a th:href="@{/listAppointment(appointmentId=${a.appointmentId})}" class="btn btn-sm btn-outline-light" title="Edit details"><em class="icon ni ni-edit"></em></a>
+                                            </td>
+                                        </tr>
+                                        <tr th:if="${appointmentList == null or #lists.isEmpty(appointmentList)}"><td th:attr="colspan=${staffRole == 'ADMIN' ? 6 : 5}" class="text-center text-soft py-4">No appointments found. <span th:if="${staffRole == 'BARBER'}">Your schedule is empty.</span></td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div th:if="${appointment}" class="card">
+                        <div class="card-inner">
+                            <h6 class="title mb-3"><em class="icon ni ni-edit me-1"></em> Edit Appointment <span th:if="${staffRole == 'BARBER'}" class="badge bg-gray ms-2">Read-only</span></h6>
+                            <div th:if="${success}" class="alert alert-success small py-2" th:text="${success}"></div>
+                            <div th:if="${error}" class="alert alert-danger small py-2" th:text="${error}"></div>
+                            <form th:action="@{/admin/update-appointment}" method="post" id="editAppointmentForm">
+                                <input type="hidden" name="appointmentId" th:value="${appointment.appointmentId}"/>
+                                <div class="mb-2"><label class="form-label small text-soft">Booking For</label><input type="text" class="form-control form-control-sm" th:value="${appointment.custBookFor}" readonly/></div>
+                                <div class="mb-2"><label class="form-label small text-soft">Customer Category</label><input type="text" class="form-control form-control-sm" th:value="${appointment.custType}" readonly/></div>
+                                <div class="form-group mb-2"><label class="form-label">Date <span class="text-danger">*</span></label><input type="date" class="form-control form-control-sm" id="editDate" name="appointmentDate" th:value="${appointment.appointmentDate}" onchange="updateAvailableTimes()" th:readonly="${staffRole == 'BARBER'}"/></div>
+                                <div class="form-group mb-2">
+                                    <label class="form-label">Time <span class="text-danger">*</span></label>
+                                    <div class="form-control-wrap" style="position:relative;">
+                                        <select class="form-select form-select-sm" id="editTime" name="appointmentTime" required th:disabled="${staffRole == 'BARBER'}"><option value="">Select Time</option></select>
+                                        <span id="timeSpinner" class="spinner-border spinner-border-sm" style="position:absolute; right:32px; top:50%; transform:translateY(-50%); display:none; width:14px; height:14px;"></span>
+                                    </div>
+                                    <input type="hidden" id="originalTime" th:value="${appointment.appointmentTime}"/>
+                                    <div id="timeHelp" class="form-note text-soft small mt-1"></div>
+                                </div>
+                                <div class="form-group mb-3"><label class="form-label">Barber <span class="text-danger">*</span></label><select class="form-select form-select-sm" id="editBarber" name="barberId" onchange="updateAvailableTimes()" th:disabled="${staffRole == 'BARBER'}"><option th:each="b : ${barberList}" th:value="${b.staffId}" th:text="${b.staffName}" th:selected="${appointment != null && appointment.barberId == b.staffId}"></option></select></div>
+                                <div th:if="${staffRole == 'ADMIN'}" class="d-flex justify-content-end gap-2 mt-3">
+                                    <a th:href="@{/listAppointment}" class="btn btn-outline-light btn-sm">Cancel</a>
+                                    <button type="submit" class="btn btn-primary btn-sm" id="saveAppointmentBtn"><em class="icon ni ni-save me-1"></em>Save</button>
+                                </div>
+                                <div th:if="${staffRole == 'BARBER'}" class="alert alert-light border small mt-3 mb-0"><em class="icon ni ni-info me-1"></em>Barbers cannot edit appointments. Contact an admin.</div>
+                            </form>
+                        </div>
+                    </div>
+                    <div th:if="${appointment == null}" class="card"><div class="card-inner text-center py-4"><em class="icon ni ni-calendar" style="font-size:28px;opacity:.3"></em><p class="text-soft small mt-2" th:text="${param.appointmentId != null ? 'Appointment not found.' : 'Select an appointment to view or edit details.'}">Select…</p></div></div>
+                </div>
+            </div>
+        </div></div>
+        <div class="nk-footer"><div class="container-fluid"><div class="nk-footer-wrap"><div class="nk-footer-copyright">© 2026 Hugi Barbershop.</div></div></div></div>
+    </div>
+</div></div>
+<div th:replace="~{fragments/adminScripts :: adminJs}"></div>
+<script th:inline="javascript">
+  document.addEventListener('DOMContentLoaded', function(){
+    var sInput=document.getElementById('apptSearch'), svc=document.getElementById('serviceFilter'), pay=document.getElementById('paymentFilter'), table=document.getElementById('appointmentTable');
+    function filter(){
+      if(!table) return;
+      var q=sInput? sInput.value.toLowerCase() : '', sv=svc? svc.value.toLowerCase() : '', pv=pay? pay.value.toLowerCase() : '';
+      Array.from(table.tBodies[0].rows).forEach(function(tr){
+        if(tr.cells.length < 5) return;
+        var text=tr.innerText.toLowerCase();
+        var ds=(tr.getAttribute('data-service')||'').toLowerCase();
+        var dp=(tr.getAttribute('data-payment')||'').toLowerCase();
+        var okQ=!q || text.includes(q);
+        var okS=!sv || ds===sv;
+        var okP=!pv || dp===pv;
+        tr.style.display=(okQ && okS && okP)?'':'none';
+      });
+    }
+    if(sInput) sInput.addEventListener('input', filter);
+    if(svc) svc.addEventListener('change', filter);
+    if(pay) pay.addEventListener('change', filter);
+  });
+</script>
+<script th:inline="javascript">
+  document.addEventListener('DOMContentLoaded', function () {
+    var today=new Date().toISOString().split('T')[0];
+    var dateInput=document.getElementById('editDate');
+    if(dateInput){
+      dateInput.setAttribute('min', today);
+      dateInput.addEventListener('change', function(){ if(this.value && this.value < today){ this.value=''; window.adminToast && window.adminToast('Cannot select a past date.','warning'); } });
+    }
+    updateAvailableTimes();
+    // dirty check for Save
+    var form=document.getElementById('editAppointmentForm'), btn=document.getElementById('saveAppointmentBtn');
+    if(form && btn){
+      var initial=new FormData(form);
+      var initialStr=Array.from(initial.entries()).toString();
+      form.addEventListener('input', function(){
+        var cur=Array.from(new FormData(form).entries()).toString();
+        btn.disabled = (cur===initialStr);
+      });
+    }
+  });
+  function isTimeInPast(dateStr, timeStr){
+    if(!dateStr||!timeStr) return false;
+    try{
+      var parts=timeStr.split(' '); var hm=parts[0].split(':'); var h=parseInt(hm[0]); var ap=parts[1].toLowerCase();
+      if(ap==='pm' && h!==12) h+=12; if(ap==='am' && h===12) h=0;
+      var dt=new Date(dateStr+' '+String(h).padStart(2,'0')+':'+hm[1]); return dt < new Date();
+    }catch(e){return false;}
+  }
+  function updateAvailableTimes(){
+    var dateEl=document.getElementById('editDate'), barberEl=document.getElementById('editBarber'), timeSelect=document.getElementById('editTime'), spinner=document.getElementById('timeSpinner'), help=document.getElementById('timeHelp');
+    if(!dateEl || !timeSelect) return;
+    var date=dateEl.value, barberId=barberEl?barberEl.value:'', appointmentId=document.querySelector('input[name="appointmentId"]')?.value;
+    var currentlySelectedTime=timeSelect.value;
+    timeSelect.innerHTML='<option value="">Select Time</option>';
+    if(help) help.textContent='';
+    if(!date) return;
+    if(spinner) spinner.style.display='inline-block';
+    if(help) help.textContent='Loading available times…';
+    var url='/api/available-times?date='+encodeURIComponent(date);
+    if(barberId) url+='&barberId='+encodeURIComponent(barberId);
+    if(appointmentId) url+='&excludeAppointmentId='+encodeURIComponent(appointmentId);
+    fetch(url).then(function(r){ if(!r.ok) throw new Error('Network'); return r.json(); }).then(function(times){
+      times.forEach(function(time){
+        var today=new Date().toISOString().split('T')[0];
+        if(date===today && isTimeInPast(date, time)) return;
+        var opt=document.createElement('option'); opt.value=time; opt.textContent=time; timeSelect.appendChild(opt);
+      });
+      var originalTime=document.getElementById('originalTime')?.value;
+      if(originalTime && Array.from(timeSelect.options).some(function(o){return o.value===originalTime;})) timeSelect.value=originalTime;
+      else if(currentlySelectedTime && Array.from(timeSelect.options).some(function(o){return o.value===currentlySelectedTime;})) timeSelect.value=currentlySelectedTime;
+      if(help) help.textContent= times.length ? '' : 'No available slots for this date/barber.';
+    }).catch(function(err){
+      console.error(err);
+      if(help) help.textContent='Failed to load times. Try again.';
+      if(window.adminToast) window.adminToast('Failed to load available times.','error');
+    }).finally(function(){ if(spinner) spinner.style.display='none'; });
+  }
+</script>
 </body>
-
 </html>

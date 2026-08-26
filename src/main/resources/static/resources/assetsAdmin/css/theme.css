@@ -1,9 +1,58 @@
 /*!
- * Theme: Default
- * Package: NioBoard
- * Version: 1.0.0
- * Updated: 10.21.2022
- * Author: Softnio
- * Author URI: http://themeforest.net/user/softnio
-**/
-/** WRITE YOUR OWN STYLE **/
+ * Theme: Hugi Barbershop Admin — Heritage-aligned overrides for NioBoard 1.1.2
+ * Extends: style.css (Bootstrap 5) — keep style.css untouched
+ * Author: Hugi Admin Revamp
+ **/
+
+/* ——— Global layout ——— */
+.nk-content { padding-top: 24px; }
+.nk-wrap { min-height: 100vh; }
+.nk-footer { border-top: 1px solid #e5e9f2; }
+
+/* ——— Sidebar ——— */
+.nk-sidebar.is-theme { background: #1a1714; border-right: 3px solid #c9a227; }
+.nk-sidebar-brand .logo-img { width: 140px; height: auto; max-height: 56px; object-fit: contain; }
+.nk-sidebar-brand { padding: 16px 12px; }
+.nk-menu-heading .overline-title { color: rgba(255,255,255,.45); letter-spacing:.14em; font-size:.72rem; }
+.nk-menu-link { gap: 10px; font-weight:500; }
+.nk-menu-link .nki { width: 18px; text-align:center; opacity:.9; }
+.nk-menu-item.active > .nk-menu-link,
+.nk-menu-link.active { color:#fff; background: rgba(201,162,39,.18); border-radius:6px; }
+.nk-menu-link:hover { color:#fff; }
+
+/* ——— Header ——— */
+.nk-header { backdrop-filter: blur(6px); }
+.nk-header-wrap { gap: 12px; }
+.nk-header-tools .user-avatar img { border:2px solid #e5e9f2; }
+
+/* ——— Cards & Blocks ——— */
+.nk-block-head { margin-bottom: 18px; }
+.card { border: 1px solid #e5e9f2; }
+.card-inner { padding: 18px; }
+.nk-tb-list .nk-tb-item { vertical-align: middle; }
+
+/* ——— KPI ——— */
+.kpi-card .kpi-icon { width:44px; height:44px; border-radius:10px; display:grid; place-items:center; font-size:18px; }
+.kpi-card .kpi-icon.primary { background: rgba(95,56,249,.12); color:#5f38f9; }
+.kpi-card .kpi-icon.success { background: rgba(0,176,90,.12); color:#00b05a; }
+.kpi-card .kpi-icon.warning { background: rgba(255,159,67,.14); color:#ff9f43; }
+
+/* ——— Tables ——— */
+.table-responsive { border-radius:8px; }
+.table thead th { font-size:.78rem; letter-spacing:.06em; text-transform:uppercase; color:#526484; font-weight:600; white-space:nowrap; }
+.table td { font-size:.88rem; }
+.badge-dot { padding-left: 18px; position:relative; }
+.badge-dot::before { content:""; position:absolute; left:6px; top:50%; transform:translateY(-50%); width:7px; height:7px; border-radius:50%; background: currentColor; }
+
+/* ——— Empty / Loading ——— */
+.empty-state { padding: 36px 16px; }
+.skeleton { background: linear-gradient(90deg,#eef2f7 25%,#e5e9f2 37%,#eef2f7 63%); background-size:400% 100%; animation: shimmer 1.2s ease-in-out infinite; }
+@keyframes shimmer { 0%{background-position:100% 0} 100%{background-position:-100% 0} }
+
+/* ——— Responsive ——— */
+@media (max-width: 991.98px) {
+  .nk-content .container, .nk-content .container-fluid { padding-left:16px; padding-right:16px; }
+}
+@media (max-width: 576px) {
+  .nk-block-head .nk-block-title { font-size:1.25rem; }
+}

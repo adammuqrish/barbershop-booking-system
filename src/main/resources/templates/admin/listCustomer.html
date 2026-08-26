@@ -1,107 +1,126 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-
 <head>
-    <meta charset="UTF-8">
-    <title>Hugi Barbershop System - Customers</title>
-    <link rel="stylesheet" th:href="@{/resources/assetsAdmin/css/style.css}">
-    <link rel="stylesheet" th:href="@{/resources/assetsAdmin/css/fontawesome/css/all.min.css}">
-    <style>
-        .nk-wrap {
-            padding-top: 60px;
-        }
-    </style>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <title th:text="${staffRole == 'BARBER' ? 'My Clients - Hugi Barbershop' : 'Customers - Hugi Barbershop'}">Customers - Hugi</title>
+    <link rel="stylesheet" th:href="@{/resources/assetsAdmin/css/style.css}"/>
+    <link rel="stylesheet" th:href="@{/resources/assetsAdmin/css/theme.css}"/>
+    <link rel="stylesheet" th:href="@{/resources/assetsAdmin/css/fontawesome/css/all.min.css}"/>
 </head>
-
 <body class="nk-body" data-sidebar-collapse="lg" data-navbar-collapse="lg">
-    <div class="nk-app-root">
-        <div class="nk-main">
-            <div th:replace="~{fragments/adminFragments :: sidebar}"></div>
-            <div class="nk-wrap">
-                <div th:replace="~{fragments/adminFragments :: header}"></div>
-                <div class="nk-content">
-                    <div class="container">
-                        <div class="nk-block-head">
-                            <h2 class="nk-block-title">Customers List</h2>
+<div class="nk-app-root"><div class="nk-main">
+    <div th:replace="~{fragments/adminFragments :: sidebar}"></div>
+    <div class="nk-wrap">
+        <div th:replace="~{fragments/adminFragments :: header}"></div>
+        <div class="nk-content">
+            <div class="container-fluid">
+                <div class="nk-block-head">
+                    <div class="nk-block-between">
+                        <div class="nk-block-head-content">
+                            <h3 class="nk-block-title page-title" th:text="${staffRole == 'BARBER' ? 'My Clients' : 'Customers'}">Customers</h3>
+                            <div class="nk-block-des text-soft"><p th:text="${staffRole == 'BARBER' ? 'Clients you have served — filtered to your appointments.' : 'All registered customers. Select a row to view details.'}">Subtitle</p></div>
                         </div>
-                        <div style="display: flex; gap: 30px;">
-                            <!-- Customer Table -->
-                            <div class="nk-block" style="flex:2;">
-                                <div class="card">
-                                    <table class="table">
-                                        <thead class="table-light">
-                                            <tr>
-                                                <th>Name</th>
-                                                <th>Phone Number</th>
-                                                <th>Loyalty Points</th>
-                                                <th>Action</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr th:each="cust : ${customerList}">
-                                                <td th:text="${cust.custName}"></td>
-                                                <td th:text="${cust.custPhoneNumber}"></td>
-                                                <td th:text="${cust.custLoyaltyPoints}"></td>
-                                                <!-- 
-                                                ✅ LOGIK ACTION BUTTON:
-                                                Admin -> /listCustomer
-                                                Barber -> /barber/customers
-                                                -->
-                                                <td>
-                                                    <a th:if="${staffRole == 'ADMIN'}"
-                                                        th:href="@{/listCustomer(custId=${cust.custId})}"
-                                                        class="btn btn-sm btn-primary">View</a>
-
-                                                    <a th:if="${staffRole == 'BARBER'}"
-                                                        th:href="@{/barber/customers(custId=${cust.custId})}"
-                                                        class="btn btn-sm btn-primary">View</a>
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                            <!-- Customer Details Panel -->
-                            <div style="flex:1;">
-                                <div th:if="${customer}" class="card" style="padding: 30px; min-width: 350px;">
-                                    <div style="display: flex; flex-direction: column; align-items: center;">
-                                        <img th:if="${customer.custPicture != null}"
-                                            th:src="@{'/resources/uploads/' + ${customer.custPicture}}"
-                                            alt="Profile Picture"
-                                            style="width:100px;height:100px;border-radius:50%;object-fit:cover;background:#f2f2f2;margin-bottom:20px;" />
-                                        <div th:if="${customer.custPicture == null}"
-                                            style="width:100px;height:100px;border-radius:50%;background:#f2f2f2;display:flex;align-items:center;justify-content:center;font-size:20px;color:#888;margin-bottom:20px;">
-                                            <span>No<br>Picture</span>
-                                        </div>
-                                        <h5>Details</h5>
-                                        <div style="width:100%;">
-                                            <div class="mb-2"><strong>Full Name:</strong> <span
-                                                    th:text="${customer.custName}"></span>
-                                            </div>
-                                            <div class="mb-2"><strong>Email:</strong> <span
-                                                    th:text="${customer.custEmail}"></span>
-                                            </div>
-                                            <div class="mb-2"><strong>Phone Number:</strong> <span
-                                                    th:text="${customer.custPhoneNumber}"></span>
-                                            </div>
-                                            <div class="mb-2"><strong>Loyalty Points:</strong> <span
-                                                    th:text="${customer.custLoyaltyPoints}"></span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div th:if="${param.custId != null and customer == null}"
-                                    class="alert alert-danger mt-3">
-                                    Customer not found.
+                        <div class="nk-block-head-content">
+                            <div class="search-wrap" style="min-width:240px">
+                                <div class="search-content">
+                                    <a href="#" class="search-back btn btn-icon toggle-search" data-target="search"><em class="icon ni ni-arrow-left"></em></a>
+                                    <input type="text" id="customerSearch" class="form-control border-transparent form-focus-none" placeholder="Search by name or phone…"/>
+                                    <button class="search-submit btn btn-icon"><em class="icon ni ni-search"></em></button>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
+
+                <div class="row g-gs">
+                    <div class="col-lg-8">
+                        <div class="card">
+                            <div class="card-inner-group">
+                                <div class="card-inner p-0">
+                                    <div class="table-responsive">
+                                        <table class="table" id="customerTable">
+                                            <thead>
+                                                <tr class="nk-tb-head">
+                                                    <th class="nk-tb-col">Name</th>
+                                                    <th class="nk-tb-col">Phone</th>
+                                                    <th class="nk-tb-col">Loyalty</th>
+                                                    <th class="nk-tb-col nk-tb-col-tools text-end">Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr th:each="cust : ${customerList}" class="nk-tb-item" th:classappend="${customer != null and customer.custId == cust.custId} ? 'table-active'">
+                                                    <td class="nk-tb-col"><span class="tb-amount" th:text="${cust.custName}">Name</span></td>
+                                                    <td class="nk-tb-col"><span class="tb-amount small" th:text="${cust.custPhoneNumber}">Phone</span></td>
+                                                    <td class="nk-tb-col"><span class="badge badge-dot bg-outline-gray" th:text="${cust.custLoyaltyPoints} + ' pts'">0 pts</span></td>
+                                                    <td class="nk-tb-col nk-tb-col-tools text-end">
+                                                        <a th:if="${staffRole == 'ADMIN'}" th:href="@{/listCustomer(custId=${cust.custId})}" class="btn btn-sm btn-outline-light">View</a>
+                                                        <a th:if="${staffRole == 'BARBER'}" th:href="@{/barber/customers(custId=${cust.custId})}" class="btn btn-sm btn-outline-light">View</a>
+                                                    </td>
+                                                </tr>
+                                                <tr th:if="${customerList == null or #lists.isEmpty(customerList)}"><td colspan="4" class="text-center text-soft py-4">No customers found.</td></tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div th:if="${customerList != null and #lists.size(customerList) > 10}" class="card-inner border-top">
+                                        <div class="text-soft small">Showing <span th:text="${#lists.size(customerList)}">0</span> customers. Use search to filter.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div th:if="${customer}" class="card">
+                            <div class="card-inner">
+                                <div class="text-center">
+                                    <div class="user-card">
+                                        <div class="user-avatar lg bg-light mx-auto mb-2" style="width:88px;height:88px;font-size:32px;">
+                                            <img th:if="${customer.custPicture != null}" th:src="@{'/resources/uploads/' + ${customer.custPicture}}" alt="Customer photo" style="width:100%;height:100%;object-fit:cover;border-radius:50%;"/>
+                                            <span th:if="${customer.custPicture == null}" style="display:grid;place-items:center;width:100%;height:100%;border-radius:50%;background:#eef2f7;color:#526484;">—</span>
+                                        </div>
+                                        <div class="user-info">
+                                            <span class="tb-lead" th:text="${customer.custName}">Name</span>
+                                            <span class="tb-amount small text-soft" th:text="${customer.custEmail}">email</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mt-3">
+                                    <div class="row g-2">
+                                        <div class="col-12"><div class="form-group"><label class="form-label">Phone</label><div class="form-control-wrap"><input class="form-control" th:value="${customer.custPhoneNumber}" readonly/></div></div></div>
+                                        <div class="col-12"><div class="form-group"><label class="form-label">Loyalty Points</label><div class="form-control-wrap"><input class="form-control" th:value="${customer.custLoyaltyPoints}" readonly/></div></div></div>
+                                        <div class="col-12"><div class="form-group"><label class="form-label">Email</label><div class="form-control-wrap"><input class="form-control" th:value="${customer.custEmail}" readonly/></div></div></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div th:if="${customer == null}" class="card">
+                            <div class="card-inner text-center py-4">
+                                <em class="icon ni ni-users" style="font-size:32px; opacity:.3"></em>
+                                <p class="text-soft small mt-2">Select a customer to view details.</p>
+                            </div>
+                        </div>
+                        <div th:if="${param.custId != null and customer == null}" class="alert alert-danger mt-3">Customer not found or not accessible.</div>
+                    </div>
+                </div>
             </div>
         </div>
+        <div class="nk-footer"><div class="container-fluid"><div class="nk-footer-wrap"><div class="nk-footer-copyright">© 2026 Hugi Barbershop.</div></div></div></div>
     </div>
-    <div th:replace="~{fragments/adminScripts :: adminJs}"></div>
+</div></div>
+<div th:replace="~{fragments/adminScripts :: adminJs}"></div>
+<script>
+  document.addEventListener('DOMContentLoaded', function(){
+    var input = document.getElementById('customerSearch');
+    var table = document.getElementById('customerTable');
+    if (!input || !table) return;
+    input.addEventListener('input', function(){
+      var q = this.value.toLowerCase();
+      Array.from(table.tBodies[0].rows).forEach(function(tr){
+        var text = tr.innerText.toLowerCase();
+        tr.style.display = text.includes(q) ? '' : 'none';
+      });
+    });
+  });
+</script>
 </body>
-
 </html>
