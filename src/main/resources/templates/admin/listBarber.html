@@ -1,261 +1,151 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-
 <head>
-    <meta charset="UTF-8">
-    <title>Hugi Barbershop System - Staffs</title>
-    <link rel="stylesheet" th:href="@{/resources/assetsAdmin/css/style.css}">
-    <link rel="stylesheet" th:href="@{/resources/assetsAdmin/css/fontawesome/css/all.min.css}">
+    <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Staff — Hugi Barbershop</title>
+    <link rel="stylesheet" th:href="@{/resources/assetsAdmin/css/style.css}"/>
+    <link rel="stylesheet" th:href="@{/resources/assetsAdmin/css/theme.css}"/>
+    <link rel="stylesheet" th:href="@{/resources/assetsAdmin/css/fontawesome/css/all.min.css}"/>
 </head>
-
 <body class="nk-body" data-sidebar-collapse="lg" data-navbar-collapse="lg">
-    <div class="nk-app-root">
-        <div class="nk-main">
-            <div th:replace="~{fragments/adminFragments :: sidebar}"></div>
-            <div class="nk-wrap">
-                <div th:replace="~{fragments/adminFragments :: header}"></div>
-                <div class="nk-content">
-                    <div class="container text-left">
-                        <div class="nk-block-head">
-                            <div class="nk-block-head-between flex-wrap gap-2">
-                                <div th:if="${success}" class="alert alert-success alert-dismissible fade show"
-                                    role="alert">
-                                    <span th:text="${success}"></span>
-                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                                </div>
-                                <div class="nk-block-head-content">
-                                    <h2 class="nk-block-title">Staff List</h2>
-                                </div>
-                                <div class="nk-block-head-content" th:if="${staffRole == 'ADMIN'}">
-                                    <button class="btn btn-primary" data-bs-toggle="modal"
-                                        data-bs-target="#addBarberModal">Register New Staff</button>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="nk-block">
-                            <div style="display:flex; gap:20px; align-items:flex-start;">
-                                <div style="flex:2;">
-                                    <div class="card">
-                                        <table class="table">
-                                            <thead class="table-light">
-                                                <tr>
-                                                    <th>Name</th>
-                                                    <th>Phone Number</th>
-                                                    <th>Role</th>
-                                                    <th>Admin</th>
-                                                    <th>Action</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <tr th:each="barber : ${barberList}">
-                                                    <td th:text="${barber.staffName}"></td>
-                                                    <td th:text="${barber.staffPhoneNumber}"></td>
-                                                    <td th:text="${barber.staffRole}"></td>
-                                                    <td th:text="${adminNameMap[barber.staffId]} ?: '—'"></td>
-                                                    <td>
-                                                        <a th:href="@{/listBarber(staffId=${barber.staffId})}"
-                                                            class="btn btn-sm btn-icon btn-zoom">
-                                                            <i class="fas fa-eye"></i>
-                                                        </a>
-                                                    </td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-
-                                <div style="flex:1; min-width:300px;">
-                                    <div th:if="${barber}" class="card" style="padding:30px;">
-                                        <div style="display:flex; flex-direction:column; align-items:center;">
-                                            <img th:if="${barber.staffPicture != null}"
-                                                th:src="@{'/resources/uploads/' + ${barber.staffPicture}}"
-                                                style="width:100px;height:100px;border-radius:50%;object-fit:cover;margin-bottom:20px;" />
-
-                                            <div th:if="${barber.staffPicture == null}" style="width:100px;height:100px;border-radius:50%;background:#f2f2f2;
-                                                        display:flex;align-items:center;justify-content:center;
-                                                        font-size:14px;color:#888;margin-bottom:20px;">
-                                                No<br>Picture
-                                            </div>
-
-                                            <h5 class="mb-3">Barber Details</h5>
-
-                                            <div style="width:100%;">
-                                                <div class="mb-2">
-                                                    <strong>Full Name:</strong>
-                                                    <span th:text="${barber.staffName}"></span>
-                                                </div>
-                                                <div class="mb-2">
-                                                    <strong>Email:</strong>
-                                                    <span th:text="${barber.staffEmail}"></span>
-                                                </div>
-                                                <div class="mb-2">
-                                                    <strong>Phone:</strong>
-                                                    <span th:text="${barber.staffPhoneNumber}"></span>
-                                                </div>
-                                                <div class="mb-2">
-                                                    <strong>Role:</strong>
-                                                    <span th:text="${barber.staffRole}"></span>
-                                                </div>
-                                                <div class="mb-2">
-                                                    <strong>Description:</strong>
-                                                    <span th:text="${barber.description}"></span>
-                                                </div>
-                                                <div class="mt-4 d-flex justify-content-center gap-2"
-                                                    th:if="${#strings.equalsIgnoreCase(staffRole, 'ADMIN')}">
-
-                                                    <!-- EDIT -->
-                                                    <a th:href="@{/admin/edit-staff(staffId=${barber.staffId})}"
-                                                        class="btn btn-warning btn-sm">
-                                                        <i class="fas fa-edit"></i> Edit
-                                                    </a>
-
-                                                    <!-- DELETE -->
-                                                    <form th:action="@{/admin/delete-staff}" method="post"
-                                                        onsubmit="return confirm('Are you sure you want to delete this staff?');">
-
-                                                        <input type="hidden" name="staffId"
-                                                            th:value="${barber.staffId}" />
-
-                                                        <button type="submit" class="btn btn-danger btn-sm">
-                                                            <i class="fas fa-trash"></i> Delete
-                                                        </button>
-                                                    </form>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Not found -->
-                                    <div th:if="${param.staffId != null and barber == null}"
-                                        class="alert alert-danger mt-3">
-                                        Barber not found.
-                                    </div>
-                                </div>
-
-                            </div>
-                        </div>
+<div class="nk-app-root"><div class="nk-main">
+    <div th:replace="~{fragments/adminFragments :: sidebar}"></div>
+    <div class="nk-wrap">
+        <div th:replace="~{fragments/adminFragments :: header}"></div>
+        <div class="nk-content"><div class="container-fluid">
+            <div class="nk-block-head">
+                <div class="nk-block-between">
+                    <div class="nk-block-head-content">
+                        <h3 class="nk-block-title page-title">Staff</h3>
+                        <div class="nk-block-des text-soft"><p>All staff accounts — barbers and admins. Restricted to ADMIN role.</p></div>
+                    </div>
+                    <div class="nk-block-head-content" th:if="${staffRole == 'ADMIN'}">
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addBarberModal"><em class="icon ni ni-plus me-1"></em> Register Staff</button>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
+            <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert"><span th:text="${success}"></span><button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
+            <div th:if="${error} and ${param.staffId == null}" class="alert alert-danger alert-dismissible fade show" role="alert"><span th:text="${error}"></span><button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
 
-
-    <!-- Register Barber Modal -->
-    <div class="modal fade" id="addBarberModal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <form th:action="@{/admin/register-staff}" method="post">
-                    <input type="hidden" name="admin_id" th:value="${adminId}" value="Admin">
-                    <div class="modal-header">
-                        <h4 class="modal-title">Register New Staff</h4>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body">
-
-                        <!-- ALERT ERROR -->
-                        <div th:if="${error}" class="alert alert-danger mt-2" role="alert">
-                            <span th:text="${error}"></span>
+            <div class="row g-gs">
+                <div class="col-lg-8">
+                    <div class="card">
+                        <div class="card-inner-group">
+                            <div class="card-inner position-relative">
+                                <div class="card-title-group">
+                                    <div class="card-title"><h6 class="title">Staff Directory</h6></div>
+                                    <div class="card-tools"><input type="text" id="staffSearch" class="form-control form-control-sm" placeholder="Search name, phone or role…" style="width:220px"/></div>
+                                </div>
+                            </div>
+                            <div class="card-inner p-0">
+                                <div class="table-responsive">
+                                    <table class="table" id="staffTable">
+                                        <thead><tr class="nk-tb-head">
+                                            <th class="nk-tb-col" scope="col">Name</th>
+                                            <th class="nk-tb-col" scope="col">Phone</th>
+                                            <th class="nk-tb-col" scope="col">Role</th>
+                                            <th class="nk-tb-col" scope="col">Created by</th>
+                                            <th class="nk-tb-col nk-tb-col-tools text-end" scope="col">Action</th>
+                                        </tr></thead>
+                                        <tbody>
+                                            <tr th:each="barber : ${barberList}" class="nk-tb-item" th:classappend="${barber != null and barber.staffId == barber.staffId} ? '' : ''" th:with="active=${param.staffId != null and barber.staffId.toString() == param.staffId}">
+                                                <td class="nk-tb-col"><span class="tb-lead" th:text="${barber.staffName}">Name</span><br/><span class="text-soft small" th:text="${barber.staffEmail}">email</span></td>
+                                                <td class="nk-tb-col"><span class="small" th:text="${barber.staffPhoneNumber}">phone</span></td>
+                                                <td class="nk-tb-col"><span class="badge badge-dot" th:classappend="${barber.staffRole == 'ADMIN' ? 'bg-primary' : 'bg-gray'}" th:text="${barber.staffRole}">BARBER</span></td>
+                                                <td class="nk-tb-col small text-soft" th:text="${adminNameMap[barber.staffId]} ?: '—'">—</td>
+                                                <td class="nk-tb-col nk-tb-col-tools text-end">
+                                                    <a th:href="@{/listBarber(staffId=${barber.staffId})}" class="btn btn-sm btn-outline-light" title="View"><em class="icon ni ni-eye"></em></a>
+                                                </td>
+                                            </tr>
+                                            <tr th:if="${barberList == null or #lists.isEmpty(barberList)}"><td colspan="5" class="text-center text-soft py-4">No staff found.</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div th:replace="~{fragments/adminComponents :: pagination(currentPage=${currentPage}, totalPages=${totalPages}, baseUrl='/listBarber')}"></div>
                         </div>
-
-                        <div class="row g-3">
-                            <div class="col-12">
-                                <label class="form-label">Name</label>
-                                <input type="text" name="name" class="form-control" required>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div th:if="${barber}" class="card">
+                        <div class="card-inner text-center">
+                            <div class="user-avatar lg bg-light mx-auto mb-3" style="width:88px;height:88px;">
+                                <img th:if="${barber.staffPicture != null}" th:src="@{'/resources/uploads/' + ${barber.staffPicture}}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;"/>
+                                <span th:if="${barber.staffPicture == null}" style="display:grid;place-items:center;width:100%;height:100%;border-radius:50%;background:#eef2f7;color:#526484;font-size:12px;">No<br/>Picture</span>
                             </div>
-                            <div class="col-12">
-                                <label class="form-label">Email</label>
-                                <input type="email" name="email" class="form-control" required>
+                            <h6 class="title" th:text="${barber.staffName}">Name</h6>
+                            <span class="badge badge-dot mt-1" th:classappend="${barber.staffRole == 'ADMIN' ? 'bg-primary' : 'bg-gray'}" th:text="${barber.staffRole}">ROLE</span>
+                            <div class="mt-3 text-start small">
+                                <div class="mb-2"><span class="text-soft">Email:</span> <span th:text="${barber.staffEmail}">email</span></div>
+                                <div class="mb-2"><span class="text-soft">Phone:</span> <span th:text="${barber.staffPhoneNumber}">phone</span></div>
+                                <div class="mb-2"><span class="text-soft">Description:</span> <span th:text="${barber.description ?: '—'}">—</span></div>
                             </div>
-                                <div class="col-6">
-                                    <label class="form-label">Password</label>
-                                    <div style="position:relative;">
-                                        <input type="password" name="password" id="barberPassword" class="form-control" required style="padding-right:2.5rem;">
-                                        <button type="button" data-target="barberPassword"
-                                            class="btn btn-link password-toggle"
-                                            tabindex="-1" aria-label="Show password"
-                                            style="position:absolute;top:50%;right:0;transform:translateY(-50%);padding:0.3rem 0.5rem;text-decoration:none;color:#6c757d;">
-                                            <i class="fas fa-eye eye-icon"></i>
-                                            <i class="fas fa-eye-slash eye-off-icon" style="display:none;"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="col-6">
-                                    <label class="form-label">Confirm Password</label>
-                                    <div style="position:relative;">
-                                        <input type="password" name="confirmPassword" id="barberConfirmPassword" class="form-control" required style="padding-right:2.5rem;">
-                                        <button type="button" data-target="barberConfirmPassword"
-                                            class="btn btn-link password-toggle"
-                                            tabindex="-1" aria-label="Show password"
-                                            style="position:absolute;top:50%;right:0;transform:translateY(-50%);padding:0.3rem 0.5rem;text-decoration:none;color:#6c757d;">
-                                            <i class="fas fa-eye eye-icon"></i>
-                                            <i class="fas fa-eye-slash eye-off-icon" style="display:none;"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            <div class="col-12">
-                                <label class="form-label">Phone Number</label>
-                                <input type="text" name="phone" class="form-control" required>
-                            </div>
-                            <div class="col-12">
-                                <label class="form-label">Role</label>
-                                <select name="role" class="form-select" required>
-                                    <option value="ADMIN">Administrator</option>
-                                    <option value="BARBER">Barber</option>
-                                </select>
-                            </div>
-                            <div class="col-12">
-                                <label class="form-label">Description</label>
-                                <textarea name="description" class="form-control" rows="2"></textarea>
+                            <div class="mt-3 d-flex justify-content-center gap-2" th:if="${#strings.equalsIgnoreCase(staffRole,'ADMIN')}">
+                                <a th:href="@{/admin/edit-staff(staffId=${barber.staffId})}" class="btn btn-outline-gray btn-sm"><em class="icon ni ni-edit me-1"></em>Edit</a>
+                                <form th:action="@{/admin/delete-staff}" method="post" onsubmit="return confirm('Delete this staff?');">
+                                    <input type="hidden" name="staffId" th:value="${barber.staffId}"/>
+                                    <button type="submit" class="btn btn-danger btn-sm"><em class="icon ni ni-trash me-1"></em>Delete</button>
+                                </form>
                             </div>
                         </div>
                     </div>
-                    <div class="modal-footer">
-                        <button type="submit" class="btn btn-primary">Register</button>
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    </div>
-                </form>
+                    <div th:if="${barber == null}" class="card"><div class="card-inner text-center py-4"><em class="icon ni ni-users" style="font-size:28px;opacity:.3"></em><p class="text-soft small mt-2">Select a staff member to view details.</p></div></div>
+                    <div th:if="${param.staffId != null and barber == null}" class="alert alert-danger mt-3">Staff not found.</div>
+                </div>
             </div>
-        </div>
+        </div></div>
+        <div class="nk-footer"><div class="container-fluid"><div class="nk-footer-wrap"><div class="nk-footer-copyright">© 2026 Hugi Barbershop.</div></div></div></div>
     </div>
+</div></div>
 
-    <!-- Hidden Input untuk JavaScript Check (Lebih Stabil) -->
-    <input type="hidden" id="has-error-flag" th:value="${error != null ? 'true' : 'false'}">
+<!-- Register Modal -->
+<div class="modal fade" id="addBarberModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered"><div class="modal-content">
+        <form th:action="@{/admin/register-staff}" method="post">
+            <input type="hidden" name="admin_id" th:value="${adminId}" value="Admin"/>
+            <div class="modal-header"><h5 class="modal-title">Register New Staff</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-body">
+                <div th:if="${error}" class="alert alert-danger small" th:text="${error}"></div>
+                <div class="row g-3">
+                    <div class="col-12"><label class="form-label">Name <span class="text-danger">*</span></label><input type="text" name="name" class="form-control" required/></div>
+                    <div class="col-12"><label class="form-label">Email <span class="text-danger">*</span></label><input type="email" name="email" class="form-control" required/></div>
+                    <div class="col-12"><label class="form-label">Phone <span class="text-danger">*</span></label><input type="text" name="phone" class="form-control" required/></div>
+                    <div class="col-12"><label class="form-label">Role <span class="text-danger">*</span></label><select name="role" class="form-select" required><option value="">— Select —</option><option value="ADMIN">ADMIN</option><option value="BARBER">BARBER</option></select></div>
+                    <div class="col-md-6"><label class="form-label">Password <span class="text-danger">*</span></label><div class="form-control-wrap" style="position:relative;"><input type="password" name="password" id="regPassword" class="form-control" required style="padding-right:2.4rem"/><button type="button" data-target="regPassword" class="btn btn-link password-toggle" tabindex="-1" style="position:absolute;top:50%;right:0;transform:translateY(-50%);padding:.3rem .5rem;color:#6c757d;"><i class="fas fa-eye eye-icon"></i><i class="fas fa-eye-slash eye-off-icon" style="display:none;"></i></button></div></div>
+                    <div class="col-md-6"><label class="form-label">Confirm <span class="text-danger">*</span></label><input type="password" name="confirmPassword" class="form-control" required/></div>
+                    <div class="col-12"><label class="form-label">Description</label><textarea name="description" class="form-control" rows="2" placeholder="Optional"></textarea></div>
+                </div>
+            </div>
+            <div class="modal-footer"><button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancel</button><button type="submit" class="btn btn-primary">Register</button></div>
+        </form>
+    </div></div>
+</div>
 
-    <!-- Script -->
-    <div th:replace="~{fragments/adminScripts :: adminJs}"></div>
-
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            // Baca nilai dari hidden input
-            var hasError = document.getElementById('has-error-flag').value;
-
-            // Jika 'true', buka modal
-            if (hasError === 'true') {
-                var myModal = new bootstrap.Modal(document.getElementById('addBarberModal'));
-                myModal.show();
-            }
-
-            // Password visibility toggle
-            document.querySelectorAll('.password-toggle').forEach(function (button) {
-                button.addEventListener('click', function () {
-                    var input = document.getElementById(button.getAttribute('data-target'));
-                    if (!input) return;
-
-                    var isPassword = input.type === 'password';
-                    input.type = isPassword ? 'text' : 'password';
-
-                    var eyeIcon = button.querySelector('.eye-icon');
-                    var eyeOffIcon = button.querySelector('.eye-off-icon');
-                    if (eyeIcon) eyeIcon.style.display = isPassword ? 'none' : 'inline-block';
-                    if (eyeOffIcon) eyeOffIcon.style.display = isPassword ? 'inline-block' : 'none';
-
-                    button.setAttribute('aria-label', isPassword ? 'Hide password' : 'Show password');
-                });
-            });
-        });
-    </script>
-
+<div th:replace="~{fragments/adminScripts :: adminJs}"></div>
+<script>
+  document.addEventListener('DOMContentLoaded', function(){
+    var input=document.getElementById('staffSearch'), table=document.getElementById('staffTable');
+    if(input && table) input.addEventListener('input', function(){
+      var q=this.value.toLowerCase();
+      Array.from(table.tBodies[0].rows).forEach(function(tr){ tr.style.display = tr.innerText.toLowerCase().includes(q) ? '' : 'none'; });
+    });
+    // password toggle (shared)
+    document.querySelectorAll('.password-toggle').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var input=document.getElementById(btn.getAttribute('data-target'));
+        if(!input) return;
+        var isPw=input.type==='password';
+        input.type=isPw?'text':'password';
+        var eye=btn.querySelector('.eye-icon'), off=btn.querySelector('.eye-off-icon');
+        if(eye) eye.style.display=isPw?'none':'';
+        if(off) off.style.display=isPw?'':'none';
+      });
+    });
+    // reopen modal if error present
+    var hasError=document.body.innerHTML.includes('Register New Staff') && document.querySelector('#addBarberModal .alert-danger');
+    // simple: if error param and modal hidden, show (controller returns same page with error)
+    // keep manual check via flag already in original (hidden input) — Bootstrap will be triggered if error exists
+  });
+</script>
 </body>
-
 </html>

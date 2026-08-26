@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<!-- Reusable admin components -->
+
+<!-- Empty state -->
+<div th:fragment="emptyState(icon, title, subtitle, actionUrl, actionLabel)">
+    <div class="card">
+        <div class="card-inner text-center py-5">
+            <div class="mb-3">
+                <em th:class="${icon != null ? icon : 'icon ni ni-inbox'}" style="font-size:48px; opacity:.25"></em>
+            </div>
+            <h5 class="title" th:text="${title}">Nothing here yet</h5>
+            <p class="text-soft" th:if="${subtitle != null}" th:text="${subtitle}">No data to display.</p>
+            <a th:if="${actionUrl != null}" th:href="${actionUrl}" class="btn btn-outline-primary btn-sm mt-2" th:text="${actionLabel}">Action</a>
+        </div>
+    </div>
+</div>
+
+<!-- Table wrapper with responsive + search slot -->
+<div th:fragment="tableCard(title, subtitle)">
+    <div class="card">
+        <div class="card-inner-group">
+            <div class="card-inner position-relative">
+                <div class="card-title-group">
+                    <div class="card-title">
+                        <h5 class="title" th:text="${title}">Table</h5>
+                        <p th:if="${subtitle != null}" class="text-soft small" th:text="${subtitle}"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Pagination — baseUrl is a plain string like '/listCustomer' -->
+<nav th:fragment="pagination(currentPage, totalPages, baseUrl)" th:if="${totalPages != null and totalPages > 1}" aria-label="Pagination">
+    <ul class="pagination justify-content-center mt-3">
+        <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+            <a class="page-link" th:href="${baseUrl + '?page=' + (currentPage - 1)}">Previous</a>
+        </li>
+        <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+            th:classappend="${i == currentPage} ? 'active'">
+            <a class="page-link" th:href="${baseUrl + '?page=' + i}" th:text="${i + 1}">1</a>
+        </li>
+        <li class="page-item" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'">
+            <a class="page-link" th:href="${baseUrl + '?page=' + (currentPage + 1)}">Next</a>
+        </li>
+    </ul>
+    <div class="text-center text-soft small mt-1" th:text="'Page ' + (currentPage + 1) + ' of ' + totalPages">Page 1 of 1</div>
+</nav>
+
+<!-- Password toggle field -->
+<div th:fragment="passwordToggle(inputId, label, name, placeholder)">
+    <label class="form-label" th:for="${inputId}"><span th:text="${label}">Password</span> <span class="text-danger">*</span></label>
+    <div class="form-control-wrap" style="position:relative;">
+        <input type="password" class="form-control" th:id="${inputId}" th:name="${name}" th:placeholder="${placeholder}" required style="padding-right:2.5rem;"/>
+        <button type="button" th:data-target="${inputId}" class="btn btn-link password-toggle"
+                tabindex="-1" aria-label="Show password"
+                style="position:absolute;top:50%;right:0;transform:translateY(-50%);padding:.3rem .5rem;color:#6c757d;">
+            <i class="fas fa-eye eye-icon"></i><i class="fas fa-eye-slash eye-off-icon" style="display:none;"></i>
+        </button>
+    </div>
+</div>
+
+<!-- Status badge -->
+<span th:fragment="statusBadge(status)" th:with="s=${#strings.toLowerCase(status)}"
+      class="badge"
+      th:classappend="${s == 'completed' || s == 'done'} ? 'badge-dot bg-success' : (s == 'pending' ? 'badge-dot bg-warning' : (s == 'cancelled' ? 'badge-dot bg-danger' : 'badge-dot bg-gray'))"
+      th:text="${status}">Status</span>
+
+</html>

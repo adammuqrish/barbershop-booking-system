@@ -1,61 +1,86 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-
 <head>
-    <meta charset="UTF-8">
-    <title>Hugi Barbershop System - Transactions</title>
-    <link rel="stylesheet" th:href="@{/resources/assetsAdmin/css/style.css}">
-    <link rel="stylesheet" th:href="@{/resources/assetsAdmin/css/fontawesome/css/all.min.css}">
-    <style>
-        .nk-wrap {
-            padding-top: 60px;
-        }
-    </style>
+    <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <title th:text="${staffRole == 'BARBER' ? 'My Transactions - Hugi Barbershop' : 'Transactions - Hugi Barbershop'}">Transactions - Hugi</title>
+    <link rel="stylesheet" th:href="@{/resources/assetsAdmin/css/style.css}"/>
+    <link rel="stylesheet" th:href="@{/resources/assetsAdmin/css/theme.css}"/>
+    <link rel="stylesheet" th:href="@{/resources/assetsAdmin/css/fontawesome/css/all.min.css}"/>
 </head>
-
 <body class="nk-body" data-sidebar-collapse="lg" data-navbar-collapse="lg">
-    <div class="nk-app-root">
-        <div class="nk-main">
-            <div th:replace="~{fragments/adminFragments :: sidebar}"></div>
-            <div class="nk-wrap">
-                <div th:replace="~{fragments/adminFragments :: header}"></div>
-                <div class="nk-content">
-                    <div class="container">
-                        <div class="nk-block-head">
-                            <h2 class="nk-block-title">Transactions List</h2>
-                        </div>
-                        <div class="nk-block">
-                            <div class="card">
-                                <table class="table">
-                                    <thead class="table-light">
-                                        <tr>
-                                            <th>Payment ID</th>
-                                            <th>Customer Name</th>
-                                            <th>Amount</th>
-                                            <th>Payment Method</th>
-                                            <th>Payment Date</th>
-                                            <th>Status</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr th:each="transaction : ${transactions}">
-                                            <td th:text="${transaction.paymentId}"></td>
-                                            <td th:text="${transaction.customerName}"></td>
-                                            <td th:text="${'RM ' + transaction.amount}"></td>
-                                            <td th:text="${transaction.paymentMethod}"></td>
-                                            <td th:text="${#temporals.format(transaction.paymentDate, 'dd/MM/yyyy')}"></td>
-                                            <td th:text="${transaction.paymentStatus}"></td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+<div class="nk-app-root"><div class="nk-main">
+    <div th:replace="~{fragments/adminFragments :: sidebar}"></div>
+    <div class="nk-wrap">
+        <div th:replace="~{fragments/adminFragments :: header}"></div>
+        <div class="nk-content"><div class="container-fluid">
+            <div class="nk-block-head">
+                <div class="nk-block-between">
+                    <div class="nk-block-head-content">
+                        <h3 class="nk-block-title page-title" th:text="${staffRole == 'BARBER' ? 'My Transactions' : 'Transactions'}">Transactions</h3>
+                        <div class="nk-block-des text-soft"><p th:text="${staffRole == 'BARBER' ? 'Payments for your appointments only.' : 'All payments — filter or search to narrow.'}">Subtitle</p></div>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-inner-group">
+                    <div class="card-inner position-relative card-tools-toggle">
+                        <div class="card-title-group">
+                            <div class="card-title">
+                                <h6 class="title">Transactions</h6>
+                                <p class="text-soft small d-none d-sm-block">CSV respects current barber scope (barbers export own data only).</p>
                             </div>
+                            <div class="card-tools">
+                                <div class="form-inline flex-nowrap gx-3 align-items-center">
+                                    <div class="form-wrap w-200px">
+                                        <input type="text" id="txSearch" class="form-control form-control-sm" placeholder="Search customer or method…"/>
+                                    </div>
+                                    <a th:href="${staffRole == 'BARBER' ? '/barber/export-transactions' : '/admin/export-transactions'}" class="btn btn-outline-primary btn-sm">
+                                        <em class="icon ni ni-download me-1"></em> Export CSV
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-inner p-0">
+                        <div class="table-responsive">
+                            <table class="table" id="txTable">
+                                <thead><tr class="nk-tb-head">
+                                    <th class="nk-tb-col" scope="col">Payment ID</th>
+                                    <th class="nk-tb-col" scope="col">Customer</th>
+                                    <th class="nk-tb-col text-end" scope="col">Amount</th>
+                                    <th class="nk-tb-col" scope="col">Method</th>
+                                    <th class="nk-tb-col" scope="col">Date</th>
+                                    <th class="nk-tb-col" scope="col">Status</th>
+                                </tr></thead>
+                                <tbody>
+                                    <tr th:each="transaction : ${transactions}" class="nk-tb-item">
+                                        <td class="nk-tb-col"><span class="tb-amount small" th:text="${transaction.paymentId}">#</span></td>
+                                        <td class="nk-tb-col"><span class="tb-lead" th:text="${transaction.customerName}">Name</span></td>
+                                        <td class="nk-tb-col text-end"><span class="tb-amount" th:text="${'RM ' + #numbers.formatDecimal(transaction.amount,1,2)}">RM 0.00</span></td>
+                                        <td class="nk-tb-col"><span class="badge badge-dot" th:classappend="${transaction.paymentMethod == 'ONLINE' ? 'bg-success' : 'bg-gray'}" th:text="${transaction.paymentMethod}">CASH</span></td>
+                                        <td class="nk-tb-col"><span th:text="${transaction.paymentDate != null ? #temporals.format(transaction.paymentDate, 'dd MMM yyyy') : '—'}">01 Jan 2026</span></td>
+                                        <td class="nk-tb-col"><span class="badge badge-dot" th:classappend="${transaction.paymentStatus == 'completed' ? 'bg-success' : (transaction.paymentStatus == 'pending' ? 'bg-warning' : 'bg-gray')}" th:text="${transaction.paymentStatus}">completed</span></td>
+                                    </tr>
+                                    <tr th:if="${transactions == null or #lists.isEmpty(transactions)}"><td colspan="6" class="text-center text-soft py-4">No transactions yet.</td></tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </div></div>
+        <div class="nk-footer"><div class="container-fluid"><div class="nk-footer-wrap"><div class="nk-footer-copyright">© 2026 Hugi Barbershop.</div></div></div></div>
     </div>
-    <div th:replace="~{fragments/adminScripts :: adminJs}"></div>
+</div></div>
+<div th:replace="~{fragments/adminScripts :: adminJs}"></div>
+<script>
+  document.addEventListener('DOMContentLoaded', function(){
+    var input=document.getElementById('txSearch'), table=document.getElementById('txTable');
+    if(input && table) input.addEventListener('input', function(){
+      var q=this.value.toLowerCase();
+      Array.from(table.tBodies[0].rows).forEach(function(tr){ tr.style.display = tr.innerText.toLowerCase().includes(q) ? '' : 'none'; });
+    });
+  });
+</script>
 </body>
-
 </html>
