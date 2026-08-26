@@ -1,52 +1,66 @@
 <nav xmlns:th="http://www.thymeleaf.org" th:fragment="nav" class="hb-nav">
     <div class="hb-nav-inner">
-        <a class="hb-brand" th:href="@{/index}">
+
+        <!-- GROUP 1: Brand -->
+        <a class="hb-brand" th:href="@{/index}" aria-label="Hugi Barbershop home">
             <span class="hb-brand-mark">H</span>
             <span class="hb-brand-name">Hugi<em>.</em></span>
         </a>
 
-        <!-- Desktop links -->
-        <ul class="hb-nav-links hb-desktop-only">
-            <li><a th:href="@{/index#aboutUs}">About</a></li>
-            <li><a th:href="@{/index#services}">Services &amp; Prices</a></li>
-            <li><a th:href="@{/index#barbers}">Barbers</a></li>
-            <li><a th:href="@{/index#visit}">Visit Us</a></li>
-            <!-- Logged-in customer -->
+        <!-- GROUP 2 + 3 + 4: right-aligned cluster -->
+        <div class="hb-nav-right hb-desktop-only">
+
+            <!-- GROUP 2: Page links -->
+            <ul class="hb-nav-group hb-nav-links">
+                <li><a th:href="@{/index#aboutUs}">About</a></li>
+                <li><a th:href="@{/index#services}">Services</a></li>
+                <li><a th:href="@{/index#barbers}">Barbers</a></li>
+                <li><a th:href="@{/index#visit}">Visit Us</a></li>
+            </ul>
+
+            <!-- Logged-in: actions + user area -->
             <th:block th:if="${session.customer != null}">
-                <li class="hb-nav-sep" aria-hidden="true"></li>
-                <li><a th:href="@{/booking}">Book Appointment</a></li>
-                <li><a th:href="@{/view-appointment}">My Appointments</a></li>
-                <li><a th:href="@{/appointment-history}">History</a></li>
-            </th:block>
-            <th:block th:if="${session.customer != null}">
-                <li>
-                    <a th:href="@{/profile}" style="display:inline-flex;align-items:center;gap:8px">
+                <!-- GROUP 3: Actions -->
+                <ul class="hb-nav-group hb-nav-actions">
+                    <li><a class="hb-action-link" th:href="@{/booking}">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                        Book Appointment</a></li>
+                    <li><a class="hb-action-link" th:href="@{/view-appointment}">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg>
+                        My Appointments</a></li>
+                    <li><a class="hb-action-link" th:href="@{/appointment-history}">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><polyline points="12 7 12 12 15 14"/></svg>
+                        History</a></li>
+                </ul>
+
+                <!-- GROUP 4: User area -->
+                <div class="hb-user-area">
+                    <a class="hb-user-chip" th:href="@{/profile}" title="View profile">
                         <img th:if="${session.customer.custPicture != null}"
                              th:src="@{'/resources/uploads/' + ${session.customer.custPicture}}"
-                             alt="Profile picture"
-                             style="width:28px;height:28px;border-radius:50%;object-fit:cover;border:2px solid var(--brass)" />
+                             alt="" class="hb-avatar" />
                         <th:block th:unless="${session.customer.custPicture != null}">
-                            <svg width="22" height="22" viewBox="0 0 20 20" fill="var(--brass)" aria-hidden="true">
-                                <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
-                                      clip-rule="evenodd"></path>
-                            </svg>
+                            <span class="hb-avatar hb-avatar-fallback"
+                                  th:text="${#strings.substring(session.customer.custName, 0, 1)}">U</span>
                         </th:block>
-                        <th:block th:text="${session.customer.custName}">Name</th:block>
+                        <span class="hb-username" th:text="${session.customer.custName}">User</span>
                     </a>
-                </li>
-                <li class="hb-nav-cta">
-                    <form th:action="@{/logout}" method="post" style="display:inline;margin:0">
-                        <button type="submit" class="hb-btn hb-btn-outline" style="font-size:16px;padding:6px 18px">Logout</button>
+                    <form th:action="@{/logout}" method="post" style="margin:0">
+                        <button type="submit" class="hb-btn hb-btn-outline hb-logout-btn">Logout</button>
                     </form>
-                </li>
+                </div>
             </th:block>
 
-            <!-- Guest -->
+            <!-- Guest: login + CTA -->
             <th:block th:unless="${session.customer != null}">
-                <li><a th:href="@{/register#login}">Login</a></li>
-                <li class="hb-nav-cta"><a class="hb-btn hb-btn-brass" th:href="@{/booking}">Book Now</a></li>
+                <ul class="hb-nav-group hb-nav-links">
+                    <li><a th:href="@{/register#login}">Login</a></li>
+                </ul>
+                <div class="hb-user-area">
+                    <a class="hb-btn hb-btn-brass" th:href="@{/booking}" style="white-space:nowrap">Book Now</a>
+                </div>
             </th:block>
-        </ul>
+        </div>
 
         <!-- Mobile hamburger -->
         <button type="button" class="hb-burger hb-mobile-only" aria-label="Open menu" aria-expanded="false"
@@ -62,19 +76,23 @@
     <!-- Mobile menu panel -->
     <div class="hb-mobile-menu" id="hbMobileMenu">
         <ul>
+            <li style="padding:10px 22px 4px;font-size:.72rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:rgba(245,239,228,.45)">Explore</li>
             <li><a th:href="@{/index#aboutUs}" onclick="document.getElementById('hbMobileMenu').classList.remove('open')">About</a></li>
             <li><a th:href="@{/index#services}" onclick="document.getElementById('hbMobileMenu').classList.remove('open')">Services &amp; Prices</a></li>
             <li><a th:href="@{/index#barbers}" onclick="document.getElementById('hbMobileMenu').classList.remove('open')">Barbers</a></li>
             <li><a th:href="@{/index#visit}" onclick="document.getElementById('hbMobileMenu').classList.remove('open')">Visit Us</a></li>
             <th:block th:if="${session.customer != null}">
                 <li class="hb-menu-sep" aria-hidden="true"></li>
+                <li style="padding:10px 22px 4px;font-size:.72rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:rgba(245,239,228,.45)">Your booking</li>
                 <li><a class="hb-m-cta" th:href="@{/booking}" onclick="document.getElementById('hbMobileMenu').classList.remove('open')">📅 Book Appointment</a></li>
-                <li><a th:href="@{/view-appointment}" onclick="document.getElementById('hbMobileMenu').classList.remove('open')">My Appointments</a></li>
-                <li><a th:href="@{/appointment-history}" onclick="document.getElementById('hbMobileMenu').classList.remove('open')">Appointment History</a></li>
+                <li><a th:href="@{/view-appointment}" onclick="document.getElementById('hbMobileMenu').classList.remove('open')">🕐 My Appointments</a></li>
+                <li><a th:href="@{/appointment-history}" onclick="document.getElementById('hbMobileMenu').classList.remove('open')">🗂 History</a></li>
+                <li class="hb-menu-sep" aria-hidden="true"></li>
+                <li style="padding:10px 22px 4px;font-size:.72rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:rgba(245,239,228,.45)">Account</li>
                 <li><a th:href="@{/profile}" onclick="document.getElementById('hbMobileMenu').classList.remove('open')"
                        th:text="'👤 ' + ${session.customer.custName}">Profile</a></li>
                 <li>
-                    <form th:action="@{/logout}" method="post" style="margin:0;padding:6px 22px">
+                    <form th:action="@{/logout}" method="post" style="margin:0;padding:6px 22px 14px">
                         <button type="submit" class="hb-btn hb-btn-outline" style="width:100%;font-size:16px;padding:10px 18px">Logout</button>
                     </form>
                 </li>
@@ -82,7 +100,7 @@
             <th:block th:unless="${session.customer != null}">
                 <li class="hb-menu-sep" aria-hidden="true"></li>
                 <li><a th:href="@{/register#login}" onclick="document.getElementById('hbMobileMenu').classList.remove('open')">Login</a></li>
-                <li style="padding:6px 22px"><a class="hb-btn hb-btn-brass" style="display:block;text-align:center" th:href="@{/booking}">Book Now</a></li>
+                <li style="padding:6px 22px 14px"><a class="hb-btn hb-btn-brass" style="display:block;text-align:center" th:href="@{/booking}">Book Now</a></li>
             </th:block>
         </ul>
     </div>
