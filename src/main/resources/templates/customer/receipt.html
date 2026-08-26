@@ -59,7 +59,8 @@
            style="display:inline-flex;align-items:center;justify-content:center;text-align:center;background:var(--oxblood);color:#fff;text-decoration:none;border-radius:5px;padding:14px 30px;font-family:'Bebas Neue';font-size:21px;letter-spacing:.09em"
            onmouseover="this.style.filter='brightness(1.12)'" onmouseout="this.style.filter=''">
             <span th:if="${source == 'appointment-history'}">Back to Appointment History</span>
-            <span th:if="${source != 'appointment-history'}">Back to Appointment Page</span>
+            <span th:if="${source == 'view-appointment'}">Back to My Appointments</span>
+            <span th:if="${source != 'appointment-history' and source != 'view-appointment'}">Back to Appointment Page</span>
         </a>
     </div>
 </main>

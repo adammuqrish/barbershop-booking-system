@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/header :: head}">
+    <title>Page Not Found — Hugi Barbershop</title>
+</head>
+
+<body class="flex flex-col min-h-screen" style="font-family:'Inter',system-ui,sans-serif;background:var(--cream);color:var(--ink);margin:0">
+
+<nav th:replace="~{fragments/nav :: nav}"></nav>
+
+<main style="flex:1;display:flex;align-items:center;justify-content:center;padding:60px 24px">
+    <div style="text-align:center;max-width:480px">
+        <p style="font-family:'Bebas Neue';font-size:120px;line-height:1;color:var(--brass);margin:0">404</p>
+        <h1 style="font-family:'Bebas Neue';font-size:34px;letter-spacing:.06em;margin:6px 0 12px;color:var(--ink)">This page got a close shave.</h1>
+        <p style="color:var(--muted);font-size:.98rem;line-height:1.6;margin:0 0 28px">
+            The page you're looking for doesn't exist or may have moved.
+            Let's get you back to something sharp.
+        </p>
+        <div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap">
+            <a th:href="@{/index}" class="hb-btn hb-btn-blood">Back to Home</a>
+            <a th:href="@{/booking}" class="hb-btn hb-btn-outline">Book an Appointment</a>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+
+</html>
