@@ -16,6 +16,18 @@
 
 <nav th:replace="~{fragments/nav :: nav}"></nav>
 
+<!-- Login success toast -->
+<div th:if="${justLoggedIn}" id="loginToast" role="status"
+     style="position:fixed;top:86px;right:20px;z-index:100;background:#eef7ee;border:2px solid #2e7d32;color:#2e7d32;font-weight:600;padding:12px 20px;border-radius:6px;box-shadow:0 8px 22px rgba(0,0,0,.15)">
+    ✓ Welcome back! You're logged in.
+</div>
+<script th:if="${justLoggedIn}">
+    setTimeout(function () {
+        var t = document.getElementById('loginToast');
+        if (t) t.remove();
+    }, 4000);
+</script>
+
 <main style="flex:1">
 
     <!-- ================= HERO ================= -->

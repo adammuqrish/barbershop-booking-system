@@ -76,15 +76,18 @@
             </th:block>
         </div>
 
-        <!-- Mobile hamburger -->
-        <button type="button" class="hb-burger hb-mobile-only" aria-label="Open menu" aria-expanded="false"
-                onclick="const m=document.getElementById('hbMobileMenu');const open=m.classList.toggle('open');this.setAttribute('aria-expanded',open)">
-            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--cream)" stroke-width="2.4" stroke-linecap="round" aria-hidden="true">
-                <line x1="4" y1="7" x2="20" y2="7"></line>
-                <line x1="4" y1="12" x2="20" y2="12"></line>
-                <line x1="4" y1="17" x2="20" y2="17"></line>
-            </svg>
-        </button>
+        <!-- Mobile: compact Book Now + hamburger -->
+        <div class="hb-mobile-only" style="display:none;align-items:center;gap:10px">
+            <a class="hb-btn hb-btn-brass hb-nav-cta-sm" th:href="@{/booking}">Book Now</a>
+            <button type="button" class="hb-burger" aria-label="Open menu" aria-expanded="false"
+                    onclick="const m=document.getElementById('hbMobileMenu');const open=m.classList.toggle('open');this.setAttribute('aria-expanded',open)">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--cream)" stroke-width="2.4" stroke-linecap="round" aria-hidden="true">
+                    <line x1="4" y1="7" x2="20" y2="7"></line>
+                    <line x1="4" y1="12" x2="20" y2="12"></line>
+                    <line x1="4" y1="17" x2="20" y2="17"></line>
+                </svg>
+            </button>
+        </div>
     </div>
 
     <!-- Mobile menu panel -->

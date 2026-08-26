@@ -72,16 +72,18 @@
 
 @media(max-width:900px){
   .hb-desktop-only{display:none}
-  .hb-mobile-only{display:block}
-  .hb-nav-inner{padding:0 16px}
-  .hb-mobile-menu{display:block;max-height:0;overflow:hidden;transition:max-height .3s ease;background:var(--ink);border-top:1px solid rgba(245,239,228,.12)}
-  .hb-mobile-menu.open{max-height:none}   /* let the panel grow to its content */
-  .hb-mobile-menu:not(.open){max-height:0}
-  .hb-mobile-menu ul{list-style:none;margin:0;padding:10px 0 16px}
-  .hb-mobile-menu a{display:block;padding:13px 22px;color:var(--cream);text-decoration:none;font-weight:600;font-size:1rem;border-bottom:1px solid rgba(245,239,228,.08)}
+  .hb-mobile-only{display:inline-flex}
+  .hb-nav-inner{padding:0 16px;height:60px;max-width:100%}
+
+  /* dropdown panel OVERLAYS the page - doesn't push content down */
+  .hb-mobile-menu{display:block;position:absolute;top:100%;left:0;right:0;background:var(--ink);border-bottom:3px solid var(--brass);box-shadow:0 18px 30px rgba(0,0,0,.35);max-height:0;overflow:hidden;transition:max-height .28s ease;z-index:49}
+  .hb-mobile-menu.open{max-height:none;border-top-color:transparent}
+  .hb-nav:has(.hb-mobile-menu.open){box-shadow:none}
+  .hb-mobile-menu ul{list-style:none;margin:0;padding:8px 0 14px}
+  .hb-mobile-menu a{display:block;padding:12px 24px;color:var(--cream);text-decoration:none;font-weight:600;font-size:.98rem}
   .hb-mobile-menu a:hover{color:var(--brass);background:rgba(245,239,228,.05)}
-  .hb-m-cta{color:var(--brass) !important;font-size:1.05rem !important}
-  .hb-menu-sep{height:6px;background:rgba(245,239,228,.06);border-bottom:1px solid rgba(245,239,228,.12)}
+  .hb-m-cta{color:var(--brass) !important;font-size:1.02rem !important}
+  .hb-menu-sep{height:1px;background:rgba(245,239,228,.14)}
 }
 
 /* ---------- hero ---------- */
