@@ -76,7 +76,8 @@ public class AuthController {
             @RequestParam(required = false) String phone,
             @RequestParam(required = false) String confirmPassword,
             HttpSession session,
-            Model model) {
+            Model model,
+            org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
 
         // --- SECTION 1: LOGIN CUSTOMER ---
         if ("login".equals(action)) {
@@ -119,8 +120,14 @@ public class AuthController {
                 session.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
                 logger.debug("Spring Security context set for customer: {}", customer.getCustEmail());
 
+                redirectAttributes.addFlashAttribute("justLoggedIn", true);
                 return "redirect:/index";
             }
+
+            // ❌ Login failed - wrong email or password
+            logger.debug("Customer login failed for email: {}", email);
+            model.addAttribute("error", "Invalid email or password. Please try again.");
+            return "customer/register";
         }
 
         // --- SECTION 2: REGISTER CUSTOMER ---
@@ -238,10 +245,7 @@ public class AuthController {
         return "admin/adminLogin";
     }
 
-    @GetMapping("/logout")
-    public String logout(HttpSession session) {
-        session.invalidate();
-        SecurityContextHolder.clearContext(); // Pastikan ini ada
-        return "redirect:/index";
-    }
+    // Logout handled by Spring Security's logout filter (POST /logout) -
+    // see SecurityConfig.logout(). A GET logout link was removed so a
+    // malicious page cannot log users out via a simple image/link request.
 }

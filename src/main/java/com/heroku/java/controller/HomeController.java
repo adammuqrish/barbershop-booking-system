@@ -35,7 +35,15 @@ public class HomeController {
     }
 
     @GetMapping({ "/", "/index" })
-    public String index() {
+    public String index(org.springframework.ui.Model model,
+            org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+        // Barbers shown on the landing page (BARBER role only, admin excluded)
+        model.addAttribute("barbers",
+                staffRepository.findByStaffRole("BARBER"));
+        // Flash attribute from login (success toast) - forward it to the template
+        if (redirectAttributes.getFlashAttributes().containsKey("justLoggedIn")) {
+            model.addAttribute("justLoggedIn", true);
+        }
         return "index";
     }
 }

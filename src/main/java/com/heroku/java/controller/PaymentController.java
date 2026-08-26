@@ -13,12 +13,14 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
 import java.util.Optional;
 
 import com.heroku.java.model.Customer;
 import com.heroku.java.repository.CustomerRepository;
+import com.heroku.java.service.CustomerService;
 
 @Controller
 public class PaymentController {
@@ -26,27 +28,39 @@ public class PaymentController {
     private final AppointmentRepository appointmentRepository;
     private final PaymentRepository paymentRepository;
     private final CustomerRepository customerRepository;
+    private final CustomerService customerService;
 
     @Autowired
     public PaymentController(AppointmentRepository appointmentRepository,
             PaymentRepository paymentRepository,
-            CustomerRepository customerRepository) {
+            CustomerRepository customerRepository,
+            CustomerService customerService) {
         this.appointmentRepository = appointmentRepository;
         this.paymentRepository = paymentRepository;
         this.customerRepository = customerRepository;
+        this.customerService = customerService;
     }
-
-    private static final int MAX_LOYALTY_POINTS = 2;
 
     @GetMapping("/payment")
     public String paymentPage(@RequestParam(required = false) Long appointmentId,
             HttpSession session,
-            Model model) {
+            Model model,
+            RedirectAttributes redirectAttributes) {
 
-        // ✅ 1. AMBIL APPOINTMENT DARI SESSION
+        // ✅ 1. Consume any flash error from a failed submission
+        String flashError = (String) redirectAttributes.getFlashAttributes().get("bookingError");
+        if (flashError == null) {
+            flashError = (String) session.getAttribute("flashError");
+            if (flashError != null) {
+                session.removeAttribute("flashError");
+            }
+        }
+        if (flashError != null) model.addAttribute("bookingError", flashError);
+
+        // ✅ 2. AMBIL APPOINTMENT DARI SESSION
         Appointment appointment = (Appointment) session.getAttribute("pendingAppointment");
 
-        // 2. Jika tak ada dalam session, redirect ke Booking
+        // 3. Jika tak ada dalam session, redirect ke booking
         if (appointment == null) {
             return "redirect:/booking";
         }
@@ -86,7 +100,8 @@ public class PaymentController {
         if (customer != null) {
             // Reload from DB to get latest points
             customer = customerRepository.findById(customer.getCustId()).orElse(customer);
-            if (customer.getCustLoyaltyPoints() != null && customer.getCustLoyaltyPoints() >= MAX_LOYALTY_POINTS) {
+            if (customer.getCustLoyaltyPoints() != null
+                    && customer.getCustLoyaltyPoints() >= CustomerService.MAX_LOYALTY_POINTS) {
                 price = 0.0;
                 model.addAttribute("freeMessage",
                         "Congratulations! This appointment is FREE as you have reached loyalty reward.");
@@ -99,17 +114,37 @@ public class PaymentController {
     }
 
     @PostMapping("/processPayment")
-    public String processPayment(@RequestParam String paymentMethod,
+    public String processPayment(@RequestParam(value = "paymentMethod", required = false) String paymentMethod,
             @RequestParam(required = false) String bankName,
             @RequestParam(required = false) String bankHolderName,
-            HttpSession session) {
+            HttpSession session,
+            RedirectAttributes redirectAttributes) {
 
         // ✅ 1. AMBIL APPOINTMENT DARI SESSION
         Appointment appointment = (Appointment) session.getAttribute("pendingAppointment");
 
-        // 2. Jika session hilang/tak ada, redirect ke booking
+        // 2. Jika tak ada dalam session, redirect ke booking
         if (appointment == null) {
             return "redirect:/booking";
+        }
+
+        // ✅ 3. VALIDATE paymentMethod
+        if (paymentMethod == null || paymentMethod.trim().isEmpty()) {
+            redirectAttributes.addFlashAttribute("bookingError", "Please select a payment method before continuing.");
+            return "redirect:/payment";
+        }
+        if (!"cash".equals(paymentMethod) && !"online".equals(paymentMethod)) {
+            redirectAttributes.addFlashAttribute("bookingError", "Invalid payment method. Please choose cash or online.");
+            return "redirect:/payment";
+        }
+
+        // ✅ 4. Validate bank details if online payment
+        if ("online".equals(paymentMethod)) {
+            if (bankName == null || bankName.trim().isEmpty()
+                    || bankHolderName == null || bankHolderName.trim().isEmpty()) {
+                redirectAttributes.addFlashAttribute("bookingError", "Please fill in all bank details for online payment.");
+                return "redirect:/payment";
+            }
         }
 
         // ✅ 3. PASTIKAN ID KOSONG (Supaya JPA create new record)
@@ -142,8 +177,15 @@ public class PaymentController {
         Optional<Customer> custOpt = customerRepository.findById(custId);
         if (custOpt.isPresent()) {
             Customer c = custOpt.get();
-            if (c.getCustLoyaltyPoints() != null && c.getCustLoyaltyPoints() >= MAX_LOYALTY_POINTS) {
+            if (c.getCustLoyaltyPoints() != null
+                    && c.getCustLoyaltyPoints() >= CustomerService.MAX_LOYALTY_POINTS) {
                 price = 0.0;
+                // Mark THIS appointment as the redeemed reward cut and consume the
+                // balance NOW. Consuming at checkout (not at completion) means any
+                // further booking made before this appointment completes is charged
+                // normally - the reward cannot be reused until re-earned.
+                appointment.setValueLoyalty(Appointment.LOYALTY_REDEEMED);
+                customerService.redeemReward(custId);
             }
         }
 
@@ -165,19 +207,10 @@ public class PaymentController {
 
             savedAppointment.setPaymentStatus("completed");
 
-            // Update Loyalty Points
-            customerRepository.findById(custId).ifPresent(customer -> {
-                int currentPoints = customer.getCustLoyaltyPoints() == null ? 0 : customer.getCustLoyaltyPoints();
-                int newPoints = (currentPoints % MAX_LOYALTY_POINTS) + 1;
-                customer.setCustLoyaltyPoints(newPoints);
-                customerRepository.save(customer);
-
-                // Update session user
-                Customer sessionCustomer = (Customer) session.getAttribute("customer");
-                if (sessionCustomer != null && sessionCustomer.getCustId().equals(custId)) {
-                    session.setAttribute("customer", customer);
-                }
-            });
+            // NOTE: Loyalty points are NOT awarded here anymore.
+            // Points are granted only when the service is marked 'done'
+            // (see AdminController.updateServiceStatus) so customers earn
+            // points for completed cuts, not merely for paying up front.
 
         } else {
             CashPayment cp = new CashPayment();
@@ -196,6 +229,6 @@ public class PaymentController {
         // ✅ 7. CLEAR SESSION (PENTING!)
         session.removeAttribute("pendingAppointment");
 
-        return "redirect:/receipt?appointmentId=" + newAppointmentId + "&source=booking";
+        return "redirect:/receipt?appointmentId=" + newAppointmentId + "&source=view-appointment";
     }
 }

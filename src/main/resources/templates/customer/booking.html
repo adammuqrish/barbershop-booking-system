@@ -1,183 +1,478 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 
-<head th:replace="~{fragments/header :: head}"></head>
+<head th:replace="~{fragments/header :: head}">
+    <title>Book Appointment — Hugi Barbershop</title>
+</head>
 
-<body class="flex flex-col h-screen justify-between bg-yellow-100">
-    <nav th:replace="~{fragments/nav :: nav}"></nav>
-    <main class="flex flex-col items-center mx-3 my-12 flex-grow">
-        <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-5xl mx-auto">
-            <h1 class="text-3xl font-bold mb-6">Book Appointment</h1>
-            <form th:action="@{/booking}" method="post">
-                <div class="mb-6">
-                    <label class="block mb-1 font-semibold" for="booking-for">Booking For (For whom you book
-                        for):</label>
-                    <input id="booking-for" name="booking-for" type="text"
-                        class="w-full border rounded px-3 py-2 shadow" required />
-                </div>
-                <div class="mb-6">
-                    <label class="block font-semibold mb-2">Select Date:</label>
-                    <input id="date" name="date" type="date" class="w-full border rounded px-3 py-2 shadow"
-                        th:value="${selectedDate}" th:min="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}" required />
-                </div>
-                <div class="mb-6">
-                    <label class="block mb-1 font-semibold">Booking Time:</label>
-                    <input id="selected-time" name="selected-time" type="text"
-                        class="w-full border rounded px-3 py-2 shadow mb-2 bg-gray-100" value="--:-- --" readonly />
-                    <div class="grid grid-cols-6 gap-2">
-                        <th:block th:each="slot : ${slots}">
-                            <label class="flex items-center space-x-1">
-                                <input type="radio" name="slot" th:value="${slot}" class="slot-radio"
-                                    th:disabled="${unavailableBarbersBySlot[slot] != null && unavailableBarbersBySlot[slot].size() == barbers.size()}"
-                                    required />
-                                <span th:text="${slot}"></span>
-                            </label>
-                        </th:block>
-                    </div>
-                </div>
-                <div class="mb-6">
-                    <label class="block mb-1 font-semibold" for="category">Customer Category:</label>
-                    <select id="category" name="category" class="w-full border rounded px-3 py-2 shadow">
-                        <option>Child</option>
-                        <option>Teen</option>
-                        <option>Adult</option>
-                        <option>Senior</option>
-                    </select>
-                </div>
-                <div class="mb-6">
-                    <label class="block mb-1 font-semibold" for="barber">Select Barber:</label>
-                    <select id="barber" name="barber" class="w-full border rounded px-3 py-2 shadow" required>
-                        <option value="" selected disabled>-- Select Barber --</option>
-                        <th:block th:each="barber : ${barbers}">
-                            <option th:value="${barber.staffId}" th:text="${barber.staffName}"
-                                th:style="${unavailableBarbersBySlot[slots[0]] != null && unavailableBarbersBySlot[slots[0]].contains(barber.staffId) ? 'display:none' : ''}">
-                            </option>
-                        </th:block>
-                    </select>
-                </div>
-                <div class="flex">
-                    <button type="submit"
-                        class="bg-blue-500 text-white px-5 py-2 rounded shadow hover:bg-blue-600 transition">Book
-                        Appointment</button>
-                </div>
-            </form>
+<body class="flex flex-col min-h-screen" style="font-family:'Inter',system-ui,sans-serif;background:var(--cream);color:var(--ink);margin:0">
+
+<nav th:replace="~{fragments/nav :: nav}"></nav>
+
+<style>
+    .bk-wrap{max-width:960px;margin:0 auto;padding:48px 24px 80px;width:100%}
+    .bk-steps{display:flex;align-items:center;gap:8px;margin-bottom:36px}
+    .bk-step{display:flex;align-items:center;gap:10px;font-size:.85rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+    .bk-step .n{width:28px;height:28px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;font-family:'Bebas Neue';font-size:16px;color:var(--muted);flex-shrink:0}
+    .bk-step.active{color:var(--oxblood)}
+    .bk-step.active .n{background:var(--brass);border-color:var(--brass);color:var(--ink)}
+    .bk-sep{flex:1;border-top:2px dotted var(--line)}
+    @media(max-width:640px){
+        /* compact steps: circles only, labels hidden, dots centered between */
+        .bk-steps{padding:0 8px}
+        .bk-step{font-size:0;gap:0}          /* hide text, keep circle */
+        .bk-step .n{width:32px;height:32px;font-size:17px}
+        .bk-card{padding:22px 18px}
+        /* submit button fits the screen */
+        .bk-submit-row{display:block}
+        .bk-submit-row .hb-btn{width:100%}
+        .bk-summary{padding:14px 16px}
+    }
+
+    .bk-card{background:#fff;border:1px solid var(--line);border-radius:6px;padding:32px;box-shadow:4px 4px 0 var(--cream-2)}
+    .bk-card + .bk-card{margin-top:28px}
+    .bk-card h2{font-family:'Bebas Neue';font-weight:400;font-size:30px;letter-spacing:.05em;margin-bottom:6px}
+    .bk-card .hint{font-size:.9rem;color:var(--muted);margin-bottom:22px}
+
+    .bk-label{display:block;font-weight:600;font-size:.9rem;margin-bottom:8px;color:var(--ink-2)}
+    .bk-input{width:100%;max-width:420px;border:1px solid var(--line);border-radius:4px;padding:12px 14px;font-size:1rem;background:#fff;color:var(--ink)}
+    .bk-input:focus{outline:3px solid var(--brass);outline-offset:1px}
+
+    /* time slots as big tappable buttons */
+    .slot-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:12px}
+    .slot-grid input[type=radio]{position:absolute;opacity:0;pointer-events:none}
+    .slot-btn{display:block;text-align:center;padding:14px 8px;border:2px solid var(--line);border-radius:5px;background:#fff;font-family:'Bebas Neue';font-size:21px;letter-spacing:.06em;cursor:pointer;transition:all .15s ease;user-select:none}
+    .slot-btn:hover{border-color:var(--brass)}
+    input.slot-radio:checked + label .slot-btn,
+    input.slot-radio:checked + .slot-btn{background:var(--oxblood);border-color:var(--oxblood);color:#fff;font-size:19px}
+    input.slot-radio:checked + label .slot-btn::after,
+    input.slot-radio:checked + .slot-btn::after{content:" ✓ SELECTED";display:block;font-family:'Inter';font-size:.62rem;font-weight:700;letter-spacing:.18em;color:var(--brass);margin-top:3px}
+    input.slot-radio:focus-visible + label .slot-btn,
+    input.slot-radio:focus-visible + .slot-btn{outline:3px solid var(--brass);outline-offset:2px}
+    input.slot-radio:disabled + label .slot-btn,
+    input.slot-radio:disabled + .slot-btn{background:var(--cream-2);color:var(--muted);border-color:var(--cream-2);cursor:not-allowed;text-decoration:line-through;text-decoration-thickness:2px}
+
+    /* selection summary strip */
+    .bk-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:14px 18px;margin-top:20px;padding:16px 20px;background:var(--ink);border-radius:5px;color:var(--cream)}
+    .bk-summary > span{display:flex;flex-direction:column;gap:2px}
+    .bk-summary > span::before{content:attr(data-label);font-size:.68rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(245,239,228,.55)}
+    .bk-summary b{color:var(--brass);font-family:'Bebas Neue';font-weight:400;font-size:21px;letter-spacing:.05em;line-height:1.1}
+    .bk-summary .unset{opacity:.45}
+
+    /* inline field errors */
+    .field-error{display:none;color:#b3122f;background:#fdeaea;border-left:4px solid #b3122f;font-size:.9rem;font-weight:600;padding:8px 14px;margin-top:10px;border-radius:0 4px 4px 0}
+    .field-error.show{display:block;animation:err-in .25s ease}
+    @keyframes err-in{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+    .field-error.show ~ * .slot-btn, .bk-card:has(.field-error.show) .slot-btn{outline:none}
+
+    /* barber picker cards */
+    .barber-pick{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:16px}
+    .barber-pick input[type=radio]{position:absolute;opacity:0;pointer-events:none}
+    .barber-opt{display:flex;flex-direction:column;align-items:center;gap:10px;padding:18px 12px 14px;border:2px solid var(--line);border-radius:6px;background:#fff;cursor:pointer;transition:all .15s ease}
+    .barber-opt:hover{border-color:var(--brass)}
+    .barber-opt img,.barber-opt .fallback{width:76px;height:76px;border-radius:50%;object-fit:cover;border:3px solid var(--cream-2)}
+    .barber-opt .fallback{display:grid;place-items:center;font-family:'Bebas Neue';font-size:34px;color:var(--brass);background:var(--ink)}
+    .barber-opt .bname{font-family:'Bebas Neue';font-size:22px;letter-spacing:.05em}
+    .barber-opt .bspec{font-size:.75rem;color:var(--muted);text-align:center;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+    input.barber-radio:checked + label .barber-opt,
+    input.barber-radio:checked + .barber-opt{border-color:var(--oxblood);box-shadow:0 0 0 2px var(--oxblood)}
+    input.barber-radio:checked + label .barber-opt::after,
+    input.barber-radio:checked + .barber-opt::after{content:"✓ YOUR BARBER";display:block;margin-top:8px;font-size:.68rem;font-weight:700;letter-spacing:.14em;color:#fff;background:var(--oxblood);padding:3px 10px;border-radius:3px}
+    input.barber-radio:checked + label .barber-opt img,
+    input.barber-radio:checked + .barber-opt img,
+    input.barber-radio:checked + label .barber-opt .fallback,
+    input.barber-radio:checked + .barber-opt .fallback{border-color:var(--brass)}
+    input.barber-radio:focus-visible + .barber-opt{outline:3px solid var(--brass);outline-offset:2px}
+    input.barber-radio:disabled + label .barber-opt,
+    input.barber-radio:disabled + .barber-opt{opacity:.45;cursor:not-allowed;background:var(--cream-2);border-color:var(--cream-2)}
+    input.barber-radio:disabled + label .barber-opt img,
+    input.barber-radio:disabled + label .barber-opt .fallback,
+    input.barber-radio:disabled + .barber-opt img,
+    input.barber-radio:disabled + .barber-opt .fallback{filter:grayscale(1);border-color:var(--line)}
+    input.barber-radio:disabled + label .barber-opt::before,
+    input.barber-radio:disabled + .barber-opt::before{content:"✕ BOOKED";display:block;margin-top:8px;font-size:.68rem;font-weight:700;letter-spacing:.14em;color:#fff;background:#b3122f;padding:3px 10px;border-radius:3px}
+
+    /* category pills */
+    .cat-row{display:flex;gap:12px;flex-wrap:wrap}
+    .cat-row input[type=radio]{position:absolute;opacity:0;pointer-events:none}
+    .cat-pill{padding:11px 26px;border:2px solid var(--line);border-radius:999px;background:#fff;font-weight:600;cursor:pointer;transition:all .15s ease;display:inline-block}
+    .cat-pill:hover{border-color:var(--brass)}
+    input.cat-radio:checked + label .cat-pill,
+    input.cat-radio:checked + .cat-pill{background:var(--oxblood);border-color:var(--oxblood);color:#fff}
+    input.cat-radio:checked + label .cat-pill::after,
+    input.cat-radio:checked + .cat-pill::after{content:" ✓";color:var(--brass)}
+    input.cat-radio:focus-visible + label .cat-pill,
+    input.cat-radio:focus-visible + .cat-pill{outline:3px solid var(--brass);outline-offset:2px}
+
+    .bk-submit-row{margin-top:36px;display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+    .bk-submit-row .hb-btn{min-width:220px}
+    @media(max-width:640px){
+        .bk-submit-row .hb-btn{width:100%;min-width:0}
+    }
+    .hb-btn-blood{font-size:26px !important;padding:14px 48px !important}
+    @media(max-width:640px){.hb-btn-blood{font-size:21px !important;padding:13px 20px !important}}
+    .bk-note{font-size:.88rem;color:var(--muted);max-width:44ch}
+</style>
+
+<main style="flex:1">
+    <div class="bk-wrap">
+        <div class="sec-head" style="margin-bottom:28px">
+            <span class="hb-tag">Booking</span>
+            <h1 class="hb-display" style="font-size:clamp(42px,6vw,64px);margin-top:6px">Reserve your <em style="font-style:normal;color:var(--oxblood)">chair.</em></h1>
         </div>
-    </main>
-    <footer th:replace="~{fragments/footer :: footer}"></footer>
 
-    <script th:inline="javascript">
-        const barbersList = /*[[${barbers}]]*/[];
-        let unavailableBarbersBySlot = /*[[${unavailableBarbersBySlot}]]*/ {};
+        <!-- Step indicator -->
+        <div class="bk-steps">
+            <div class="bk-step active"><span class="n">1</span> Date &amp; Time</div>
+            <div class="bk-sep"></div>
+            <div class="bk-step active"><span class="n">2</span> Category &amp; Barber</div>
+            <div class="bk-sep"></div>
+            <div class="bk-step"><span class="n">3</span> Confirm &amp; Pay</div>
+        </div>
 
-        // ✅ LOGIK TAMBAHAN: CHECK CURRENT TIME
-        document.getElementById('date').addEventListener('change', function () {
-            const selectedDate = this.value;
+        <form id="bookingForm" th:action="@{/booking}" method="post" novalidate>
+            <!-- Server-side validation error -->
+            <div th:if="${bookingError}" role="alert"
+                 style="background:#fdeaea;border:2px solid var(--oxblood);color:var(--oxblood);border-radius:5px;padding:14px 18px;margin-bottom:24px;font-weight:600">
+                ⚠ <span th:text="${bookingError}">Error</span>
+            </div>
 
-            // Panggil API untuk check availability
-            fetch('/booking/unavailable?date=' + selectedDate)
+            <!-- STEP 1: date & time -->
+            <section class="bk-card">
+                <h2>Pick a date &amp; time</h2>
+                <p class="hint">Slots that are fully booked or already past are crossed out. We hold each cut to 30 minutes.</p>
+
+                <label class="bk-label" for="booking-for">Booking for (whose haircut is it?)</label>
+                <input id="booking-for" name="booking-for" type="text" required
+                       placeholder="e.g. yourself, your son Ahmad…" class="bk-input" />
+
+                <div style="height:22px"></div>
+                <label class="bk-label" for="date">Select date</label>
+                <input id="date" name="date" type="date" required
+                       th:value="${selectedDate}"
+                       th:min="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}" class="bk-input" />
+                <p class="field-error" id="err-date"></p>
+
+                <div style="height:22px"></div>
+                <span class="bk-label">Available times</span>
+                <input id="selected-time" name="selected-time" type="text"
+                       value="--:-- --" readonly hidden />
+                <div class="slot-grid">
+                    <th:block th:each="slot : ${slots}">
+                        <input type="radio" name="slot" th:value="${slot}"
+                               th:id="'slot-' + ${slotStat.index}" class="slot-radio"
+                               th:disabled="${unavailableBarbersBySlot[slot] != null && unavailableBarbersBySlot[slot].size() == barbers.size()}"
+                               required />
+                        <label th:for="'slot-' + ${slotStat.index}"
+                               th:class="'slot-label' + (${unavailableBarbersBySlot[slot] != null && unavailableBarbersBySlot[slot].size() == barbers.size()} ? ' fully-booked' : '')">
+                            <span class="slot-btn" th:text="${slot}">10:00 am</span>
+                        </label>
+                    </th:block>
+                </div>
+
+                <!-- Live selection summary -->
+                <div class="bk-summary" id="bk-summary">
+                    <span data-label="Date"><b id="sum-date" class="unset">—</b></span>
+                    <span data-label="Time"><b id="sum-time" class="unset">—</b></span>
+                    <span data-label="Category"><b id="sum-cat" class="unset">Adult</b></span>
+                    <span data-label="Barber"><b id="sum-barber" class="unset">—</b></span>
+                </div>
+                <p class="field-error" id="err-summary"></p>
+            </section>
+
+            <!-- STEP 2: category & barber -->
+            <section class="bk-card">
+                <h2>Who's it for &amp; which barber?</h2>
+                <p class="hint">Category sets the price. Barber photos show who's free at the chosen time.</p>
+
+                <span class="bk-label">Customer category</span>
+                <div class="cat-row">
+                    <th:block th:each="c : ${ {'Child','Teen','Adult','Senior'} }">
+                        <input type="radio" name="category" th:value="${c}" th:id="'cat-' + ${c}" class="cat-radio"
+                               th:checked="${c == 'Adult'}" required />
+                        <label th:for="'cat-' + ${c}">
+                            <span class="cat-pill" th:text="${c}">Adult</span>
+                        </label>
+                    </th:block>
+                </div>
+
+                <div style="height:26px"></div>
+                <span class="bk-label">Select barber</span>
+                <select id="barber" name="barber" required hidden>
+                    <option value="" selected disabled>-- Select Barber --</option>
+                    <th:block th:each="barber : ${barbers}">
+                        <option th:value="${barber.staffId}" th:text="${barber.staffName}"></option>
+                    </th:block>
+                </select>
+                <div class="barber-pick" id="barber-pick">
+                    <th:block th:each="barber : ${barbers}">
+                        <input type="radio" name="barber-vis" th:value="${barber.staffId}"
+                               th:id="'bpick-' + ${barber.staffId}" class="barber-radio" />
+                        <label th:for="'bpick-' + ${barber.staffId}">
+                            <span class="barber-opt">
+                                <img th:if="${barber.staffPicture != null}"
+                                     th:src="@{'/resources/uploads/barber-images/' + ${barber.staffPicture}}"
+                                     th:alt="'Portrait of ' + ${barber.staffName}" />
+                                <span th:unless="${barber.staffPicture != null}" class="fallback"
+                                      th:text="${#strings.substring(barber.staffName, 0, 1)}">H</span>
+                                <span class="bname" th:text="${barber.staffName}">Barber</span>
+                                <span class="bspec" th:text="${#strings.abbreviate(barber.description != null ? barber.description : 'Professional barber', 60)}">Specialty</span>
+                            </span>
+                        </label>
+                    </th:block>
+                </div>
+                <p class="field-error" id="err-barber"></p>
+            </section>
+
+            <!-- Submit -->
+            <div class="bk-submit-row">
+                <button type="submit" class="hb-btn hb-btn-blood">Confirm booking</button>
+                <span class="bk-note">Next step: choose how to pay — cash at the shop or card online. Nothing is charged until you confirm.</span>
+            </div>
+        </form>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+
+<script th:inline="javascript">
+    const barbersList = /*[[${barbers}]]*/[];
+    let unavailableBarbersBySlot = /*[[${unavailableBarbersBySlot}]]*/ {};
+
+    // Keep the visual barber picker and the real (hidden) select in sync
+    function syncBarberSelect() {
+        const checked = document.querySelector('input.barber-radio:checked');
+        const select = document.getElementById('barber');
+        if (checked) {
+            const match = Array.from(select.options).find(o => o.value === checked.value);
+            if (match && !match.disabled) select.value = checked.value;
+        }
+        updateSummary();
+    }
+    document.querySelectorAll('input.barber-radio').forEach(r =>
+        r.addEventListener('change', syncBarberSelect));
+
+    // Category pills -> summary
+    document.querySelectorAll('input.cat-radio').forEach(r =>
+        r.addEventListener('change', updateSummary));
+
+    function updateSummary() {
+        const set = (id, val) => {
+            const el = document.getElementById(id);
+            el.textContent = val;
+            el.classList.toggle('unset', !val || val === '—');
+        };
+        const dateVal = document.getElementById('date').value;
+        const timeVal = document.getElementById('selected-time').value;
+        const catChecked = document.querySelector('input.cat-radio:checked');
+        const barberChecked = document.querySelector('input.barber-radio:checked');
+
+        set('sum-date', dateVal ? formatDate(dateVal) : '');
+        set('sum-time', timeVal && timeVal !== '--:-- --' ? timeVal : '');
+        set('sum-cat', catChecked ? catChecked.value : '');
+        if (barberChecked) {
+            const b = barbersList.find(x => x.staffId.toString() === barberChecked.value);
+            set('sum-barber', b ? b.staffName : '');
+        } else {
+            set('sum-barber', '');
+        }
+    }
+    function formatDate(iso) {
+        const d = new Date(iso + 'T00:00:00');
+        return d.toLocaleDateString('en-MY', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+    }
+    document.getElementById('date').addEventListener('change', function () {
+        updateSummary();
+        const selectedDate = this.value;
+        fetch('/booking/unavailable?date=' + selectedDate)
+            .then(r => r.json())
+            .then(data => {
+                unavailableBarbersBySlot = data.unavailableBarbersBySlot;
+                updateSlotStatus(selectedDate, data.totalBarbers);
+            });
+    });
+
+    // Convert "10:00 am" / "01:30 pm" to 24h decimal hours
+    function slotToHours(slotStr) {
+        const parts = slotStr.trim().split(' ');
+        const hm = parts[0].split(':');
+        let h = parseInt(hm[0]);
+        const m = parseInt(hm[1] || 0);
+        const ampm = (parts[1] || '').toLowerCase();
+        if (ampm === 'pm' && h !== 12) h += 12;
+        else if (ampm === 'am' && h === 12) h = 0;
+        return h + m / 60;
+    }
+
+    function isSlotPast(selectedDate, slotStr) {
+        // A slot is past if its date is before today, OR it's today and the
+        // slot start (+ nothing - you can't book a cut that already began)
+        // is earlier than right now.
+        const todayStr = new Date().toLocaleDateString('sv-SE'); // local YYYY-MM-DD
+        if (selectedDate < todayStr) return true;
+        if (selectedDate > todayStr) return false;
+        const now = new Date();
+        return slotToHours(slotStr) < (now.getHours() + now.getMinutes() / 60);
+    }
+
+    let cachedTotalBarbers = /*[[${barbers.size()}]]*/0;
+
+    function updateSlotStatus(selectedDate, totalBarbers) {
+        cachedTotalBarbers = totalBarbers;
+        const radios = document.querySelectorAll('.slot-radio');
+        radios.forEach(radio => {
+            radio.checked = false;
+            const labelBtn = radio.nextElementSibling ? radio.nextElementSibling.querySelector('.slot-btn') : null;
+
+            // 1. Availability (all barbers booked for this slot)
+            const unavailableCount = (unavailableBarbersBySlot[radio.value] || []).length;
+            const isFull = (unavailableCount >= totalBarbers);
+            if (labelBtn && isFull) {
+                labelBtn.setAttribute('data-reason', 'Fully booked');
+            } else if (labelBtn) {
+                labelBtn.removeAttribute('data-reason');
+            }
+
+            // 2. Time already passed (live check, no buffer on the slot itself:
+            //    a 3:00 pm slot stays bookable at 2:59 pm but dies at 3:00 pm)
+            const isTimePassed = isSlotPast(selectedDate, radio.value);
+
+            radio.disabled = isFull || isTimePassed;
+        });
+        resetSelections();
+        updateSummary();
+    }
+
+    function resetSelections() {
+        document.getElementById('selected-time').value = '--:-- --';
+        const sel = document.getElementById('barber');
+        sel.selectedIndex = 0;
+        document.querySelectorAll('input.barber-radio').forEach(r => r.checked = false);
+    }
+
+    // Slot picked -> update readout + barber availability
+    document.querySelectorAll('.slot-radio').forEach(radio => {
+        radio.addEventListener('change', function () {
+            const slot = this.value;
+            document.getElementById('selected-time').value = slot;
+            const barberSelect = document.getElementById('barber');
+            const unavailableForSlot = unavailableBarbersBySlot[slot] || [];
+
+            // disable options in the real select
+            Array.from(barberSelect.options).forEach(opt => {
+                if (opt.value === "") return;
+                const isUnavailable = unavailableForSlot.some(id => id.toString() === opt.value.toString());
+                opt.disabled = isUnavailable;
+            });
+            barberSelect.selectedIndex = 0;
+
+            // mirror onto the visual cards
+            document.querySelectorAll('input.barber-radio').forEach(r => {
+                const isUnavailable = unavailableForSlot.some(id => id.toString() === r.value.toString());
+                r.disabled = isUnavailable;
+                r.checked = false;
+            });
+            updateSummary();
+        });
+    });
+
+    // Live guard: re-check past slots every 30s so a page left open doesn't
+    // keep stale bookable times, and block submit if anything is missing/past.
+    setInterval(() => {
+        const dateVal = document.getElementById('date').value;
+        if (!dateVal) return;
+        let changed = false;
+        document.querySelectorAll('.slot-radio').forEach(radio => {
+            const shouldDisable = radio.disabled ||
+                (unavailableBarbersBySlot[radio.value] || []).length >= cachedTotalBarbers ||
+                isSlotPast(dateVal, radio.value);
+            if (shouldDisable !== radio.disabled) {
+                radio.disabled = shouldDisable;
+                if (shouldDisable && radio.checked) {
+                    radio.checked = false;
+                    resetSelections();
+                }
+                changed = true;
+            }
+        });
+        if (changed) updateSummary();
+    }, 30000);
+
+    // ---- Inline validation: show a message next to each missing field ----
+    function setFieldError(id, message) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.textContent = message ? '⚠ ' + message : '';
+        el.classList.toggle('show', !!message);
+    }
+    function clearAllFieldErrors() {
+        ['err-date', 'err-summary', 'err-barber'].forEach(id => setFieldError(id, ''));
+    }
+
+    document.getElementById('bookingForm').addEventListener('submit', function (e) {
+        clearAllFieldErrors();
+        const dateVal = document.getElementById('date').value;
+        const slotRadio = document.querySelector('input.slot-radio:checked');
+        const barberChecked = document.querySelector('input.barber-radio:checked');
+        let firstBad = null;
+
+        if (!dateVal) {
+            setFieldError('err-date', 'Please pick a date for your appointment.');
+            firstBad = firstBad || document.getElementById('date');
+        }
+        if (!slotRadio) {
+            setFieldError('err-summary',
+                dateVal && isSlotPast(dateVal, '') === false
+                    ? 'Please select an available time slot.'
+                    : 'Please select an available time slot.');
+            firstBad = firstBad || document.getElementById('bk-summary');
+        } else if (isSlotPast(dateVal, slotRadio.value)) {
+            setFieldError('err-summary',
+                'That time (' + slotRadio.value + ') has already passed. Pick a later slot or another day.');
+            slotRadio.checked = false;
+            resetSelections();
+            updateSummary();
+            firstBad = firstBad || document.getElementById('bk-summary');
+        } else if (slotRadio.disabled) {
+            setFieldError('err-summary', 'That slot is no longer available. Please pick another.');
+            firstBad = firstBad || document.getElementById('bk-summary');
+        }
+        if (!barberChecked) {
+            setFieldError('err-barber', 'Please choose your barber before confirming.');
+            firstBad = firstBad || document.getElementById('barber-pick');
+        }
+
+        if (firstBad) {
+            e.preventDefault();
+            firstBad.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return;
+        }
+
+        // Final safety net: server would reject; also re-check past at click time
+        if (isSlotPast(dateVal, document.querySelector('input.slot-radio:checked').value)) {
+            e.preventDefault();
+        }
+    });
+
+    // Live-clear errors as soon as the user fixes them
+    document.querySelectorAll('input.slot-radio').forEach(r =>
+        r.addEventListener('change', () => setFieldError('err-summary', '')));
+    document.querySelectorAll('input.barber-radio').forEach(r =>
+        r.addEventListener('change', () => setFieldError('err-barber', '')));
+    document.getElementById('date').addEventListener('input', () => setFieldError('err-date', ''));
+
+    window.addEventListener('DOMContentLoaded', () => {
+        const dateInput = document.getElementById('date');
+        if (dateInput.value) {
+            fetch('/booking/unavailable?date=' + dateInput.value)
                 .then(r => r.json())
                 .then(data => {
                     unavailableBarbersBySlot = data.unavailableBarbersBySlot;
-
-                    // ✅ CALL FUNCTION UNTUK UPDATE SLOT
-                    updateSlotStatus(selectedDate, data.totalBarbers);
+                    updateSlotStatus(dateInput.value, data.totalBarbers);
                 });
-        });
-
-        // ✅ FUNGSI BARU: Update Slot Status
-        function updateSlotStatus(selectedDate, totalBarbers) {
-            const radios = document.querySelectorAll('.slot-radio');
-            const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
-
-            let currentTimeStr = ""; // Masa sekarang dalam format "HH:mm"
-            let isToday = (selectedDate === today);
-
-            // Jika tarikh hari ini, kita dapat masa sekarang
-            if (isToday) {
-                const now = new Date();
-                const hours = now.getHours();
-                const minutes = now.getMinutes();
-                // Convert 24h ke 12h format dan tambah am/pm untuk comparison
-                // ATAU lebih senang: Kita tukar slot array tu ke 24h format untuk banding
-
-                // Contoh simple: Kita bandingkan jam je (tanpa minit) untuk simplify
-                // "10:00 am" -> 10, "10:30 am" -> 10.5
-                // "01:00 pm" -> 13, "01:30 pm" -> 13.5
-                currentTimeVal = hours + (minutes / 60);
-            }
-
-            radios.forEach(radio => {
-                radio.checked = false;
-
-                // 1. Check Availability (Barber penuh)
-                const unavailableCount = (unavailableBarbersBySlot[radio.value] || []).length;
-                const isFull = (unavailableCount >= totalBarbers);
-
-                // 2. Check Time (Sudah lepas ke belum)
-                let isTimePassed = false;
-                if (isToday) {
-                    // Extract jam & minit dari slot string (contoh: "10:00 am")
-                    const timeParts = radio.value.trim().split(' ');
-                    const hm = timeParts[0].split(':');
-                    let slotHour = parseInt(hm[0]);
-                    const slotMin = parseInt(hm[1] || 0);
-                    const ampm = timeParts[1]; // am or pm
-
-                    // Convert slot ke format 24h (number decimal)
-                    let slotVal = slotHour;
-                    if (ampm.toLowerCase() === 'pm' && slotHour !== 12) {
-                        slotVal += 12;
-                    } else if (ampm.toLowerCase() === 'am' && slotHour === 12) {
-                        slotVal = 0;
-                    }
-                    slotVal = slotVal + (slotMin / 60);
-
-                    // Banding: Jika slot masa < masa sekarang, ia sudah lepas
-                    // Tambah buffer 30 minit (0.5) sebab masa tak menunggu orang
-                    if (slotVal < (currentTimeVal + 0.5)) {
-                        isTimePassed = true;
-                    }
-                }
-
-                // 3. Disable jika PENUH ATAU MASA DAH LEWAT
-                radio.disabled = isFull || isTimePassed;
-            });
-
-            document.getElementById('selected-time').value = '--:-- --';
-            document.getElementById('barber').selectedIndex = 0;
         }
-
-        // Event listener bila pilih slot
-        document.querySelectorAll('.slot-radio').forEach(radio => {
-            radio.addEventListener('change', function () {
-                const slot = this.value;
-                document.getElementById('selected-time').value = slot;
-                const barberSelect = document.getElementById('barber');
-                const unavailableForSlot = unavailableBarbersBySlot[slot] || [];
-
-                Array.from(barberSelect.options).forEach(opt => {
-                    if (opt.value === "") return;
-                    const isUnavailable = unavailableForSlot.some(id => id.toString() === opt.value.toString());
-                    opt.style.display = isUnavailable ? "none" : "";
-                    opt.disabled = isUnavailable;
-                });
-                barberSelect.selectedIndex = 0;
-            });
-        });
-
-        // ✅ RUN CHECK SEKALI PADA MASA LOAD AWAL (Kalau user refresh page, date mungkin masih terisi)
-        window.addEventListener('DOMContentLoaded', () => {
-            const dateInput = document.getElementById('date');
-            if (dateInput.value) {
-                fetch('/booking/unavailable?date=' + dateInput.value)
-                    .then(r => r.json())
-                    .then(data => {
-                        unavailableBarbersBySlot = data.unavailableBarbersBySlot;
-                        updateSlotStatus(dateInput.value, data.totalBarbers);
-                    });
-            }
-        });
-    </script>
+    });
+</script>
 </body>
 
 </html>

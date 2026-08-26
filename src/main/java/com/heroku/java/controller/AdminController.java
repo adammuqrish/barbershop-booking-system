@@ -48,6 +48,8 @@ public class AdminController {
     private final com.heroku.java.repository.FeedbackRepository feedbackRepository;
     private final BookingService bookingService;
     private final StaffService staffService;
+    private final com.heroku.java.service.FileStorageService fileStorageService;
+    private final com.heroku.java.service.CustomerService customerService;
 
     @Autowired
     public AdminController(CustomerRepository customerRepository,
@@ -56,7 +58,9 @@ public class AdminController {
             PaymentRepository paymentRepository,
             com.heroku.java.repository.FeedbackRepository feedbackRepository,
             BookingService bookingService,
-            StaffService staffService) {
+            StaffService staffService,
+            com.heroku.java.service.FileStorageService fileStorageService,
+            com.heroku.java.service.CustomerService customerService) {
         this.customerRepository = customerRepository;
         this.staffRepository = staffRepository;
         this.appointmentRepository = appointmentRepository;
@@ -64,6 +68,8 @@ public class AdminController {
         this.feedbackRepository = feedbackRepository;
         this.bookingService = bookingService;
         this.staffService = staffService;
+        this.fileStorageService = fileStorageService;
+        this.customerService = customerService;
     }
 
     // Helper method untuk dapatkan Staff yang sedang login
@@ -357,15 +363,12 @@ public class AdminController {
         // Handle Image
         if (staffPicture != null && !staffPicture.isEmpty()) {
             try {
-                String fileName = System.currentTimeMillis() + "_" + staffPicture.getOriginalFilename();
-                String uploadDir = System.getProperty("user.dir") + "/src/main/resources/static/resources/uploads/";
-                java.nio.file.Path uploadPath = java.nio.file.Paths.get(uploadDir);
-                if (!java.nio.file.Files.exists(uploadPath))
-                    java.nio.file.Files.createDirectories(uploadPath);
-                java.nio.file.Files.write(uploadPath.resolve(fileName), staffPicture.getBytes());
+                String fileName = fileStorageService.storeImage(staffPicture);
                 barber.setStaffPicture(fileName);
+            } catch (IllegalArgumentException e) {
+                redirectAttributes.addFlashAttribute("error", e.getMessage());
+                return "redirect:/barber/profile";
             } catch (Exception e) {
-                e.printStackTrace();
                 redirectAttributes.addFlashAttribute("error", "Failed to upload picture");
                 return "redirect:/barber/profile";
             }
@@ -716,6 +719,7 @@ public class AdminController {
     }
 
     // 13. API UPDATE SERVICE STATUS
+
     @PostMapping("/admin/update-service-status")
     @PreAuthorize("hasRole('ADMIN')")
     public String updateServiceStatus(@RequestParam Long appointmentId,
@@ -736,6 +740,15 @@ public class AdminController {
             }
 
             appointmentRepository.save(a);
+
+            if ("cancelled".equalsIgnoreCase(status)) {
+                // ✅ Free reward cut cancelled before service: give the reward back
+                customerService.refundRewardIfRedeemed(a);
+            } else {
+                // ✅ LOYALTY POINTS: awarded ONLY when the service is marked 'done'
+                // AND the appointment is paid. See CustomerService.
+                customerService.awardPointsForCompletedAppointment(a);
+            }
         });
 
         return "redirect:/listAppointment";
@@ -751,12 +764,16 @@ public class AdminController {
             // ✅ ONLY CASH PAYMENT CAN BE UPDATED
             if (p instanceof CashPayment) {
 
-                // update appointment payment status
-                appointmentRepository.findById(appointmentId)
-                        .ifPresent(a -> {
-                            a.setPaymentStatus(status);
-                            appointmentRepository.save(a);
-                        });
+            // update appointment payment status
+            appointmentRepository.findById(appointmentId)
+                    .ifPresent(a -> {
+                        a.setPaymentStatus(status);
+                        appointmentRepository.save(a);
+
+                        // Service may already be 'done' (cash often collected right
+                        // after the cut) - award loyalty now if both conditions met.
+                        customerService.awardPointsForCompletedAppointment(a);
+                    });
             }
         });
 
@@ -1067,8 +1084,6 @@ public class AdminController {
 
             // 4. Handle Password Update
             if (staffPassword != null && !staffPassword.isEmpty()) {
-                com.heroku.java.service.StaffService staffService = new com.heroku.java.service.StaffService(
-                        staffRepository);
                 staff.setStaffPassword(staffPassword);
                 staffService.saveStaff(staff);
             }
@@ -1076,17 +1091,12 @@ public class AdminController {
             // 5. Handle Image
             if (staffPicture != null && !staffPicture.isEmpty()) {
                 try {
-                    String fileName = System.currentTimeMillis() + "_" + staffPicture.getOriginalFilename();
-                    String uploadDir = System.getProperty("user.dir") + "/src/main/resources/static/resources/uploads/";
-                    java.nio.file.Path uploadPath = java.nio.file.Paths.get(uploadDir);
-                    if (!java.nio.file.Files.exists(uploadPath)) {
-                        java.nio.file.Files.createDirectories(uploadPath);
-                    }
-                    java.nio.file.Path path = uploadPath.resolve(fileName);
-                    java.nio.file.Files.write(path, staffPicture.getBytes());
+                    String fileName = fileStorageService.storeImage(staffPicture);
                     staff.setStaffPicture(fileName);
+                } catch (IllegalArgumentException e) {
+                    redirectAttributes.addFlashAttribute("error", e.getMessage());
+                    return "redirect:/admin/profile";
                 } catch (Exception e) {
-                    e.printStackTrace();
                     redirectAttributes.addFlashAttribute("error", "Failed to upload picture");
                     return "redirect:/admin/profile";
                 }

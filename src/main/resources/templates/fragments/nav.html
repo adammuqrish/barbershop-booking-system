@@ -1,125 +1,134 @@
-<nav xmlns:th="http://www.thymeleaf.org" class="border-b border-gray-200 shadow-xl bg-neutral-900" th:fragment="nav">
-    <div class="flex flex-col md:flex-row items-center justify-between p-4 mx-auto space-y-4 lg:space-y-0"
-        style="background-color: #101820; border-bottom: 1px solid #FFFCFB;">
-        <ul class="flex flex-col lg:flex-row justify-start md:justify-end space-x-6 text-left w-full md:w-auto">
-            <li class="block text-white">CONTACT US: <span th:text="${barbershop.phone}">0127865132</span></li>
-            <li class="block text-white">OPENING HOUR: <span
-                    th:text="${barbershop.openingHours}">TUESDAY - SUNDAY (10 a.m - 10 p.m)</span></li>
-        </ul>
-        <div class="flex flex-row justify-start md:justify-end items-center space-x-5 text-white w-full md:w-auto">
-            <a href="#" target="_blank" rel="noopener" aria-label="Facebook"
-               class="hover:text-gray-300 transition duration-300 ease-in-out">
-                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"
-                     aria-hidden="true">
-                    <path d="M22 12a10 10 0 10-11.56 9.88v-6.99H7.9V12h2.54V9.8c0-2.5 1.49-3.89 3.78-3.89 1.09 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.77-1.63 1.56V12h2.78l-.44 2.89h-2.34v6.99A10 10 0 0022 12z" />
-                </svg>
+<nav xmlns:th="http://www.thymeleaf.org" th:fragment="nav" class="hb-nav">
+    <div class="hb-nav-inner">
+
+        <!-- Brand -->
+        <a class="hb-brand" th:href="@{/index}" aria-label="Hugi Barbershop home">
+            <span class="hb-brand-mark">H</span>
+            <span class="hb-brand-name">Hugi<em>.</em></span>
+        </a>
+
+        <!-- Single-line right cluster -->
+        <div class="hb-nav-right hb-desktop-only">
+
+            <!-- Explore dropdown -->
+            <div class="hb-dd">
+                <button type="button" class="hb-dd-btn" aria-haspopup="true">Explore
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+                </button>
+                <ul class="hb-dd-menu">
+                    <li><a th:href="@{/index#aboutUs}">About Us</a></li>
+                    <li><a th:href="@{/index#services}">Services &amp; Prices</a></li>
+                    <li><a th:href="@{/index#barbers}">Our Barbers</a></li>
+                    <li><a th:href="@{/index#visit}">Visit Us</a></li>
+                </ul>
+            </div>
+
+            <!-- Staff login (always visible, discreet) -->
+            <a class="hb-dd-btn" th:href="@{/adminLogin}" style="opacity:.62;text-decoration:none" title="Staff login">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                Staff
             </a>
-            <a href="#" target="_blank" rel="noopener" aria-label="Instagram"
-               class="hover:text-gray-300 transition duration-300 ease-in-out">
-                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"
-                     aria-hidden="true">
-                    <path d="M12 2.16c3.2 0 3.58.01 4.85.07 1.17.05 1.8.25 2.23.41.56.22.96.48 1.38.9.42.42.68.82.9 1.38.16.42.36 1.06.41 2.23.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.05 1.17-.25 1.8-.41 2.23-.22.56-.48.96.9 1.38.42.42.82.68 1.38.9.42.16 1.06.36 2.23.41-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-1.17-.05-1.8-.25-2.23-.41a3.7 3.7 0 01-1.38-.9 3.7 3.7 0 01-.9-1.38c-.16-.42-.36-1.06-.41-2.23C2.17 15.58 2.16 15.2 2.16 12s.01-3.58.07-4.85c.05-1.17.25-1.8.41-2.23.22-.56.48-.96.9-1.38.42-.42.82-.68 1.38-.9.42-.16 1.06-.36 2.23-.41C8.42 2.17 8.8 2.16 12 2.16zm0 1.62c-3.15 0-3.52.01-4.76.07-1.15.05-1.77.24-2.19.4-.55.22-.94.47-1.35.88-.41.41-.66.8-.88 1.35-.16.42-.35 1.04-.4 2.19-.06 1.24-.07 1.61-.07 4.76s.01 3.52.07 4.76c.05 1.15.24 1.77.4 2.19.22.55.47.94.88 1.35.41.41.8.66 1.35.88.42.16 1.04.35 2.19.4 1.24.06 1.61.07 4.76.07s3.52-.01 4.76-.07c1.15-.05 1.77-.24 2.19-.4.55-.22.94-.47 1.35-.88.41-.41.66-.8.88-1.35.16-.42.35-1.04.4-2.19.06-1.24.07-1.61.07-4.76s-.01-3.52-.07-4.76c-.05-1.15-.24-1.77-.4-2.19a3.6 3.6 0 00-.88-1.35 3.6 3.6 0 00-1.35-.88c-.42-.16-1.04-.35-2.19-.4-1.24-.06-1.61-.07-4.76-.07zm0 2.76a5.46 5.46 0 110 10.92 5.46 5.46 0 010-10.92zm0 9a3.54 3.54 0 100-7.08 3.54 3.54 0 000 7.08zm6.95-9.22a1.28 1.28 0 11-2.55 0 1.28 1.28 0 012.55 0z" />
+
+            <!-- My Booking dropdown (logged in only) -->
+            <th:block th:if="${session.customer != null}">
+                <div class="hb-dd">
+                    <button type="button" class="hb-dd-btn" aria-haspopup="true">My Booking
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <ul class="hb-dd-menu">
+                        <li><a th:href="@{/booking}">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--brass)" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                            Book Appointment</a></li>
+                        <li><a th:href="@{/view-appointment}">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--brass)" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg>
+                            My Appointments</a></li>
+                        <li><a th:href="@{/appointment-history}">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--brass)" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><polyline points="12 7 12 12 15 14"/></svg>
+                            History</a></li>
+                    </ul>
+                </div>
+            </th:block>
+
+            <!-- User area -->
+            <th:block th:if="${session.customer != null}">
+                <div class="hb-dd">
+                    <button type="button" class="hb-dd-btn hb-user-btn" aria-haspopup="true">
+                        <img th:if="${session.customer.custPicture != null}"
+                             th:src="@{'/resources/uploads/' + ${session.customer.custPicture}}"
+                             alt="" class="hb-avatar" />
+                        <th:block th:unless="${session.customer.custPicture != null}">
+                            <span class="hb-avatar hb-avatar-fallback"
+                                  th:text="${#strings.substring(session.customer.custName, 0, 1)}">U</span>
+                        </th:block>
+                        <span class="hb-username" th:text="${session.customer.custName}">User</span>
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <ul class="hb-dd-menu hb-dd-right">
+                        <li><a th:href="@{/profile}">View Profile</a></li>
+                        <li>
+                            <form th:action="@{/logout}" method="post" style="margin:0">
+                                <button type="submit" style="background:none;border:none;width:100%;text-align:left;padding:10px 16px;font:inherit;color:#b3122f;font-weight:600;cursor:pointer;display:block">Logout</button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
+                <a class="hb-btn hb-btn-brass hb-nav-cta-sm" th:href="@{/booking}">Book Now</a>
+            </th:block>
+
+            <!-- Guest -->
+            <th:block th:unless="${session.customer != null}">
+                <a class="hb-dd-btn" th:href="@{/register#login}" style="text-decoration:none">Login</a>
+                <a class="hb-btn hb-btn-brass hb-nav-cta-sm" th:href="@{/booking}">Book Now</a>
+            </th:block>
+        </div>
+
+        <!-- Mobile: compact Book Now + hamburger -->
+        <div class="hb-mobile-only" style="align-items:center;gap:10px">
+            <a class="hb-btn hb-btn-brass hb-nav-cta-sm" th:href="@{/booking}">Book Now</a>
+            <button type="button" class="hb-burger" aria-label="Open menu" aria-expanded="false"
+                    onclick="const m=document.getElementById('hbMobileMenu');const open=m.classList.toggle('open');this.setAttribute('aria-expanded',open)">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--cream)" stroke-width="2.4" stroke-linecap="round" aria-hidden="true">
+                    <line x1="4" y1="7" x2="20" y2="7"></line>
+                    <line x1="4" y1="12" x2="20" y2="12"></line>
+                    <line x1="4" y1="17" x2="20" y2="17"></line>
                 </svg>
-            </a>
+            </button>
         </div>
     </div>
-    <div class="flex flex-wrap items-center p-4 mx-auto justify-between relative z-50"
-        style="background-color: #101820;">
-        <a th:href="@{/index}" class="flex items-center"> <span
-                class="self-center text-2xl font-semibold whitespace-nowrap text-white">Hugi
-                Barbershop</span>
-        </a>
-        <button id="menu-button" data-collapse-toggle="navbar-default" type="button"
-            class="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg md:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200"
-            aria-controls="navbar-default" aria-expanded="false">
-            <span class="sr-only">Open main menu</span>
-            <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 17 14">
-                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M1 1h15M1 7h15M1 13h15" />
-            </svg>
-        </button>
-        <div class="hidden w-full md:block md:w-auto" id="navbar-default">
-            <ul
-                class="font-medium flex flex-col p-4 md:p-0 mt-4 rounded-lg md:flex-row md:space-x-8 md:mt-0 md:border-0 bg-gray-800 md:bg-transparent md:items-center">
-                <li><a th:href="@{/index}"
-                        class="block py-2 pl-3 pr-4 text-white rounded lg:hover:bg-transparent lg:border-0 lg:hover:text-white lg:p-0 transition duration-300 ease-in-out">
-                        Home </a></li>
-                <li class="relative">
-                    <button type="button" data-dropdown="appointment-dropdown-menu"
-                            class="flex items-center w-full py-2 pl-3 pr-4 text-white rounded lg:hover:bg-transparent lg:border-0 lg:hover:text-white lg:p-0 transition duration-300 ease-in-out"
-                            aria-haspopup="true" aria-expanded="false">
-                        Appointment
-                        <svg class="ml-2 w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd"
-                                d="M5.23 7.21a.75.75 0 0 1 1.06-.02L10 10.67l3.71-3.5a.75.75 0 1 1 1.04 1.08l-4.25 4a.75.75 0 0 1-1.04 0l-4.25-4a.75.75 0 0 1-.02-1.06z"
-                                clip-rule="evenodd" />
-                        </svg>
-                    </button>
-                    <ul id="appointment-dropdown-menu"
-                        class="z-10 hidden absolute left-0 md:min-w-[12rem] mt-2 bg-gray-900 rounded-lg shadow-lg">
-                        <li><a th:href="@{/booking}"
-                                class="block px-4 py-2 text-white hover:bg-gray-700 transition">Book
-                                Appointment</a></li>
-                        <li><a th:href="@{/view-appointment}"
-                                class="block px-4 py-2 text-white hover:bg-gray-700 transition">Current
-                                Appointment</a></li>
-                        <li><a th:href="@{/appointment-history}"
-                                class="block px-4 py-2 text-white hover:bg-gray-700 transition">Appointment
-                                History</a></li>
-                    </ul>
+
+    <!-- Mobile menu panel -->
+    <div class="hb-mobile-menu" id="hbMobileMenu">
+        <ul>
+            <li style="padding:10px 22px 4px;font-size:.72rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:rgba(245,239,228,.45)">Explore</li>
+            <li><a th:href="@{/index#aboutUs}" onclick="document.getElementById('hbMobileMenu').classList.remove('open')">About Us</a></li>
+            <li><a th:href="@{/index#services}" onclick="document.getElementById('hbMobileMenu').classList.remove('open')">Services &amp; Prices</a></li>
+            <li><a th:href="@{/index#barbers}" onclick="document.getElementById('hbMobileMenu').classList.remove('open')">Our Barbers</a></li>
+            <li><a th:href="@{/index#visit}" onclick="document.getElementById('hbMobileMenu').classList.remove('open')">Visit Us</a></li>
+            <th:block th:if="${session.customer != null}">
+                <li class="hb-menu-sep" aria-hidden="true"></li>
+                <li style="padding:10px 22px 4px;font-size:.72rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:rgba(245,239,228,.45)">Your booking</li>
+                <li><a class="hb-m-cta" th:href="@{/booking}" onclick="document.getElementById('hbMobileMenu').classList.remove('open')">📅 Book Appointment</a></li>
+                <li><a th:href="@{/view-appointment}" onclick="document.getElementById('hbMobileMenu').classList.remove('open')">🕐 My Appointments</a></li>
+                <li><a th:href="@{/appointment-history}" onclick="document.getElementById('hbMobileMenu').classList.remove('open')">🗂 History</a></li>
+                <li class="hb-menu-sep" aria-hidden="true"></li>
+                <li style="padding:10px 22px 4px;font-size:.72rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:rgba(245,239,228,.45)">Account</li>
+                <li><a th:href="@{/profile}" onclick="document.getElementById('hbMobileMenu').classList.remove('open')"
+                       th:text="'👤 ' + ${session.customer.custName}">Profile</a></li>
+                <li>
+                    <form th:action="@{/logout}" method="post" style="margin:0;padding:6px 22px 14px">
+                        <button type="submit" class="hb-btn hb-btn-outline" style="width:100%;font-size:16px;padding:10px 18px">Logout</button>
+                    </form>
                 </li>
-                <li><a th:href="@{/index#aboutUs}"
-                        class="block py-2 pl-3 pr-4 text-white rounded lg:hover:bg-transparent lg:border-0 lg:hover:text-white lg:p-0 transition duration-300 ease-in-out">
-                        About Us </a></li>
-
-                <th:block th:if="${session.customer != null}">
-                    <li><a th:href="@{/logout}"
-                            class="block py-2 pl-3 pr-4 !text-white rounded lg:hover:bg-transparent lg:border-0 lg:hover:!text-white lg:p-0 transition duration-300 ease-in-out">
-                            Logout </a></li>
-                    <li>
-                        <div class="relative w-10 h-10 overflow-hidden bg-gray-100 rounded-full hidden md:block">
-                            <a th:href="@{/profile}">
-                                <img th:if="${session.customer.custPicture != null}"
-                                    th:src="@{'/resources/uploads/' + ${session.customer.custPicture}}"
-                                    class="absolute w-10 h-10 rounded-full object-cover object-center" alt="Profile picture" />
-                                <svg th:unless="${session.customer.custPicture != null}"
-                                    class="absolute w-10 h-10 text-gray-400" fill="currentColor"
-                                    viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                    <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
-                                        clip-rule="evenodd"></path>
-                                </svg>
-                            </a>
-                        </div>
-                        <a th:href="@{/profile}"
-                            class="block md:hidden py-2 pl-3 pr-4 text-white rounded lg:hover:bg-transparent lg:border-0 lg:hover:text-white lg:p-0 transition duration-300 ease-in-out">
-                            Profile </a>
-                    </li>
-                </th:block>
-
-                <th:block th:unless="${session.customer != null}">
-                    <li class="relative">
-                        <button type="button" data-dropdown="loginDropdown"
-                                class="flex items-center py-2 pl-3 pr-4 text-white rounded lg:hover:bg-transparent lg:border-0 lg:hover:text-white lg:p-0 transition duration-300 ease-in-out"
-                                aria-haspopup="true" aria-expanded="false">
-                            Login
-                            <svg class="ml-2 w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd"
-                                    d="M5.23 7.21a.75.75 0 0 1 1.06-.02L10 10.67l3.71-3.5a.75.75 0 1 1 1.04 1.08l-4.25 4a.75.75 0 0 1-1.04 0l-4.25-4a.75.75 0 0 1-.02-1.06z"
-                                    clip-rule="evenodd" />
-                            </svg>
-                        </button>
-                        <ul id="loginDropdown"
-                            class="absolute right-0 z-10 hidden bg-gray-900 rounded-lg shadow-lg mt-2 w-48">
-                            <li><a th:href="@{/register}"
-                                    class="block px-4 py-2 text-white hover:bg-gray-700 transition duration-200">Login
-                                    as Customer</a></li>
-                            <li><a th:href="@{/adminLogin}"
-                                    class="block px-4 py-2 text-white hover:bg-gray-700 transition duration-200">Login
-                                    as Staff</a></li>
-                        </ul>
-                    </li>
-                </th:block>
-            </ul>
-        </div>
+            </th:block>
+            <th:block th:unless="${session.customer != null}">
+                <li class="hb-menu-sep" aria-hidden="true"></li>
+                <li><a th:href="@{/register#login}" onclick="document.getElementById('hbMobileMenu').classList.remove('open')">Login</a></li>
+                <li style="padding:6px 22px 14px"><a class="hb-btn hb-btn-brass" style="display:block;text-align:center" th:href="@{/booking}">Book Now</a></li>
+            </th:block>
+            <li class="hb-menu-sep" aria-hidden="true"></li>
+            <li><a th:href="@{/adminLogin}" onclick="document.getElementById('hbMobileMenu').classList.remove('open')" style="opacity:.72;display:flex;align-items:center;gap:8px;font-size:.88rem">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                Staff Login</a></li>
+        </ul>
     </div>
 </nav>

@@ -1,145 +1,198 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 
-<head th:replace="~{fragments/header :: head}"></head>
+<head th:replace="~{fragments/header :: head}">
+    <title>Payment — Hugi Barbershop</title>
+</head>
 
-<body class="flex flex-col h-screen justify-between bg-yellow-100">
-    <main class="flex flex-col items-center mx-3 my-4 flex-grow justify-center">
-        <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-2xl">
-            <h1 class="text-2xl font-bold mb-4">Payment for Your Appointment</h1>
+<body class="flex flex-col min-h-screen" style="font-family:'Inter',system-ui,sans-serif;background:var(--cream);color:var(--ink);margin:0">
 
-            <div class="bg-gray-100 rounded-md p-6 mb-6">
-                <!-- Free Appointment Message -->
-                <div th:if="${freeMessage}"
-                    class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4"
-                    role="alert">
-                    <span class="block sm:inline" th:text="${freeMessage}"></span>
-                </div>
+<nav th:replace="~{fragments/nav :: nav}"></nav>
 
-                <h2 class="text-lg font-semibold mb-2">Appointment Details:</h2>
-                <p class="text-sm mb-1"><span class="font-semibold">Book For:</span> <span
-                        th:text="${appointment.custBookFor}"></span></p>
-                <p class="text-sm mb-1"><span class="font-semibold">Date:</span> <span
-                        th:text="${appointment.appointmentDate}"></span></p>
-                <p class="text-sm mb-1"><span class="font-semibold">Time:</span> <span
-                        th:text="${appointment.appointmentTime}"></span></p>
-                <p class="text-sm mb-1">
-                    <span class="font-semibold">Category:</span>
-                    <span th:text="${appointment.custType}"></span>
-                </p>
-                <p class="text-sm"><span class="font-semibold">Amount:</span> RM <span
-                        th:text="${#numbers.formatDecimal(price, 1, 2)}"></span></p>
-            </div>
+<main style="flex:1;width:100%;max-width:640px;margin:0 auto;padding:40px 24px 72px">
 
-            <!-- ✅ STATIC ALERT (Tetap) -->
-            <div class="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded relative mb-4" role="alert">
-                <div class="flex items-center">
-                    <!-- Icon Alert -->
-                    <svg class="fill-current w-6 h-6 mr-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                        <path
-                            d="M2.93 17.07A10 10 0 1 1 17.07 2.93 10 10 0 0 1 2.93 17.07zm12.73-1.41A8 8 0 1 0 4.34 4.34a8 8 0 0 0 11.32 11.32zM9 11V9h2v6H9v-4zm0-6h2v2H9V5z" />
-                    </svg>
-
-                    <div>
-                        <p class="font-bold">Important Notice</p>
-                        <p class="text-sm">Once online payment be made, no refund will be provided.</p>
-                    </div>
-                </div>
-            </div>
-
-            <form th:action="@{/processPayment}" method="post" id="paymentForm">
-                <div class="bg-gray-100 rounded-md p-6 mb-6">
-                    <h2 class="text-lg font-semibold mb-2">Payment Information:</h2>
-                    <div class="flex items-center mb-2">
-                        <input type="radio" id="cash" name="paymentMethod" value="cash" class="h-4 w-4"
-                            onchange="togglePaymentDetails()" />
-                        <label for="cash" class="ml-2 text-sm">Cash</label>
-                    </div>
-                    <div class="flex items-center mb-4">
-                        <input type="radio" id="online" name="paymentMethod" value="online" class="h-4 w-4"
-                            onchange="togglePaymentDetails()" />
-                        <label for="online" class="ml-2 text-sm">Online Banking</label>
-                    </div>
-
-                    <div id="online-details" class="mt-2 text-sm">
-                        <p>Secure online payment.</p>
-                    </div>
-                    <div id="cash-details" class="mt-2 text-sm hidden">
-                        <p>Pay in cash upon arrival.</p>
-                    </div>
-                </div>
-                <button type="submit" id="payButton"
-                    class="bg-blue-500 text-white px-4 py-2 rounded w-full hover:bg-blue-600">Pay Now</button>
-
-                <!-- Mock bank fields for Online Payment -->
-                <input type="hidden" name="bankName" id="hiddenBankName" value="Maybank" />
-                <input type="hidden" name="bankHolderName" id="hiddenBankHolder"
-                    th:value="${session.customer != null ? session.customer.custName : ''}" />
-            </form>
-        </div>
-    </main>
-
-    <!-- Mock Bank Modal -->
-    <div id="bankModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center hidden z-50">
-        <div class="bg-white p-6 rounded-lg shadow-xl max-w-md w-full">
-            <h3 class="text-lg font-medium mb-4">Select Bank</h3>
-            <select id="bankSelect" class="w-full border p-2 rounded mb-4">
-                <option>Maybank</option>
-                <option>CIMB Bank</option>
-                <option>Public Bank</option>
-            </select>
-            <button id="confirmBank" class="w-full bg-green-600 text-white p-2 rounded">Confirm Payment</button>
-        </div>
+    <div class="bk-step-row" style="display:flex;gap:10px;margin-bottom:28px;flex-wrap:wrap">
+        <div class="bk-step done" style="display:flex;align-items:center;gap:8px;font-size:.85rem;color:var(--muted)"><span class="n" style="width:26px;height:26px;border-radius:50%;background:var(--oxblood);color:#fff;display:grid;place-items:center;font-weight:700">✓</span> Booking</div>
+        <div class="bk-step active" style="display:flex;align-items:center;gap:8px;font-size:.85rem;font-weight:700;color:var(--ink)"><span class="n" style="width:26px;height:26px;border-radius:50%;background:var(--brass);color:var(--ink);display:grid;place-items:center;font-weight:700">2</span> Payment</div>
+        <div class="bk-step" style="display:flex;align-items:center;gap:8px;font-size:.85rem;color:var(--muted)"><span class="n" style="width:26px;height:26px;border-radius:50%;background:var(--cream-2);color:var(--muted);display:grid;place-items:center;font-weight:700">3</span> Done</div>
     </div>
 
-    <script th:inline="javascript">
-        /*<![CDATA[*/
-        const price = /*[[${price}]]*/ 15.0;
-        /*]]>*/
+    <h1 style="font-family:'Bebas Neue';font-size:42px;line-height:1.05;letter-spacing:.03em;margin:0 0 6px">Settle your bill</h1>
+    <p class="hint" style="color:var(--muted);margin:0 0 24px">Step 2 of 3 — nothing is charged until you confirm below.</p>
 
-        function togglePaymentDetails() {
-            const isCash = document.getElementById('cash').checked;
-            document.getElementById('cash-details').classList.toggle('hidden', !isCash);
-            document.getElementById('online-details').classList.toggle('hidden', isCash);
+    <!-- Flash error from server-side validation -->
+    <div th:if="${bookingError != null}" role="alert"
+         style="background:#fdeaea;border:2px solid var(--oxblood);color:var(--oxblood);border-radius:5px;padding:14px 18px;margin-bottom:24px;font-weight:600">
+        ⚠ <span th:text="${bookingError}">Error</span>
+    </div>
 
-            const btn = document.getElementById('payButton');
-            if (price === 0) {
-                btn.innerText = 'Proceed';
-            } else {
-                btn.innerText = isCash ? 'Confirm Cash Payment' : 'Pay Now';
-            }
-        }
+    <!-- Appointment summary card -->
+    <section style="background:#fff;border:2px solid var(--line);border-radius:6px;padding:26px 26px 20px;margin-bottom:22px">
+        <!-- Free Appointment Message -->
+        <div th:if="${freeMessage}" role="status"
+             style="background:#eef7ee;border-left:4px solid #2e7d32;color:#2e7d32;padding:10px 14px;border-radius:0 4px 4px 0;font-size:.92rem;font-weight:600;margin-bottom:16px">
+            ★ <span th:text="${freeMessage}"></span>
+        </div>
 
-        // Initialize button text based on price
+        <h2 style="font-family:'Bebas Neue';font-size:24px;letter-spacing:.06em;margin:0 0 14px">Appointment details</h2>
+        <dl style="margin:0;display:grid;grid-template-columns:auto 1fr;gap:7px 20px;font-size:.95rem">
+            <dt style="color:var(--muted)">Book for</dt><dd style="margin:0;font-weight:600" th:text="${appointment.custBookFor}">Name</dd>
+            <dt style="color:var(--muted)">Date</dt><dd style="margin:0;font-weight:600" th:text="${appointment.appointmentDate}">Date</dd>
+            <dt style="color:var(--muted)">Time</dt><dd style="margin:0;font-weight:600" th:text="${appointment.appointmentTime}">Time</dd>
+            <dt style="color:var(--muted)">Category</dt><dd style="margin:0;font-weight:600" th:text="${appointment.custType}">Category</dd>
+        </dl>
+        <div style="border-top:2px dotted var(--line);margin-top:16px;padding-top:12px;display:flex;justify-content:space-between;align-items:baseline">
+            <span style="font-family:'Bebas Neue';font-size:20px;letter-spacing:.08em">Amount due</span>
+            <span style="font-family:'Bebas Neue';font-size:34px;color:var(--oxblood)">RM <span th:text="${#numbers.formatDecimal(price, 1, 2)}">15.00</span></span>
+        </div>
+    </section>
+
+    <!-- Notice -->
+    <div role="note" style="background:var(--ink);color:var(--cream);border-radius:5px;padding:12px 18px;font-size:.88rem;margin-bottom:22px;display:flex;gap:12px;align-items:center">
+        <span style="font-family:'Bebas Neue';font-size:19px;color:var(--brass);letter-spacing:.08em;white-space:nowrap">NOTICE</span>
+        <span>Once online payment is made, no refund will be provided.</span>
+    </div>
+
+    <!-- Payment method -->
+    <section style="background:#fff;border:2px solid var(--line);border-radius:6px;padding:26px;margin-bottom:30px">
+        <h2 style="font-family:'Bebas Neue';font-size:24px;letter-spacing:.06em;margin:0 0 16px">Payment information</h2>
+        <form th:action="@{/processPayment}" method="post" id="paymentForm">
+            <style>
+                .pay-opt{display:block}
+                .pay-opt input{position:absolute;opacity:0;pointer-events:none}
+                .pay-card{display:flex;align-items:center;gap:14px;padding:16px 18px;border:2px solid var(--line);border-radius:6px;background:#fff;cursor:pointer;transition:all .15s ease;margin-bottom:12px}
+                .pay-card:hover{border-color:var(--brass)}
+                .pay-opt input:checked + .pay-card{border-color:var(--oxblood);box-shadow:0 0 0 2px var(--oxblood)}
+                .pay-opt input:checked + .pay-card::after{content:"✓";margin-left:auto;font-weight:800;color:var(--oxblood);font-size:1.2rem}
+                .pay-title{font-family:'Bebas Neue';font-size:21px;letter-spacing:.05em}
+                .pay-sub{font-size:.82rem;color:var(--muted)}
+                .pay-ico{width:44px;height:44px;border-radius:50%;background:var(--ink);color:var(--brass);display:grid;place-items:center;font-size:1.2rem;flex-shrink:0}
+            </style>
+
+            <label class="pay-opt" for="cash">
+                <input type="radio" id="cash" name="paymentMethod" value="cash" onchange="togglePaymentDetails()" />
+                <span class="pay-card">
+                    <span class="pay-ico">$</span>
+                    <span>
+                        <span class="pay-title">Cash at the shop</span><br/>
+                        <span class="pay-sub">Pay when you arrive — no card needed now.</span>
+                    </span>
+                </span>
+            </label>
+
+            <label class="pay-opt" for="online">
+                <input type="radio" id="online" name="paymentMethod" value="online" onchange="togglePaymentDetails()" />
+                <span class="pay-card">
+                    <span class="pay-ico">⚡</span>
+                    <span>
+                        <span class="pay-title">Online banking</span><br/>
+                        <span class="pay-sub">Secure transfer via Maybank / CIMB / Public Bank.</span>
+                    </span>
+                </span>
+            </label>
+
+            <p id="cash-details" class="hidden" style="font-size:.88rem;color:var(--muted);margin:6px 0 0 58px">You'll pay RM <b th:text="${#numbers.formatDecimal(price, 1, 2)}">15.00</b> in cash upon arrival.</p>
+            <p id="online-details" class="mt-2 text-sm hidden" style="display:none;font-size:.88rem;color:var(--muted);margin:6px 0 0 58px">You'll be redirected to confirm your bank after clicking Pay.</p>
+
+            <button type="submit" id="payButton"
+                    style="margin-top:22px;width:100%;background:var(--oxblood);color:#fff;border:none;border-radius:5px;padding:16px;font-family:'Bebas Neue';font-size:23px;letter-spacing:.1em;cursor:pointer;transition:filter .15s ease"
+                    onmouseover="this.style.filter='brightness(1.12)'" onmouseout="this.style.filter=''">
+                Pay Now
+            </button>
+
+            <!-- Mock bank fields for Online Payment -->
+            <input type="hidden" name="bankName" id="hiddenBankName" value="Maybank" />
+            <input type="hidden" name="bankHolderName" id="hiddenBankHolder"
+                   th:value="${session.customer != null ? session.customer.custName : ''}" />
+        </form>
+    </section>
+</main>
+
+<!-- Mock Bank Modal -->
+<div id="bankModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center hidden z-50"
+     style="position:fixed;inset:0;background:rgba(16,24,32,.55);display:none;align-items:center;justify-content:center;z-index:50">
+    <div style="background:#fff;padding:28px;border-radius:8px;box-shadow:0 20px 45px rgba(0,0,0,.25);max-width:380px;width:90%">
+        <h3 style="font-family:'Bebas Neue';font-size:26px;letter-spacing:.06em;margin:0 0 14px">Select your bank</h3>
+        <select id="bankSelect" style="width:100%;padding:11px;border:2px solid var(--line);border-radius:5px;margin-bottom:16px;font-size:.95rem;background:#fff">
+            <option>Maybank</option>
+            <option>CIMB Bank</option>
+            <option>Public Bank</option>
+        </select>
+        <button id="confirmBank" style="width:100%;background:var(--oxblood);color:#fff;border:none;border-radius:5px;padding:13px;font-family:'Bebas Neue';font-size:20px;letter-spacing:.1em;cursor:pointer">Confirm Payment</button>
+    </div>
+</div>
+
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    const price = /*[[${price}]]*/ 15.0;
+    /*]]>*/
+
+    function togglePaymentDetails() {
+        const isCash = document.getElementById('cash').checked;
+        document.getElementById('cash-details').style.display = isCash ? 'block' : 'none';
+        document.getElementById('online-details').style.display = isCash ? 'none' : 'block';
+
+        const btn = document.getElementById('payButton');
         if (price === 0) {
-            document.getElementById('payButton').innerText = 'Proceed';
+            btn.innerText = 'Proceed';
+        } else {
+            btn.innerText = isCash ? 'Confirm Cash Payment' : 'Pay Now';
+        }
+    }
+
+    // Initialize button text based on price
+    if (price === 0) {
+        document.getElementById('payButton').innerText = 'Proceed';
+    }
+
+    document.getElementById('paymentForm').addEventListener('submit', function (e) {
+        // Guard against double-submission (slow network + impatient clicks)
+        const btn = document.getElementById('payButton');
+        if (btn.dataset.submitting === '1') {
+            e.preventDefault();
+            return;
         }
 
-        document.getElementById('paymentForm').addEventListener('submit', function (e) {
-            // Check if payment method is selected
-            const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked');
-            if (!paymentMethod) {
-                e.preventDefault();
-                alert('Please select a payment method (Cash or Online Banking)');
-                return;
-            }
+        const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked');
+        if (!paymentMethod) {
+            e.preventDefault();
+            alert('Please select a payment method (Cash or Online Banking)');
+            return;
+        }
 
-            if (price === 0) {
-                // Allow direct submission for free appointment
-                return;
-            }
+        if (price === 0) {
+            btn.dataset.submitting = '1';
+            btn.innerText = 'Processing...';
+            btn.disabled = true;
+            return;
+        }
 
-            if (document.getElementById('online').checked) {
-                e.preventDefault();
-                document.getElementById('bankModal').classList.remove('hidden');
-            }
-        });
+        if (document.getElementById('online').checked) {
+            e.preventDefault();
+            document.getElementById('bankModal').style.display = 'flex';
+            return;
+        }
 
-        document.getElementById('confirmBank').addEventListener('click', function () {
-            document.getElementById('hiddenBankName').value = document.getElementById('bankSelect').value;
-            document.getElementById('paymentForm').submit();
-        });
-    </script>
+        // Cash: mark submitting so repeated clicks can't double-charge
+        btn.dataset.submitting = '1';
+        btn.innerText = 'Processing...';
+        btn.disabled = true;
+    });
+
+    document.getElementById('confirmBank').addEventListener('click', function () {
+        const btn = document.getElementById('payButton');
+        if (btn.dataset.submitting === '1') return;
+        btn.dataset.submitting = '1';
+        btn.innerText = 'Processing...';
+        btn.disabled = true;
+        this.disabled = true;
+        this.innerText = 'Processing...';
+        document.getElementById('hiddenBankName').value = document.getElementById('bankSelect').value;
+        document.getElementById('paymentForm').submit();
+    });
+</script>
 </body>
 
 </html>

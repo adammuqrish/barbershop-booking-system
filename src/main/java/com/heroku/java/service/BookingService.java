@@ -32,13 +32,17 @@ public class BookingService {
                 slot -> slot,
                 slot -> appointmentRepository.findByAppointmentDateAndAppointmentTime(date, slot)
                         .stream()
+                        // cancelled appointments free the slot back up
+                        .filter(a -> !"cancelled".equalsIgnoreCase(a.getServiceStatus()))
                         .map(Appointment::getBarberId)
                         .distinct()
                         .collect(Collectors.toList())));
     }
 
     public boolean isBarberAvailable(Long barberId, String date, String time) {
-        return appointmentRepository.findByBarberIdAndAppointmentDateAndAppointmentTime(barberId, date, time).isEmpty();
+        return appointmentRepository.findByBarberIdAndAppointmentDateAndAppointmentTime(barberId, date, time)
+                .stream()
+                .noneMatch(a -> !"cancelled".equalsIgnoreCase(a.getServiceStatus()));
     }
 
     public boolean isBarberAvailableForUpdate(Long barberId, String date, String time, Long excludeAppointmentId) {

@@ -156,7 +156,35 @@
     </style>
   </head>
 
-  <body class="flex flex-col h-screen justify-between bg-yellow-100">
+  <body class="flex flex-col h-screen justify-between" style="background:#f5efe4;font-family:'Inter',system-ui,sans-serif;color:#1c1a17">
+    <style>
+      /* Heritage theme overlay for login/register */
+      .form-container{border-radius:8px;border:2px solid var(--line,#e2d9c8)}
+      .panel.bg-gray-100{background:#fdfaf3 !important}
+      h2.text-2xl{font-family:'Bebas Neue';font-size:34px;letter-spacing:.05em;margin-bottom:1.25rem}
+      input.w-full{border:2px solid var(--line,#e2d9c8) !important;border-radius:5px;background:#fff;transition:border-color .15s ease}
+      input.w-full:focus{outline:none;border-color:var(--brass,#b08d57) !important}
+      label.block{font-weight:600;font-size:.88rem}
+      #login-form button[type=submit],#register-form button[type=submit]{background:var(--oxblood,#7d1f2e);color:#fff;border:none;border-radius:5px;padding:12px 30px;font-family:'Bebas Neue';font-size:20px;letter-spacing:.09em;cursor:pointer}
+      #login-form button[type=submit]:hover,#register-form button[type=submit]:hover{filter:brightness(1.12)}
+      .sliding-panel{background-color:#1c1a17 !important;border-radius:0 !important}
+      .sliding-panel h1{font-family:'Bebas Neue' !important;font-size:30px !important;letter-spacing:.14em !important}
+      .sliding-panel p.text-lg{color:var(--brass,#b08d57) !important;font-family:'Bebas Neue';letter-spacing:.08em;font-size:22px !important;margin-top:0 !important}
+      #toggle-register,#toggle-login{background:var(--brass,#b08d57) !important;color:#1c1a17 !important;border:none;border-radius:999px;padding:11px 40px;font-weight:700;cursor:pointer}
+      #toggle-register:hover,#toggle-login:hover{filter:brightness(1.08)}
+
+      /* ---- Mobile: stack panels vertically, no sliding overlay ---- */
+      @media(max-width:760px){
+        .form-container{height:auto !important;max-height:none !important}
+        .form-container > .flex{display:block !important;height:auto}
+        .panel{width:100% !important;position:relative !important;opacity:1 !important;z-index:auto !important;pointer-events:auto !important}
+        #register-form-container{position:relative !important;top:auto !important;right:auto !important;height:auto !important;overflow:visible !important;border-top:2px solid var(--line,#e2d9c8)}
+        .sliding-panel{position:relative !important;left:0 !important;width:100% !important;padding:1.25rem !important;border-radius:0 !important}
+        /* hide the inactive form entirely on mobile - toggle buttons switch visibility */
+        .panel.inactive{display:none !important}
+      }
+    </style>
+
     <div id="modal-overlay" class="modal-overlay">
       <div class="modal-content" id="modal-content"></div>
     </div>

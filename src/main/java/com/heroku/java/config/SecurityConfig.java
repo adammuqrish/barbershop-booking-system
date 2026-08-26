@@ -35,12 +35,15 @@ public class SecurityConfig {
                                                                 "/cancel-appointment", "/edit-appointment",
                                                                 "/update-appointment")
                                                 .authenticated()
-                                                .anyRequest().authenticated())
+                                                // Unmatched URLs fall through to MVC's 404 handling
+                                                // (themed error page). Endpoint-level session
+                                                // checks above still enforce authentication.
+                                                .anyRequest().permitAll())
                                 .formLogin(form -> form
                                                 .loginPage("/login")
                                                 .permitAll())
                                 .logout(logout -> logout
-                                                .logoutRequestMatcher(new AntPathRequestMatcher("/logout", "GET"))
+                                                .logoutRequestMatcher(new AntPathRequestMatcher("/logout", "POST"))
                                                 .logoutSuccessUrl("/index")
                                                 .invalidateHttpSession(true)
                                                 .deleteCookies("JSESSIONID")

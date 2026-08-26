@@ -69,7 +69,9 @@
 
           <!-- 6. LOGOUT -->
           <li class="nk-menu-item">
-            <a th:href="@{/logout}" class="nk-menu-link">Logout</a>
+            <form th:action="@{/logout}" method="post" class="d-inline">
+              <button type="submit" class="nk-menu-link bg-transparent border-0">Logout</button>
+            </form>
           </li>
         </ul>
       </div>

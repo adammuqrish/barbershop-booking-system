@@ -289,7 +289,10 @@ fi
 MAVEN_OPTS="$(concat_lines "$MAVEN_PROJECTBASEDIR/.mvn/jvm.config") $MAVEN_OPTS"
 
 # For Cygwin, switch paths to Windows format before running java
-if $cygwin; then
+# For MSYS2/Git-Bash (mingw), the same conversion is required - the stock
+# script only handles Cygwin, so paths like /c/Users/... leak into the
+# java classpath and MavenWrapperMain fails to load.
+if $cygwin || $mingw; then
   [ -n "$M2_HOME" ] &&
     M2_HOME=`cygpath --path --windows "$M2_HOME"`
   [ -n "$JAVA_HOME" ] &&

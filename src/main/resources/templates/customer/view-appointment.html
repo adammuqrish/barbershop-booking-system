@@ -1,98 +1,137 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 
-<head th:replace="~{fragments/header :: head}"></head>
+<head th:replace="~{fragments/header :: head}">
+    <title>Your Appointments — Hugi Barbershop</title>
+</head>
 
-<body class="flex flex-col h-screen justify-between bg-yellow-100">
-    <nav th:replace="~{fragments/nav :: nav}"></nav>
-    <main class="flex flex-col items-center mx-3 my-4 flex-grow justify-center">
-        <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-5xl mx-auto">
-            <h1 class="text-2xl font-bold mb-6">Your Current Appointments:</h1>
-            <div th:if="${success}"
-                class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4"
-                role="alert">
-                <span class="block sm:inline" th:text="${success}"></span>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <th:block th:each="appt : ${appointments}">
-                    <!-- Appointment Card -->
-                    <div class="bg-white p-6 rounded-lg shadow-md border flex flex-col justify-between">
-                        <div>
-                            <p><strong>Book For:</strong> <span th:text="${appt.custBookFor}"></span></p>
-                            <p><strong>Date:</strong> <span th:text="${appt.appointmentDate}"></span></p>
-                            <p><strong>Time:</strong> <span th:text="${appt.appointmentTime}"></span></p>
-                            <p><strong>Barber:</strong> <span th:text="${appt.appointmentBarber}"></span></p>
-                            <p><strong>Payment:</strong> <span th:text="${appt.paymentStatus}"></span></p>
-                            <p><strong>Service:</strong> <span th:text="${appt.serviceStatus}"></span></p>
-                        </div>
-                        <div class="flex gap-2 mt-4 justify-end">
-                            <a th:href="@{/receipt(appointmentId=${appt.appointmentId}, source='view-appointment')}"
-                                class="bg-blue-200 text-blue-800 px-3 py-1 rounded text-sm">View Receipt</a>
-                            <a th:if="${#strings.toLowerCase(appt.serviceStatus) == 'pending'}"
-                                th:href="@{/edit-appointment(appointmentId=${appt.appointmentId})}"
-                                class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 text-sm">
-                                Edit
-                            </a>
-                            <button class="bg-red-500 text-white px-3 py-1 rounded text-sm"
-                                th:onclick="'showCancelModal(' + ${appt.appointmentId} + ')'">Cancel</button>
-                            <form th:id="'cancelForm-' + ${appt.appointmentId}" th:action="@{/cancel-appointment}"
-                                method="post" style="display:none;">
-                                <input type="hidden" name="appointmentId" th:value="${appt.appointmentId}" />
-                            </form>
-                        </div>
-                    </div>
-                </th:block>
-                <!-- Pagination -->
-                <div class="col-span-1 md:col-span-2 flex justify-end mt-6" th:if="${totalPages > 1}">
-                    <nav class="inline-flex rounded-md shadow-sm">
-                        <a th:href="@{/view-appointment(page=${currentPage - 1})}"
-                            th:classappend="${currentPage == 0} ? 'pointer-events-none opacity-50'"
-                            class="px-4 py-2 border border-gray-300 rounded-l-md bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
-                            Previous
-                        </a>
-                        <span
-                            class="px-4 py-2 border-t border-b border-gray-300 bg-white text-sm font-medium text-gray-700">
-                            Page <span th:text="${currentPage + 1}"></span> of <span th:text="${totalPages}"></span>
-                        </span>
-                        <a th:href="@{/view-appointment(page=${currentPage + 1})}"
-                            th:classappend="${currentPage + 1 >= totalPages} ? 'pointer-events-none opacity-50'"
-                            class="px-4 py-2 border border-gray-300 rounded-r-md bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
-                            Next
-                        </a>
-                    </nav>
-                </div>
-                <p th:if="${#lists.isEmpty(appointments.content)}">No appointments found.</p>
-            </div>
-        </div>
-    </main>
+<body class="flex flex-col min-h-screen" style="font-family:'Inter',system-ui,sans-serif;background:var(--cream);color:var(--ink);margin:0">
 
-    <!-- Cancel Modal -->
-    <div id="cancelModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50 hidden">
-        <div class="bg-white rounded-lg shadow-lg p-6 w-80">
-            <h2 class="text-lg font-semibold mb-4">Cancel Appointment</h2>
-            <p class="mb-6">Are you sure?</p>
-            <div class="flex justify-end gap-2">
-                <button onclick="hideCancelModal()" class="px-4 py-1 rounded bg-gray-300">No</button>
-                <button id="confirmCancelBtn" class="px-4 py-1 rounded bg-red-500 text-white">Yes</button>
-            </div>
-        </div>
+<nav th:replace="~{fragments/nav :: nav}"></nav>
+
+<main style="flex:1;width:100%;max-width:960px;margin:0 auto;padding:40px 24px 72px">
+
+    <h1 style="font-family:'Bebas Neue';font-size:42px;line-height:1.05;letter-spacing:.03em;margin:0 0 6px">Upcoming appointments</h1>
+    <p class="hint" style="color:var(--muted);margin:0 0 26px">Your active bookings — edit or cancel any time before the slot.</p>
+
+    <div th:if="${success}" role="status"
+         style="background:#eef7ee;border-left:4px solid #2e7d32;color:#2e7d32;padding:12px 16px;border-radius:0 4px 4px 0;font-size:.92rem;font-weight:600;margin-bottom:22px">
+        <span th:text="${success}">Success</span>
     </div>
 
-    <footer th:replace="~{fragments/footer :: footer}"></footer>
-    <!-- Cancel Modal Script -->
-    <script>
-        let cancelId = null;
-        function showCancelModal(id) {
-            cancelId = id;
-            document.getElementById('cancelModal').classList.remove('hidden');
+    <style>
+        .appt-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+        @media(max-width:760px){.appt-grid{grid-template-columns:1fr}}
+        .appt-card{background:#fff;border:2px solid var(--line);border-radius:6px;padding:22px;display:flex;flex-direction:column}
+        .appt-card .who{font-family:'Bebas Neue';font-size:24px;letter-spacing:.05em;margin-bottom:8px}
+        .appt-meta{display:grid;grid-template-columns:auto 1fr;gap:5px 16px;font-size:.92rem;margin-bottom:14px}
+        .appt-meta dt{color:var(--muted)}
+        .appt-meta dd{margin:0;font-weight:600}
+        .badge{display:inline-block;font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 10px;border-radius:999px}
+        .badge-paid{background:#eef7ee;color:#2e7d32;border:1px solid #bfe3bf}
+        .badge-pending{background:#fdf3e3;color:#8a5a00;border:1px solid #ecd9ae}
+        .badge-cancelled{background:#fdeaea;color:#b3122f;border:1px solid #f3c1c1}
+        .appt-actions{display:flex;gap:10px;margin-top:auto;justify-content:flex-end;flex-wrap:wrap}
+        .btn-sm{display:inline-flex;align-items:center;justify-content:center;text-align:center;text-decoration:none;border:none;border-radius:4px;padding:9px 16px;font-size:.88rem;font-weight:700;cursor:pointer;transition:filter .15s ease}
+        .btn-sm:hover{filter:brightness(1.1)}
+        .btn-edit{background:var(--oxblood);color:#fff}
+        .btn-receipt{background:transparent;color:var(--oxblood);border:2px solid var(--oxblood)}
+        .btn-cancel{background:transparent;color:#b3122f;border:2px solid #b3122f}
+        .pager{display:flex;justify-content:center;align-items:stretch;margin-top:28px;max-width:460px;margin-left:auto;margin-right:auto;border:2px solid var(--line);border-radius:6px;overflow:hidden;box-shadow:0 2px 8px rgba(26,23,20,.09);background:#fff}
+        .pager > a,.pager > span{box-sizing:border-box;text-decoration:none;font-size:.88rem;font-weight:600;letter-spacing:.01em;display:inline-flex;align-items:center;justify-content:center;white-space:nowrap;line-height:1;min-height:44px;border:none}
+        .pager > a{padding:11px 18px;min-width:108px;background:#fff;color:var(--ink);transition:background .15s ease}
+        .pager > a + span,.pager > span + a{border-left:2px solid var(--line)}
+        .pager > span{background:var(--cream-2);flex:1 1 auto;min-width:140px;padding:11px 16px;gap:.45em;font-weight:500;color:var(--ink)}
+        .pager > span span{padding:0;border:none;background:none;display:inline;white-space:nowrap}
+        .pager > span .pager-num{font-weight:700;font-variant-numeric:tabular-nums}
+        .pager > span .pager-lbl{font-weight:500;opacity:.92}
+        .pager > a:hover{background:#fffef7}
+        .pager > a:active{background:var(--cream-2)}
+        .pager > a.off{opacity:.42;pointer-events:none;background:#faf8f4;color:var(--muted)}
+        @media(max-width:480px){
+            .pager{margin-top:22px;max-width:none;box-shadow:0 1px 4px rgba(26,23,20,.08)}
+            .pager > a{min-width:84px;padding:10px 12px;font-size:.82rem;min-height:42px}
+            .pager > span{min-width:0;padding:10px 10px;font-size:.82rem;gap:.38em}
         }
-        function hideCancelModal() {
-            document.getElementById('cancelModal').classList.add('hidden');
-        }
-        document.getElementById('confirmCancelBtn').onclick = () => {
-            if (cancelId) document.getElementById('cancelForm-' + cancelId).submit();
-        };
-    </script>
+    </style>
+
+    <div class="appt-grid">
+        <th:block th:each="appt : ${appointments}">
+            <div class="appt-card">
+                <span class="who" th:text="${appt.custBookFor}">Name</span>
+                <dl class="appt-meta">
+                    <dt>Date</dt><dd th:text="${appt.appointmentDate}"></dd>
+                    <dt>Time</dt><dd th:text="${appt.appointmentTime}"></dd>
+                    <dt>Barber</dt><dd th:text="${appt.appointmentBarber}"></dd>
+                </dl>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">
+                    <span class="badge"
+                          th:classappend="${appt.paymentStatus == 'completed'} ? 'badge-paid' : 'badge-pending'"
+                          th:text="'Payment: ' + ${appt.paymentStatus}">Payment</span>
+                    <span class="badge"
+                          th:classappend="${appt.serviceStatus == 'cancelled'} ? 'badge-cancelled' : 'badge-pending'"
+                          th:text="'Service: ' + ${appt.serviceStatus}">Service</span>
+                </div>
+                <div class="appt-actions">
+                    <a th:href="@{/receipt(appointmentId=${appt.appointmentId}, source='view-appointment')}"
+                       class="btn-sm btn-receipt">View Receipt</a>
+                    <a th:if="${#strings.toLowerCase(appt.serviceStatus) == 'pending'}"
+                       th:href="@{/edit-appointment(appointmentId=${appt.appointmentId})}"
+                       class="btn-sm btn-edit">Edit</a>
+                    <button type="button" class="btn-sm btn-cancel"
+                            th:if="${#strings.toLowerCase(appt.serviceStatus) == 'pending'}"
+                            th:onclick="'showCancelModal(' + ${appt.appointmentId} + ')'">Cancel</button>
+                    <form th:id="'cancelForm-' + ${appt.appointmentId}" th:action="@{/cancel-appointment}"
+                          method="post" style="display:none;">
+                        <input type="hidden" name="appointmentId" th:value="${appt.appointmentId}" />
+                    </form>
+                </div>
+            </div>
+        </th:block>
+
+        <p th:if="${#lists.isEmpty(appointments.content)}"
+           style="grid-column:1/-1;text-align:center;background:#fff;border:2px dashed var(--line);border-radius:6px;padding:44px 20px;color:var(--muted)">
+            No appointments found.
+        </p>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pager" th:if="${totalPages > 1}">
+        <a th:href="@{/view-appointment(page=${currentPage - 1})}"
+           th:classappend="${currentPage == 0} ? 'off'">Previous</a>
+        <span><span class="pager-lbl">Page</span><span class="pager-num" th:text="${currentPage + 1}"></span><span class="pager-lbl">of</span><span class="pager-num" th:text="${totalPages}"></span></span>
+        <a th:href="@{/view-appointment(page=${currentPage + 1})}"
+           th:classappend="${currentPage + 1 >= totalPages} ? 'off'">Next</a>
+    </div>
+</main>
+
+<!-- Cancel Modal -->
+<div id="cancelModal"
+     style="position:fixed;inset:0;background:rgba(16,24,32,.55);align-items:center;justify-content:center;z-index:50;display:none">
+    <div style="background:#fff;border-radius:8px;box-shadow:0 20px 45px rgba(0,0,0,.25);padding:28px;width:340px">
+        <h2 style="font-family:'Bebas Neue';font-size:26px;letter-spacing:.06em;margin:0 0 8px">Cancel appointment</h2>
+        <p style="color:var(--muted);margin:0 0 22px">Are you sure? This frees up your time slot.</p>
+        <div style="display:flex;justify-content:flex-end;gap:10px">
+            <button onclick="hideCancelModal()" class="btn-sm btn-cancel" type="button">Keep it</button>
+            <button id="confirmCancelBtn" class="btn-sm btn-edit" type="button">Yes, cancel it</button>
+        </div>
+    </div>
+</div>
+
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+<script>
+    let cancelId = null;
+    function showCancelModal(id) {
+        cancelId = id;
+        document.getElementById('cancelModal').style.display = 'flex';
+    }
+    function hideCancelModal() {
+        document.getElementById('cancelModal').style.display = 'none';
+    }
+    document.getElementById('confirmCancelBtn').onclick = () => {
+        if (cancelId) document.getElementById('cancelForm-' + cancelId).submit();
+    };
+</script>
 </body>
 
 </html>

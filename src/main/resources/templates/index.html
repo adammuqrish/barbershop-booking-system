@@ -3,65 +3,224 @@
 
 <head th:replace="~{fragments/header :: head}"></head>
 
-<body class="flex flex-col min-h-screen bg-neutral-900">
-	<nav th:replace="~{fragments/nav :: nav}"></nav>
+<body class="flex flex-col min-h-screen" style="font-family:'Inter',system-ui,sans-serif;background:var(--cream);color:var(--ink);margin:0">
 
-	<main class="flex-1 w-full bg-white">
-		<section
-			class="relative w-full h-[160px] md:h-[220px] lg:h-[280px] bg-cover bg-center flex items-center overflow-hidden -mt-[1px]"
-			th:style="'background-image: url(' + @{/resources/uploads/barber-images/barber-7.jpg} + ');'">
-			<div class="absolute inset-0 bg-black/50"></div>
-			<div class="relative z-10 w-full flex justify-center items-center">
-				<h1 class="text-white text-2xl md:text-4xl font-extrabold tracking-widest text-center drop-shadow-lg">
-					HUGI BARBERSHOP</h1>
-			</div>
-		</section>
+<!-- Topbar (above nav) -->
+<div class="hb-topbar">
+    <div class="hb-topbar-inner">
+        <span th:text="'Open ' + ${barbershop.openingHours}">Open TUESDAY - SUNDAY (10 a.m - 10 p.m)</span>
+        <span>Walk-ins welcome</span>
+        <span th:text="'Call ' + ${barbershop.phone}">Call 012-7865132</span>
+    </div>
+</div>
 
-		<section id="aboutUs" class="relative max-w-6xl mx-auto px-4 md:px-8 lg:px-12 py-8 bg-white overflow-visible">
-			<div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-start relative">
-				<div class="flex flex-col justify-center z-10">
-					<h2 class="text-lg text-red-600 uppercase font-bold mb-2">About Us</h2>
-					<h3 class="text-2xl md:text-3xl font-extrabold mb-4">Welcome to Hugi Barbershop</h3>
-					<p class="text-gray-700 mb-3">At Hugi Barbershop, we combine the classic art of barbering with
-						contemporary techniques. Our team of skilled barbers specializes in modern fades, sharp beard
-						trims, and clean, stylish precision haircuts.</p>
-					<p class="text-gray-700 mb-3">Whether you’re here for a quick touch-up or a full grooming session,
-						we promise top-tier care and unmatched attention and expertise.</p>
-					<p class="text-gray-800 font-medium mb-6">Ready for your next cut? Book your appointment today —
-						we’re looking forward to serving you!</p>
-				</div>
-				<div class="relative hidden md:flex h-[320px] md:h-[340px] lg:h-[380px] w-full md:w-auto">
-					<img th:src="@{/resources/uploads/barber-images/barber-1.jpg}"
-						class="absolute -top-12 right-0 w-32 md:w-40 lg:w-44 xl:w-48 h-auto rounded-lg shadow-xl border-4 border-white z-30 object-cover" />
-					<img th:src="@{/resources/uploads/barber-images/barber-4.jpg}"
-						class="absolute top-24 right-4 md:top-24 md:right-16 w-44 md:w-56 lg:w-64 xl:w-72 h-auto rounded-lg shadow-lg border-4 border-white z-20 object-cover rotate-3" />
-				</div>
-			</div>
-		</section>
+<nav th:replace="~{fragments/nav :: nav}"></nav>
 
-		<section
-			class="relative max-w-6xl mx-auto px-4 md:px-8 lg:px-12 py-8 bg-neutral-100 my-4 rounded-lg shadow mb-16">
-			<div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-				<div class="relative flex justify-center md:justify-start">
-					<div class="w-72 h-48 md:w-80 md:h-56 rounded shadow-lg overflow-hidden border-4 border-white">
-						<img th:src="@{/resources/uploads/barber-images/barber-8.jpg}" alt="Haircut Action"
-							class="object-cover w-full h-full">
-					</div>
-				</div>
-				<div>
-					<h3 class="text-2xl md:text-3xl font-bold mb-4">Let’s Make An Appointment!</h3>
-					<p class="text-gray-700 mb-4">Book your haircut online today for a stress-free experience—skip the
-						wait, choose your preferred barber, get instant confirmation, and enjoy hassle-free reminders.
-						Your perfect haircut is just a click away!</p>
-					<a th:href="@{/booking}"
-						class="inline-block bg-green-600 hover:bg-white text-white hover:text-green-500 border border-green-500 font-semibold py-3 px-6 rounded-md shadow transition duration-300">
-						BOOK NOW ! </a>
-				</div>
-			</div>
-		</section>
-	</main>
+<!-- Login success toast -->
+<div th:if="${justLoggedIn}" id="loginToast" role="status"
+     style="position:fixed;top:86px;right:20px;z-index:100;background:#eef7ee;border:2px solid #2e7d32;color:#2e7d32;font-weight:600;padding:12px 20px;border-radius:6px;box-shadow:0 8px 22px rgba(0,0,0,.15)">
+    ✓ Welcome back! You're logged in.
+</div>
+<script th:if="${justLoggedIn}">
+    setTimeout(function () {
+        var t = document.getElementById('loginToast');
+        if (t) t.remove();
+    }, 4000);
+</script>
 
-	<footer th:replace="~{fragments/footer :: footer}"></footer>
+<main style="flex:1">
+
+    <!-- ================= HERO ================= -->
+    <header class="hb-hero"
+            th:style="'background-image:url(' + @{/resources/uploads/barber-images/barber-7.jpg} + ')'">
+        <div class="hb-hero-overlay"></div>
+        <div class="hb-hero-inner">
+            <span class="hb-kicker">Est. Klang &middot; Gents' grooming</span>
+            <h1>Classic cuts.<br><span class="gold">Modern standards.</span></h1>
+            <p class="sub">Fades, beard sculpting and hot-towel shaves from barbers who treat it like a craft
+                &mdash; not a chore. Book online, skip the wait.</p>
+            <div class="hb-hero-actions">
+                <a class="hb-btn hb-btn-blood" th:href="@{/booking}">Book an appointment</a>
+                <a class="hb-btn hb-btn-outline" href="#services">See the price list</a>
+            </div>
+        </div>
+        <!-- Stats: in normal flow on ALL screens now (no absolute positioning) -->
+        <div class="hb-strip">
+            <div class="hb-strip-inner">
+                <span><b>15+</b>&nbsp;&nbsp;Years of craft</span>
+                <span><b>4.9&#9733;</b>&nbsp;&nbsp;Customer rating</span>
+                <span><b>10am&ndash;10pm</b>&nbsp;&nbsp;Tue to Sun</span>
+                <span><b>Palm Garden</b>&nbsp;&nbsp;Bandar Baru Klang</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- ================= ABOUT ================= -->
+    <section class="hb-section" id="aboutUs" style="scroll-margin-top:80px">
+        <div class="hb-section-inner">
+            <div class="hb-sec-head">
+                <span class="hb-tag">About us</span>
+                <h2>More than a haircut &mdash; <em>a ritual.</em></h2>
+            </div>
+            <p style="max-width:66ch;font-size:1.08rem">
+                At Hugi Barbershop we combine the classic art of barbering with contemporary technique. Our barbers
+                specialise in modern fades, sharp beard trims and clean precision cuts &mdash; with the hot towel,
+                the small talk and the careful finish that make a barbershop worth returning to. Whether it's a quick
+                touch-up or a full grooming session, you leave looking sharper than you arrived.
+            </p>
+        </div>
+    </section>
+
+    <!-- ================= SERVICES / PRICES ================= -->
+    <!-- Prices mirror the app's actual pricing logic (PaymentController):
+         Child RM10 · Teen RM13 · Senior RM12 · Adult RM15 (loyalty reward = free cut) -->
+    <section class="hb-section dark" id="services" style="scroll-margin-top:80px">
+        <div class="hb-section-inner">
+            <div class="hb-sec-head">
+                <span class="hb-tag">Services &amp; prices</span>
+                <h2>The <em>menu.</em></h2>
+                <p class="lead" style="margin-top:12px;max-width:56ch;color:rgba(245,239,228,.75)">
+                    Straightforward services, honest prices. One signature cut, priced by age group
+                    &mdash; no surprises at the till.</p>
+            </div>
+            <div class="hb-menu-grid">
+                <div>
+                    <div class="hb-menu-item">
+                        <div class="hb-menu-row">
+                            <span class="name">Adult Signature Cut <span class="hb-badge">Popular</span></span>
+                            <span class="dots"></span><span class="price">RM15</span>
+                        </div>
+                        <span class="desc">Consultation, precision cut, wash &amp; style finish</span>
+                    </div>
+                    <div class="hb-menu-item">
+                        <div class="hb-menu-row">
+                            <span class="name">Teen Cut (13&ndash;17)</span>
+                            <span class="dots"></span><span class="price">RM13</span>
+                        </div>
+                        <span class="desc">Same craft, sized for school and college styles</span>
+                    </div>
+                </div>
+                <div>
+                    <div class="hb-menu-item">
+                        <div class="hb-menu-row">
+                            <span class="name">Child Cut (under 12)</span>
+                            <span class="dots"></span><span class="price">RM10</span>
+                        </div>
+                        <span class="desc">Patient, friendly cuts for young gents</span>
+                    </div>
+                    <div class="hb-menu-item">
+                        <div class="hb-menu-row">
+                            <span class="name">Senior Cut (60+)</span>
+                            <span class="dots"></span><span class="price">RM12</span>
+                        </div>
+                        <span class="desc">Unhurried, classic &mdash; with extra care</span>
+                    </div>
+                </div>
+            </div>
+            <div class="hb-menu-note">
+                <span class="hb-badge">Loyalty</span>
+                Collect points with every visit &mdash; reach the reward and your next cut is on the house.
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= BARBERS ================= -->
+    <section id="barbers" class="hb-section" style="background:var(--cream-2);scroll-margin-top:80px">
+        <div class="hb-section-inner">
+            <div class="hb-sec-head">
+                <span class="hb-tag">The team</span>
+                <h2>Meet your <em>barbers.</em></h2>
+            </div>
+            <div class="hb-barber-grid">
+                <th:block th:each="barber : ${barbers}">
+                    <article class="hb-barber-card">
+                        <img th:if="${barber.staffPicture != null}"
+                             th:src="@{'/resources/uploads/barber-images/' + ${barber.staffPicture}}"
+                             th:alt="'Portrait of ' + ${barber.staffName}" />
+                        <div th:unless="${barber.staffPicture != null}" class="fallback"
+                             th:text="${#strings.substring(barber.staffName, 0, 1)}">H</div>
+                        <div class="hb-barber-info">
+                            <h3 th:text="${barber.staffName}">Barber name</h3>
+                            <span class="spec" th:text="${barber.description}">Professional barber</span>
+                        </div>
+                    </article>
+                </th:block>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= HOURS + VISIT ================= -->
+    <section class="hb-visit hb-section" id="visit" style="scroll-margin-top:80px">
+        <div class="hb-section-inner">
+            <div class="hb-visit-grid">
+                <div>
+                    <div class="hb-sec-head">
+                        <span class="hb-tag">Visit us</span>
+                        <h2>Opening <em>hours.</em></h2>
+                    </div>
+                    <table class="hb-hours">
+                        <tr><td>Tuesday</td><td>10:00 &ndash; 22:00</td></tr>
+                        <tr><td>Wednesday</td><td>10:00 &ndash; 22:00</td></tr>
+                        <tr><td>Thursday</td><td>10:00 &ndash; 22:00</td></tr>
+                        <tr><td>Friday</td><td>10:00 &ndash; 22:00</td></tr>
+                        <tr><td>Saturday</td><td>10:00 &ndash; 22:00</td></tr>
+                        <tr><td>Sunday</td><td>10:00 &ndash; 22:00</td></tr>
+                        <tr><td>Monday</td><td>Closed</td></tr>
+                    </table>
+                </div>
+                <aside class="hb-signboard">
+                    <h3>Find the shop</h3>
+                    <div class="row"><span class="lbl">Address</span><span th:text="${barbershop.address}">LOT-A-G9, Palm Garden, Bandar Baru Klang, 41150 Klang, Selangor.</span></div>
+                    <div class="row"><span class="lbl">Phone</span><span><strong th:text="${barbershop.phone}">012-7865132</strong></span></div>
+                    <div class="row"><span class="lbl">Email</span><span th:text="${barbershop.email}">hugibarbershop@gmail.com</span></div>
+                    <p style="margin-top:18px;font-size:.9rem;color:var(--muted)">
+                        Free parking at Palm Garden. Walk-ins welcome, but weekends fill up fast &mdash;
+                        booking ahead is smarter.
+                    </p>
+                    <a class="hb-btn hb-btn-blood" style="margin-top:14px" th:href="@{/booking}">Book your slot</a>
+                </aside>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= TESTIMONIALS ================= -->
+    <section class="hb-section">
+        <div class="hb-section-inner">
+            <div class="hb-sec-head">
+                <span class="hb-tag">Word on the street</span>
+                <h2>Customers <em>talking.</em></h2>
+            </div>
+            <div class="hb-quote-grid">
+                <figure class="hb-quote">
+                    <p>Best fade I've had in Klang, hands down. They actually take time to ask what you want instead of rushing you out of the chair.</p>
+                    <figcaption class="who"><b>Aiman R.</b><span class="hb-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</span></figcaption>
+                </figure>
+                <figure class="hb-quote">
+                    <p>Brought my 7-year-old for his first proper haircut. The barber was so patient with him he didn't want to leave. We're regulars now.</p>
+                    <figcaption class="who"><b>Puan Siti</b><span class="hb-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</span></figcaption>
+                </figure>
+                <figure class="hb-quote">
+                    <p>The hot towel shave is worth every sen. Old-school service with a proper cup of coffee while you wait.</p>
+                    <figcaption class="who"><b>Encik Rahim</b><span class="hb-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</span></figcaption>
+                </figure>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= CTA BAND ================= -->
+    <section class="hb-cta-band">
+        <div class="hb-section-inner">
+            <h2>Ready for the chair?</h2>
+            <p>Pick your barber, choose your time, walk in like you own the place.
+                Booking takes less than two minutes.</p>
+            <a class="hb-btn" th:href="@{/booking}">Book Now &mdash; It's Easy</a>
+        </div>
+    </section>
+
+</main>
+
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+
 </body>
 
 </html>

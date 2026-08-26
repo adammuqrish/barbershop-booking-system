@@ -19,11 +19,14 @@ public class ProfileController {
 
     private final CustomerRepository customerRepository;
     private final CustomerService customerService;
+    private final com.heroku.java.service.FileStorageService fileStorageService;
 
     @Autowired
-    public ProfileController(CustomerRepository customerRepository, CustomerService customerService) {
+    public ProfileController(CustomerRepository customerRepository, CustomerService customerService,
+            com.heroku.java.service.FileStorageService fileStorageService) {
         this.customerRepository = customerRepository;
         this.customerService = customerService;
+        this.fileStorageService = fileStorageService;
     }
 
     @GetMapping("/profile")
@@ -60,7 +63,7 @@ public class ProfileController {
             @RequestParam String email,
             @RequestParam String phone,
             @RequestParam(required = false) String password,
-            @RequestParam("image") org.springframework.web.multipart.MultipartFile image,
+            @RequestParam(value = "image", required = false) org.springframework.web.multipart.MultipartFile image,
             HttpSession session,
             RedirectAttributes redirectAttributes) {
 
@@ -89,6 +92,18 @@ public class ProfileController {
             }
             // ------------------------------------------
 
+            // ✅ NO-CHANGE GUARD: nothing modified -> skip save & success message
+            boolean detailsUnchanged = customer.getCustName().equals(name)
+                    && customer.getCustEmail().equals(email)
+                    && customer.getCustPhoneNumber().equals(phone);
+            boolean noNewPassword = password == null || password.isEmpty();
+            boolean noNewImage = image == null || image.isEmpty();
+            if (detailsUnchanged && noNewPassword && noNewImage) {
+                redirectAttributes.addFlashAttribute("success",
+                        "No changes were made to your profile.");
+                return "redirect:/profile";
+            }
+
             // --- LOGIK CHECK PASSWORD (KOD ASAL) ---
             if (password != null && !password.isEmpty()) {
                 org.springframework.security.crypto.password.PasswordEncoder encoder = new org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder();
@@ -108,26 +123,17 @@ public class ProfileController {
             customer.setCustEmail(email);
             customer.setCustPhoneNumber(phone);
 
-            // Handle Image Upload (Kod Asal)
+            // Handle Image Upload (validated, stored in external upload dir)
             if (image != null && !image.isEmpty()) {
                 try {
-                    String fileName = java.util.UUID.randomUUID().toString() + "_" + image.getOriginalFilename();
-                    java.nio.file.Path uploadPath = java.nio.file.Paths
-                            .get("src/main/resources/static/resources/uploads");
-
-                    if (!java.nio.file.Files.exists(uploadPath)) {
-                        java.nio.file.Files.createDirectories(uploadPath);
-                    }
-
-                    java.nio.file.Path filePath = uploadPath.resolve(fileName);
-                    java.nio.file.Files.copy(image.getInputStream(), filePath,
-                            java.nio.file.StandardCopyOption.REPLACE_EXISTING);
-
+                    String fileName = fileStorageService.storeImage(image);
                     customer.setCustPicture(fileName);
+                } catch (IllegalArgumentException e) {
+                    redirectAttributes.addFlashAttribute("error", e.getMessage());
+                    return "redirect:/edit-profile";
                 } catch (java.io.IOException e) {
-                    e.printStackTrace();
                     redirectAttributes.addFlashAttribute("error", "Failed to upload image.");
-                    return "redirect:/edit-profile"; // <<<< Tambah redirect ni jika upload gagal
+                    return "redirect:/edit-profile";
                 }
             }
 
