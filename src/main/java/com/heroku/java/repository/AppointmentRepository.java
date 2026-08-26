@@ -27,6 +27,17 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
            "a.appointmentId DESC")
     List<Appointment> findAllSortedByDateAndStatus();
 
+    @Query("SELECT a FROM Appointment a " +
+           "ORDER BY a.appointmentDate DESC, " +
+           "a.appointmentTime DESC, " +
+           "CASE WHEN a.serviceStatus = 'pending' THEN 0 ELSE 1 END, " +
+           "a.appointmentId DESC")
+    Page<Appointment> findAllSortedByDateAndStatus(Pageable pageable);
+
+    long countByServiceStatus(String serviceStatus);
+
+    long countByBarberIdAndServiceStatus(Long barberId, String serviceStatus);
+
     List<Appointment> findByBarberIdAndAppointmentDate(Long barberId, String date);
     List<Appointment> findByAppointmentDate(String date);
 

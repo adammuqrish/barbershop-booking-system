@@ -45,12 +45,12 @@
                         <div class="table-responsive">
                             <table class="table" id="txTable">
                                 <thead><tr class="nk-tb-head">
-                                    <th class="nk-tb-col">Payment ID</th>
-                                    <th class="nk-tb-col">Customer</th>
-                                    <th class="nk-tb-col text-end">Amount</th>
-                                    <th class="nk-tb-col">Method</th>
-                                    <th class="nk-tb-col">Date</th>
-                                    <th class="nk-tb-col">Status</th>
+                                    <th class="nk-tb-col" scope="col">Payment ID</th>
+                                    <th class="nk-tb-col" scope="col">Customer</th>
+                                    <th class="nk-tb-col text-end" scope="col">Amount</th>
+                                    <th class="nk-tb-col" scope="col">Method</th>
+                                    <th class="nk-tb-col" scope="col">Date</th>
+                                    <th class="nk-tb-col" scope="col">Status</th>
                                 </tr></thead>
                                 <tbody>
                                     <tr th:each="transaction : ${transactions}" class="nk-tb-item">

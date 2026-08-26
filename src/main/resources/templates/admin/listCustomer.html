@@ -42,10 +42,10 @@
                                         <table class="table" id="customerTable">
                                             <thead>
                                                 <tr class="nk-tb-head">
-                                                    <th class="nk-tb-col">Name</th>
-                                                    <th class="nk-tb-col">Phone</th>
-                                                    <th class="nk-tb-col">Loyalty</th>
-                                                    <th class="nk-tb-col nk-tb-col-tools text-end">Action</th>
+                                                    <th class="nk-tb-col" scope="col">Name</th>
+                                                    <th class="nk-tb-col" scope="col">Phone</th>
+                                                    <th class="nk-tb-col" scope="col">Loyalty</th>
+                                                    <th class="nk-tb-col nk-tb-col-tools text-end" scope="col">Action</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -62,12 +62,11 @@
                                             </tbody>
                                         </table>
                                     </div>
-                                    <div th:if="${customerList != null and #lists.size(customerList) > 10}" class="card-inner border-top">
-                                        <div class="text-soft small">Showing <span th:text="${#lists.size(customerList)}">0</span> customers. Use search to filter.</div>
-                                    </div>
+                                    <div th:replace="~{fragments/adminComponents :: pagination(currentPage=${currentPage}, totalPages=${totalPages}, baseUrl=${staffRole == 'BARBER' ? '/barber/customers' : '/listCustomer'})}"></div>
                                 </div>
                             </div>
                         </div>
+                        <div class="text-soft small text-center mt-2" th:if="${customerPage != null}">Showing <span th:text="${customerPage.number * customerPage.size + 1}">1</span>–<span th:text="${customerPage.number * customerPage.size + #lists.size(customerList)}">10</span> of <span th:text="${customerPage.totalElements}">0</span></div>
                     </div>
                     <div class="col-lg-4">
                         <div th:if="${customer}" class="card">

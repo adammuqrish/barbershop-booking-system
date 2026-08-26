@@ -99,10 +99,7 @@ public class AdminController {
         if (barber == null)
             return "redirect:/adminLogin";
 
-        // Set user info untuk header (sama macam admin)
-        model.addAttribute("staffName", barber.getStaffName());
-        model.addAttribute("staffRole", barber.getStaffRole());
-        model.addAttribute("staff", barber);
+        adminHeaderService.populate(model);
 
         // 1. Total Sales (Hanya untuk appointment barber ini)
         // Anggap method 'getTotalSalesByStaffId' wujud dalam PaymentRepository (lihat
@@ -158,21 +155,27 @@ public class AdminController {
     // 2. BARBER CUSTOMER LIST
     @GetMapping("/barber/customers")
     public String barberCustomerList(
-            @RequestParam(required = false) Long custId, // ✅ TAMBAH PARAMETER NI
+            @RequestParam(required = false) Long custId,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size,
             Model model) {
 
         Staff barber = getLoggedInStaff();
         if (barber == null)
             return "redirect:/adminLogin";
 
-        // Set info user untuk header
-        model.addAttribute("staffName", barber.getStaffName());
-        model.addAttribute("staffRole", barber.getStaffRole());
-        model.addAttribute("staff", barber);
+        adminHeaderService.populate(model);
 
-        // 1. Dapatkan senarai customer yang assign kepada barber ini
-        List<Customer> customers = customerRepository.findCustomersByStaffId(barber.getStaffId());
+        // 1. Dapatkan senarai customer yang assign kepada barber ini (barber-scoped)
+        List<Customer> allCustomers = customerRepository.findCustomersByStaffId(barber.getStaffId());
+        // Manual pagination (custom query returns List, not Page)
+        int total = allCustomers.size();
+        int from = Math.min(page * size, total);
+        int to = Math.min(from + size, total);
+        List<Customer> customers = allCustomers.subList(from, to);
         model.addAttribute("customerList", customers);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", (int) Math.ceil((double) total / size));
 
         // 2. Logik View Details (Jika ada custId dihantar)
         if (custId != null) {
@@ -208,9 +211,7 @@ public class AdminController {
         if (barber == null)
             return "redirect:/adminLogin";
 
-        model.addAttribute("staffName", barber.getStaffName());
-        model.addAttribute("staffRole", barber.getStaffRole());
-        model.addAttribute("staff", barber);
+        adminHeaderService.populate(model);
         model.addAttribute("loggedInStaff", barber); // Untuk kegunaan template
 
         // Filter appointments
@@ -552,27 +553,17 @@ public class AdminController {
     @PreAuthorize("hasRole('ADMIN')")
     public String listCustomers(
             @org.springframework.web.bind.annotation.RequestParam(name = "custId", required = false) Long custId,
+            @org.springframework.web.bind.annotation.RequestParam(name = "page", defaultValue = "0") int page,
+            @org.springframework.web.bind.annotation.RequestParam(name = "size", defaultValue = "10") int size,
             Model model) {
-        // Load staff role
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth != null && !auth.getName().equals("anonymousUser")) {
-            String email = auth.getName();
-            Optional<Staff> staffOpt = staffRepository.findByStaffEmail(email);
-            if (staffOpt.isPresent()) {
-                Staff staff = staffOpt.get();
-                model.addAttribute("staffName", staff.getStaffName());
-                model.addAttribute("staffRole", staff.getStaffRole());
-                model.addAttribute("staff", staff);
-            } else {
-                model.addAttribute("staffName", "Staff");
-                model.addAttribute("staffRole", null);
-            }
-        } else {
-            model.addAttribute("staffName", "Staff");
-            model.addAttribute("staffRole", null);
-        }
+        adminHeaderService.populate(model);
 
-        model.addAttribute("customerList", customerRepository.findAll());
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size, org.springframework.data.domain.Sort.by("custName").ascending());
+        org.springframework.data.domain.Page<Customer> customerPage = customerRepository.findAll(pageable);
+        model.addAttribute("customerPage", customerPage);
+        model.addAttribute("customerList", customerPage.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", customerPage.getTotalPages());
 
         if (custId != null) {
             Optional<Customer> customer = customerRepository.findById(custId);
@@ -587,21 +578,18 @@ public class AdminController {
     @PreAuthorize("hasRole('ADMIN')")
     public String listBarber(
             @RequestParam(name = "staffId", required = false) Long staffId,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size,
             Model model) {
 
-        // ✅ Get logged-in admin info
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth != null && !auth.getName().equals("anonymousUser")) {
-            staffRepository.findByStaffEmail(auth.getName()).ifPresent(admin -> {
-                model.addAttribute("staffName", admin.getStaffName());
-                model.addAttribute("staffRole", admin.getStaffRole()); // ✅ IMPORTANT
-                model.addAttribute("staff", admin);
-                model.addAttribute("loggedInStaff", admin);
-            });
-        }
+        adminHeaderService.populate(model);
 
-        // ✅ Barber list
-        model.addAttribute("barberList", staffRepository.findAll());
+        // ✅ Barber list — server-paginated
+        org.springframework.data.domain.Page<Staff> barberPage = staffRepository.findAll(org.springframework.data.domain.PageRequest.of(page, size, org.springframework.data.domain.Sort.by("staffName").ascending()));
+        model.addAttribute("barberPage", barberPage);
+        model.addAttribute("barberList", barberPage.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", barberPage.getTotalPages());
 
         // ✅ Selected barber
         if (staffId != null) {
@@ -627,20 +615,19 @@ public class AdminController {
     @PreAuthorize("hasRole('ADMIN')")
     public String listAppointments(
             @RequestParam(name = "appointmentId", required = false) Long appointmentId,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size,
             Model model,
             Authentication authentication) {
 
-        // ✅ logged-in admin info (for header)
-        staffRepository.findByStaffEmail(authentication.getName())
-                .ifPresent(admin -> {
-                    model.addAttribute("staffName", admin.getStaffName());
-                    model.addAttribute("staffRole", admin.getStaffRole());
-                    model.addAttribute("staff", admin);
-                    model.addAttribute("loggedInStaff", admin);
-                });
+        adminHeaderService.populate(model);
 
-        // ✅ appointment list
-        Iterable<Appointment> appointments = appointmentRepository.findAllSortedByDateAndStatus();
+        // ✅ appointment list — server-paginated, sorted
+        org.springframework.data.domain.Page<Appointment> appointmentPage = appointmentRepository.findAllSortedByDateAndStatus(org.springframework.data.domain.PageRequest.of(page, size));
+        List<Appointment> appointments = appointmentPage.getContent();
+        model.addAttribute("appointmentPage", appointmentPage);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", appointmentPage.getTotalPages());
 
         for (Appointment a : appointments) {
 
@@ -692,6 +679,13 @@ public class AdminController {
         }
 
         model.addAttribute("barberList", barbers);
+
+        // Audit map for updatedBy
+        Map<Long, String> adminNameMap2 = new HashMap<>();
+        for (Staff s : staffRepository.findAll()) {
+            adminNameMap2.put(s.getStaffId(), s.getStaffName());
+        }
+        model.addAttribute("adminNameMap", adminNameMap2);
 
         return "admin/listAppointment";
     }

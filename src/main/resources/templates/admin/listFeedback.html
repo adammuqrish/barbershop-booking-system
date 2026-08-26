@@ -43,10 +43,10 @@
                         <div class="table-responsive">
                             <table class="table" id="feedbackTable">
                                 <thead><tr class="nk-tb-head">
-                                    <th class="nk-tb-col">Customer</th>
-                                    <th class="nk-tb-col">Rating</th>
+                                    <th class="nk-tb-col" scope="col">Customer</th>
+                                    <th class="nk-tb-col" scope="col">Rating</th>
                                     <th class="nk-tb-col" style="min-width:280px">Comments</th>
-                                    <th class="nk-tb-col">Appointment</th>
+                                    <th class="nk-tb-col" scope="col">Appointment</th>
                                 </tr></thead>
                                 <tbody>
                                     <tr th:each="feedback : ${feedbackList}" class="nk-tb-item" th:data-rating="${feedback.rating}">

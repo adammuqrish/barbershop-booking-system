@@ -97,7 +97,7 @@
                   <div class="card-inner p-0">
                     <div class="table-responsive">
                       <table class="table table-plain">
-                        <thead><tr class="nk-tb-head"><th class="nk-tb-col">Name</th><th class="nk-tb-col">Contact</th><th class="nk-tb-col"><span class="d-none d-sm-inline">Phone</span></th></tr></thead>
+                        <thead><tr class="nk-tb-head"><th class="nk-tb-col" scope="col">Name</th><th class="nk-tb-col" scope="col">Contact</th><th class="nk-tb-col" scope="col"><span class="d-none d-sm-inline">Phone</span></th></tr></thead>
                         <tbody>
                           <tr th:each="cust, iterStat : ${customerList}" th:if="${iterStat.index < 5}" class="nk-tb-item">
                             <td class="nk-tb-col"><span class="tb-amount" th:text="${cust.custName}">Name</span><br/><span class="text-soft small d-sm-none" th:text="${cust.custEmail}">email</span></td>

@@ -85,6 +85,12 @@
             <span class="badge bg-light text-dark border" style="font-weight:500"><em class="icon ni ni-info me-1"></em>Viewing your data only</span>
           </li>
           <li>
+            <a th:href="${staffRole == 'ADMIN' ? '/listAppointment' : '/barber/appointments'}" class="position-relative d-flex align-items-center justify-content-center" style="width:36px; height:36px; border-radius:50%; background:#eef2f7; color:#526484; text-decoration:none;" title="Pending appointments">
+              <em class="icon ni ni-bell" style="font-size:18px;"></em>
+              <span th:if="${pendingCount != null and pendingCount > 0}" th:text="${pendingCount > 9 ? '9+' : pendingCount}" class="badge bg-danger" style="position:absolute; top:-4px; right:-4px; font-size:.65rem; padding:2px 5px; border-radius:10px; min-width:18px; text-align:center;">0</span>
+            </a>
+          </li>
+          <li>
             <a th:href="${staffRole == 'ADMIN' ? '/admin/profile' : '/barber/profile'}" class="d-flex align-items-center gap-2 text-decoration-none">
               <span class="d-none d-sm-inline" th:text="${staffName}" style="font-weight:600; color:#364a63; font-size:13px;"></span>
               <span class="badge bg-outline-gray d-sm-none" th:text="${staffRole}" style="font-size:.65rem"></span>

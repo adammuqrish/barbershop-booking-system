@@ -1,6 +1,7 @@
 package com.heroku.java.service;
 
 import com.heroku.java.model.Staff;
+import com.heroku.java.repository.AppointmentRepository;
 import com.heroku.java.repository.StaffRepository;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -18,9 +19,11 @@ import java.util.Optional;
 public class AdminHeaderService {
 
     private final StaffRepository staffRepository;
+    private final AppointmentRepository appointmentRepository;
 
-    public AdminHeaderService(StaffRepository staffRepository) {
+    public AdminHeaderService(StaffRepository staffRepository, AppointmentRepository appointmentRepository) {
         this.staffRepository = staffRepository;
+        this.appointmentRepository = appointmentRepository;
     }
 
     public Optional<Staff> getLoggedInStaff() {
@@ -39,9 +42,19 @@ public class AdminHeaderService {
             model.addAttribute("staffRole", s.getStaffRole());
             model.addAttribute("staff", s);
             model.addAttribute("loggedInStaff", s);
+            // Pending bell — admin sees all, barber sees own
+            try {
+                long pending = "BARBER".equalsIgnoreCase(s.getStaffRole())
+                        ? appointmentRepository.countByBarberIdAndServiceStatus(s.getStaffId(), "pending")
+                        : appointmentRepository.countByServiceStatus("pending");
+                model.addAttribute("pendingCount", pending);
+            } catch (Exception e) {
+                model.addAttribute("pendingCount", 0L);
+            }
         } else {
             model.addAttribute("staffName", "Staff");
             model.addAttribute("staffRole", null);
+            model.addAttribute("pendingCount", 0L);
         }
     }
 

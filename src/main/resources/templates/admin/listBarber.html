@@ -41,11 +41,11 @@
                                 <div class="table-responsive">
                                     <table class="table" id="staffTable">
                                         <thead><tr class="nk-tb-head">
-                                            <th class="nk-tb-col">Name</th>
-                                            <th class="nk-tb-col">Phone</th>
-                                            <th class="nk-tb-col">Role</th>
-                                            <th class="nk-tb-col">Created by</th>
-                                            <th class="nk-tb-col nk-tb-col-tools text-end">Action</th>
+                                            <th class="nk-tb-col" scope="col">Name</th>
+                                            <th class="nk-tb-col" scope="col">Phone</th>
+                                            <th class="nk-tb-col" scope="col">Role</th>
+                                            <th class="nk-tb-col" scope="col">Created by</th>
+                                            <th class="nk-tb-col nk-tb-col-tools text-end" scope="col">Action</th>
                                         </tr></thead>
                                         <tbody>
                                             <tr th:each="barber : ${barberList}" class="nk-tb-item" th:classappend="${barber != null and barber.staffId == barber.staffId} ? '' : ''" th:with="active=${param.staffId != null and barber.staffId.toString() == param.staffId}">
@@ -62,6 +62,7 @@
                                     </table>
                                 </div>
                             </div>
+                            <div th:replace="~{fragments/adminComponents :: pagination(currentPage=${currentPage}, totalPages=${totalPages}, baseUrl='/listBarber')}"></div>
                         </div>
                     </div>
                 </div>

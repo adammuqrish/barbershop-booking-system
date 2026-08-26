@@ -61,11 +61,11 @@
                             <div class="table-responsive">
                                 <table class="table" id="appointmentTable">
                                     <thead><tr class="nk-tb-head">
-                                        <th class="nk-tb-col">Customer</th>
-                                        <th class="nk-tb-col">Date / Time</th>
-                                        <th class="nk-tb-col">Category</th>
-                                        <th class="nk-tb-col">Payment</th>
-                                        <th class="nk-tb-col">Service</th>
+                                        <th class="nk-tb-col" scope="col">Customer</th>
+                                        <th class="nk-tb-col" scope="col">Date / Time</th>
+                                        <th class="nk-tb-col" scope="col">Category</th>
+                                        <th class="nk-tb-col" scope="col">Payment</th>
+                                        <th class="nk-tb-col" scope="col">Service</th>
                                         <th th:if="${staffRole == 'ADMIN'}" class="nk-tb-col nk-tb-col-tools text-end">Action</th>
                                     </tr></thead>
                                     <tbody>
@@ -113,6 +113,7 @@
                             </div>
                         </div>
                     </div>
+                    <div th:replace="~{fragments/adminComponents :: pagination(currentPage=${currentPage}, totalPages=${totalPages}, baseUrl=${staffRole == 'BARBER' ? '/barber/appointments' : '/listAppointment'})}"></div>
                 </div>
                 <div class="col-lg-4">
                     <div th:if="${appointment}" class="card">
@@ -135,6 +136,10 @@
                                     <div id="timeHelp" class="form-note text-soft small mt-1"></div>
                                 </div>
                                 <div class="form-group mb-3"><label class="form-label">Barber <span class="text-danger">*</span></label><select class="form-select form-select-sm" id="editBarber" name="barberId" onchange="updateAvailableTimes()" th:disabled="${staffRole == 'BARBER'}"><option th:each="b : ${barberList}" th:value="${b.staffId}" th:text="${b.staffName}" th:selected="${appointment != null && appointment.barberId == b.staffId}"></option></select></div>
+                                <div th:if="${appointment.updatedAt != null}" class="alert alert-light border small py-2" style="font-size:.78rem">
+                                    <em class="icon ni ni-clock me-1"></em> Last updated <span th:text="${#temporals.format(appointment.updatedAt, 'dd MMM yyyy HH:mm')}">01 Jan 2026 10:00</span>
+                                    <span th:if="${appointment.updatedBy != null}"> by <span th:text="${adminNameMap != null ? adminNameMap[appointment.updatedBy] : '#' + appointment.updatedBy}">Admin</span></span>
+                                </div>
                                 <div th:if="${staffRole == 'ADMIN'}" class="d-flex justify-content-end gap-2 mt-3">
                                     <a th:href="@{/listAppointment}" class="btn btn-outline-light btn-sm">Cancel</a>
                                     <button type="submit" class="btn btn-primary btn-sm" id="saveAppointmentBtn"><em class="icon ni ni-save me-1"></em>Save</button>

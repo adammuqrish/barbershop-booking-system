@@ -32,20 +32,21 @@
     </div>
 </div>
 
-<!-- Pagination -->
-<nav th:fragment="pagination(currentPage, totalPages, baseUrl)" th:if="${totalPages > 1}" aria-label="Pagination">
+<!-- Pagination — baseUrl is a plain string like '/listCustomer' -->
+<nav th:fragment="pagination(currentPage, totalPages, baseUrl)" th:if="${totalPages != null and totalPages > 1}" aria-label="Pagination">
     <ul class="pagination justify-content-center mt-3">
         <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
-            <a class="page-link" th:href="@{${baseUrl}(page=${currentPage - 1})}">Previous</a>
+            <a class="page-link" th:href="${baseUrl + '?page=' + (currentPage - 1)}">Previous</a>
         </li>
         <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
             th:classappend="${i == currentPage} ? 'active'">
-            <a class="page-link" th:href="@{${baseUrl}(page=${i})}" th:text="${i + 1}">1</a>
+            <a class="page-link" th:href="${baseUrl + '?page=' + i}" th:text="${i + 1}">1</a>
         </li>
         <li class="page-item" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'">
-            <a class="page-link" th:href="@{${baseUrl}(page=${currentPage + 1})}">Next</a>
+            <a class="page-link" th:href="${baseUrl + '?page=' + (currentPage + 1)}">Next</a>
         </li>
     </ul>
+    <div class="text-center text-soft small mt-1" th:text="'Page ' + (currentPage + 1) + ' of ' + totalPages">Page 1 of 1</div>
 </nav>
 
 <!-- Password toggle field -->
