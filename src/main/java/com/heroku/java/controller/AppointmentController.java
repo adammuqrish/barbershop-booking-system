@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.heroku.java.service.BookingService;
+import com.heroku.java.service.CustomerService;
 import java.util.Map;
 import java.util.List;
 import java.util.Optional;
@@ -29,13 +30,15 @@ public class AppointmentController {
     private final AppointmentRepository appointmentRepository;
     private final StaffRepository staffRepository;
     private final BookingService bookingService;
+    private final CustomerService customerService;
 
     @Autowired
     public AppointmentController(AppointmentRepository appointmentRepository, StaffRepository staffRepository,
-            BookingService bookingService) {
+            BookingService bookingService, CustomerService customerService) {
         this.appointmentRepository = appointmentRepository;
         this.staffRepository = staffRepository;
         this.bookingService = bookingService;
+        this.customerService = customerService;
     }
 
     @GetMapping("/view-appointment")
@@ -123,6 +126,9 @@ public class AppointmentController {
             if (appointment.getCustId().equals(custId)) {
                 appointment.setServiceStatus("cancelled");
                 appointmentRepository.save(appointment);
+
+                // ✅ Free reward cut cancelled before service: give the reward back
+                customerService.refundRewardIfRedeemed(appointment);
             }
         }
 

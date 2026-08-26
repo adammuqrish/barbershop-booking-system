@@ -49,6 +49,7 @@ public class AdminController {
     private final BookingService bookingService;
     private final StaffService staffService;
     private final com.heroku.java.service.FileStorageService fileStorageService;
+    private final com.heroku.java.service.CustomerService customerService;
 
     @Autowired
     public AdminController(CustomerRepository customerRepository,
@@ -58,7 +59,8 @@ public class AdminController {
             com.heroku.java.repository.FeedbackRepository feedbackRepository,
             BookingService bookingService,
             StaffService staffService,
-            com.heroku.java.service.FileStorageService fileStorageService) {
+            com.heroku.java.service.FileStorageService fileStorageService,
+            com.heroku.java.service.CustomerService customerService) {
         this.customerRepository = customerRepository;
         this.staffRepository = staffRepository;
         this.appointmentRepository = appointmentRepository;
@@ -67,6 +69,7 @@ public class AdminController {
         this.bookingService = bookingService;
         this.staffService = staffService;
         this.fileStorageService = fileStorageService;
+        this.customerService = customerService;
     }
 
     // Helper method untuk dapatkan Staff yang sedang login
@@ -716,6 +719,7 @@ public class AdminController {
     }
 
     // 13. API UPDATE SERVICE STATUS
+
     @PostMapping("/admin/update-service-status")
     @PreAuthorize("hasRole('ADMIN')")
     public String updateServiceStatus(@RequestParam Long appointmentId,
@@ -736,6 +740,15 @@ public class AdminController {
             }
 
             appointmentRepository.save(a);
+
+            if ("cancelled".equalsIgnoreCase(status)) {
+                // ✅ Free reward cut cancelled before service: give the reward back
+                customerService.refundRewardIfRedeemed(a);
+            } else {
+                // ✅ LOYALTY POINTS: awarded ONLY when the service is marked 'done'
+                // AND the appointment is paid. See CustomerService.
+                customerService.awardPointsForCompletedAppointment(a);
+            }
         });
 
         return "redirect:/listAppointment";
@@ -751,12 +764,16 @@ public class AdminController {
             // ✅ ONLY CASH PAYMENT CAN BE UPDATED
             if (p instanceof CashPayment) {
 
-                // update appointment payment status
-                appointmentRepository.findById(appointmentId)
-                        .ifPresent(a -> {
-                            a.setPaymentStatus(status);
-                            appointmentRepository.save(a);
-                        });
+            // update appointment payment status
+            appointmentRepository.findById(appointmentId)
+                    .ifPresent(a -> {
+                        a.setPaymentStatus(status);
+                        appointmentRepository.save(a);
+
+                        // Service may already be 'done' (cash often collected right
+                        // after the cut) - award loyalty now if both conditions met.
+                        customerService.awardPointsForCompletedAppointment(a);
+                    });
             }
         });
 

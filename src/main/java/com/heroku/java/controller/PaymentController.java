@@ -20,6 +20,7 @@ import java.util.Optional;
 
 import com.heroku.java.model.Customer;
 import com.heroku.java.repository.CustomerRepository;
+import com.heroku.java.service.CustomerService;
 
 @Controller
 public class PaymentController {
@@ -27,17 +28,18 @@ public class PaymentController {
     private final AppointmentRepository appointmentRepository;
     private final PaymentRepository paymentRepository;
     private final CustomerRepository customerRepository;
+    private final CustomerService customerService;
 
     @Autowired
     public PaymentController(AppointmentRepository appointmentRepository,
             PaymentRepository paymentRepository,
-            CustomerRepository customerRepository) {
+            CustomerRepository customerRepository,
+            CustomerService customerService) {
         this.appointmentRepository = appointmentRepository;
         this.paymentRepository = paymentRepository;
         this.customerRepository = customerRepository;
+        this.customerService = customerService;
     }
-
-    private static final int MAX_LOYALTY_POINTS = 2;
 
     @GetMapping("/payment")
     public String paymentPage(@RequestParam(required = false) Long appointmentId,
@@ -98,7 +100,8 @@ public class PaymentController {
         if (customer != null) {
             // Reload from DB to get latest points
             customer = customerRepository.findById(customer.getCustId()).orElse(customer);
-            if (customer.getCustLoyaltyPoints() != null && customer.getCustLoyaltyPoints() >= MAX_LOYALTY_POINTS) {
+            if (customer.getCustLoyaltyPoints() != null
+                    && customer.getCustLoyaltyPoints() >= CustomerService.MAX_LOYALTY_POINTS) {
                 price = 0.0;
                 model.addAttribute("freeMessage",
                         "Congratulations! This appointment is FREE as you have reached loyalty reward.");
@@ -174,8 +177,15 @@ public class PaymentController {
         Optional<Customer> custOpt = customerRepository.findById(custId);
         if (custOpt.isPresent()) {
             Customer c = custOpt.get();
-            if (c.getCustLoyaltyPoints() != null && c.getCustLoyaltyPoints() >= MAX_LOYALTY_POINTS) {
+            if (c.getCustLoyaltyPoints() != null
+                    && c.getCustLoyaltyPoints() >= CustomerService.MAX_LOYALTY_POINTS) {
                 price = 0.0;
+                // Mark THIS appointment as the redeemed reward cut and consume the
+                // balance NOW. Consuming at checkout (not at completion) means any
+                // further booking made before this appointment completes is charged
+                // normally - the reward cannot be reused until re-earned.
+                appointment.setValueLoyalty(Appointment.LOYALTY_REDEEMED);
+                customerService.redeemReward(custId);
             }
         }
 
@@ -197,19 +207,10 @@ public class PaymentController {
 
             savedAppointment.setPaymentStatus("completed");
 
-            // Update Loyalty Points
-            customerRepository.findById(custId).ifPresent(customer -> {
-                int currentPoints = customer.getCustLoyaltyPoints() == null ? 0 : customer.getCustLoyaltyPoints();
-                int newPoints = (currentPoints % MAX_LOYALTY_POINTS) + 1;
-                customer.setCustLoyaltyPoints(newPoints);
-                customerRepository.save(customer);
-
-                // Update session user
-                Customer sessionCustomer = (Customer) session.getAttribute("customer");
-                if (sessionCustomer != null && sessionCustomer.getCustId().equals(custId)) {
-                    session.setAttribute("customer", customer);
-                }
-            });
+            // NOTE: Loyalty points are NOT awarded here anymore.
+            // Points are granted only when the service is marked 'done'
+            // (see AdminController.updateServiceStatus) so customers earn
+            // points for completed cuts, not merely for paying up front.
 
         } else {
             CashPayment cp = new CashPayment();

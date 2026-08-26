@@ -23,6 +23,12 @@
                 </ul>
             </div>
 
+            <!-- Staff login (always visible, discreet) -->
+            <a class="hb-dd-btn" th:href="@{/adminLogin}" style="opacity:.62;text-decoration:none" title="Staff login">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                Staff
+            </a>
+
             <!-- My Booking dropdown (logged in only) -->
             <th:block th:if="${session.customer != null}">
                 <div class="hb-dd">
@@ -119,6 +125,10 @@
                 <li><a th:href="@{/register#login}" onclick="document.getElementById('hbMobileMenu').classList.remove('open')">Login</a></li>
                 <li style="padding:6px 22px 14px"><a class="hb-btn hb-btn-brass" style="display:block;text-align:center" th:href="@{/booking}">Book Now</a></li>
             </th:block>
+            <li class="hb-menu-sep" aria-hidden="true"></li>
+            <li><a th:href="@{/adminLogin}" onclick="document.getElementById('hbMobileMenu').classList.remove('open')" style="opacity:.72;display:flex;align-items:center;gap:8px;font-size:.88rem">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                Staff Login</a></li>
         </ul>
     </div>
 </nav>

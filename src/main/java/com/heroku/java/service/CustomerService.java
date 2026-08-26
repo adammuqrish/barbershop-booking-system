@@ -1,6 +1,8 @@
 package com.heroku.java.service;
 
+import com.heroku.java.model.Appointment;
 import com.heroku.java.model.Customer;
+import com.heroku.java.repository.AppointmentRepository;
 import com.heroku.java.repository.CustomerRepository;
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,11 +16,18 @@ import java.util.Optional;
 public class CustomerService {
 
     private static final Logger logger = LoggerFactory.getLogger(CustomerService.class);
+
+    /** Points needed to unlock one free (reward) cut. */
+    public static final int MAX_LOYALTY_POINTS = 2;
+
     private final CustomerRepository customerRepository;
+    private final AppointmentRepository appointmentRepository;
 
     @Autowired
-    public CustomerService(CustomerRepository customerRepository) {
+    public CustomerService(CustomerRepository customerRepository,
+            AppointmentRepository appointmentRepository) {
         this.customerRepository = customerRepository;
+        this.appointmentRepository = appointmentRepository;
     }
 
     public Customer registerCustomer(Customer customer) {
@@ -61,18 +70,79 @@ public Optional<Customer> login(String email, String password) {
         return customerRepository.save(customer);
     }
 
-    public void updateLoyaltyPoints(Long custId, int points) {
-        customerRepository.findById(custId).ifPresent(customer -> {
-            int newPoints = customer.getCustLoyaltyPoints() + points;
-            if (newPoints > 10)
-                newPoints = 0;
-            customer.setCustLoyaltyPoints(newPoints);
-            customerRepository.save(customer);
-        });
-    }
-
     public Customer findByCustPhoneNumber(String phone) {
         // Anda perlu panggil method yang sama dalam Repository
         return customerRepository.findByCustPhoneNumber(phone);
+    }
+
+    // ============================================================
+    // Loyalty points lifecycle (single source of truth)
+    //
+    // Reward is CONSUMED AT CHECKOUT of the free appointment, not when the
+    // service completes. This closes the loophole where a customer could book
+    // several appointments right after earning a reward and get all of them
+    // free, because the balance only dropped once an appointment completed.
+    // ============================================================
+
+    /**
+     * Checkout of a free reward cut: consume the earned balance immediately so
+     * any further booking made before this appointment completes is charged
+     * normally.
+     */
+    public void redeemReward(Long custId) {
+        customerRepository.findById(custId).ifPresent(customer -> {
+            customer.setCustLoyaltyPoints(0);
+            customerRepository.save(customer);
+            logger.debug("Loyalty reward redeemed at checkout for customer {}", custId);
+        });
+    }
+
+    /**
+     * Grants one point for an appointment that is both COMPLETED ('done') and
+     * PAID ('completed'). Safe to call repeatedly or from any lifecycle
+     * endpoint: value_loyalty is marked LOYALTY_AWARDED once granted, so status
+     * flips or later payment confirmations can never double-award.
+     */
+    public void awardPointsForCompletedAppointment(Appointment a) {
+        if (!"done".equalsIgnoreCase(a.getServiceStatus())) return;
+        if (!"completed".equalsIgnoreCase(a.getPaymentStatus())) return;
+        int flag = a.getValueLoyalty() == null ? Appointment.LOYALTY_NORMAL : a.getValueLoyalty();
+        if (flag == Appointment.LOYALTY_AWARDED) return;
+
+        customerRepository.findById(a.getCustId()).ifPresent(customer -> {
+            int current = customer.getCustLoyaltyPoints() == null
+                    ? 0 : customer.getCustLoyaltyPoints();
+            // Every completed visit counts, including a redeemed free one
+            // (balance was zeroed at its checkout, so it lands on 1).
+            int newPoints = Math.min(current + 1, MAX_LOYALTY_POINTS);
+            customer.setCustLoyaltyPoints(newPoints);
+            customerRepository.save(customer);
+
+            a.setValueLoyalty(Appointment.LOYALTY_AWARDED);
+            appointmentRepository.save(a);
+        });
+    }
+
+    /**
+     * Restores a consumed reward when its appointment is cancelled before the
+     * service completes, so the customer does not lose it. No-op unless the
+     * appointment actually was a redeemed (free) cut; marking the appointment
+     * back to NORMAL makes the refund idempotent.
+     */
+    public void refundRewardIfRedeemed(Appointment a) {
+        int flag = a.getValueLoyalty() == null ? Appointment.LOYALTY_NORMAL : a.getValueLoyalty();
+        if (flag != Appointment.LOYALTY_REDEEMED) return;
+
+        customerRepository.findById(a.getCustId()).ifPresent(customer -> {
+            int current = customer.getCustLoyaltyPoints() == null
+                    ? 0 : customer.getCustLoyaltyPoints();
+            if (current < MAX_LOYALTY_POINTS) {
+                customer.setCustLoyaltyPoints(MAX_LOYALTY_POINTS);
+                customerRepository.save(customer);
+                logger.debug("Loyalty reward refunded after cancellation for customer {}", a.getCustId());
+            }
+            a.setValueLoyalty(Appointment.LOYALTY_NORMAL);
+            appointmentRepository.save(a);
+        });
     }
 }

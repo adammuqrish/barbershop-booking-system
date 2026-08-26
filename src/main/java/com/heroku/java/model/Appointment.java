@@ -7,6 +7,11 @@ import jakarta.persistence.*;
         "barber_id", "appointment_date", "appointment_time" }))
 public class Appointment {
 
+    /** value_loyalty states: plain paid appointment / free loyalty-reward cut / points already granted */
+    public static final int LOYALTY_NORMAL = 0;
+    public static final int LOYALTY_REDEEMED = 1;
+    public static final int LOYALTY_AWARDED = 2;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "appointment_id")
