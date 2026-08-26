@@ -1,67 +1,70 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 
-<head th:replace="~{fragments/header :: head}"></head>
+<head th:replace="~{fragments/header :: head}">
+    <title>Receipt — Hugi Barbershop</title>
+</head>
 
-<body class="flex flex-col h-screen justify-between bg-yellow-100">
-    <nav th:replace="~{fragments/nav :: nav}"></nav>
-    <main class="flex flex-col items-center mx-3 my-4 flex-grow">
-        <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-5xl mx-auto">
-            <h1 class="text-2xl font-bold text-center mb-2">Receipt</h1>
-            <!-- Show different message based on payment method -->
-            <p class="text-center text-lg mb-6">
-                <span th:if="${payment != null && payment.paymentMethod == 'cash'}">Thank you for booking!</span>
-                <span th:if="${payment == null || payment.paymentMethod != 'cash'}">Thank you for your payment!</span>
-            </p>
+<body class="flex flex-col min-h-screen" style="font-family:'Inter',system-ui,sans-serif;background:var(--cream);color:var(--ink);margin:0">
 
-            <hr class="mb-4">
+<nav th:replace="~{fragments/nav :: nav}"></nav>
 
-            <div class="mb-6">
-                <h2 class="font-semibold mb-2">Payment Details</h2>
-                <p>Payment ID: <span th:text="${payment != null ? payment.paymentId : 'N/A'}"></span></p>
-                <p>Payment Method: <span th:text="${payment != null ? payment.paymentMethod : 'N/A'}"></span></p>
-                <!-- Show different label based on payment method -->
-                <p th:if="${payment != null && payment.paymentMethod == 'cash'}">
-                    Amount Need to Pay: RM <span th:text="${#numbers.formatDecimal(payment.amount, 1, 2)}"></span>
-                </p>
-                <p th:if="${payment == null || payment.paymentMethod != 'cash'}">
-                    Amount Paid: RM <span th:text="${payment != null ? #numbers.formatDecimal(payment.amount, 1, 2) : '0.00'}"></span>
-                </p>
-                <!-- Show different label for date based on payment method -->
-                <p th:if="${payment != null && payment.paymentMethod == 'cash'}">
-                    Date of Booking: <span th:text="${appointment != null ? appointment.appointmentDate : 'N/A'}"></span>
-                </p>
-                <p th:if="${payment == null || payment.paymentMethod != 'cash'}">
-                    Date of Payment: <span th:text="${payment != null ? #temporals.format(payment.paymentDate, 'yyyy-MM-dd') : 'N/A'}"></span>
-                </p>
-            </div>
+<main style="flex:1;width:100%;max-width:560px;margin:0 auto;padding:40px 24px 72px">
 
-            <hr class="mb-4">
+    <!-- Receipt card, styled like a printed slip -->
+    <section style="background:#fff;border:2px solid var(--line);border-radius:6px;padding:34px 30px;position:relative;overflow:hidden">
+        <div aria-hidden="true" style="position:absolute;top:0;left:0;right:0;height:6px;background:repeating-linear-gradient(90deg,var(--brass) 0 14px,var(--ink) 14px 28px,var(--oxblood) 28px 42px)"></div>
 
-            <div class="mb-6">
-                <h2 class="font-semibold mb-2">Customer Information</h2>
-                <p>Name: <span th:text="${customer?.custName}"></span></p>
-                <p>Email: <span th:text="${customer?.custEmail}"></span></p>
-                <p>Phone Number: <span th:text="${customer?.custPhoneNumber}"></span></p>
-            </div>
+        <p style="text-align:center;font-family:'Bebas Neue';font-size:18px;letter-spacing:.3em;color:var(--muted);margin:10px 0 0">HUGI BARBERSHOP</p>
+        <h1 style="text-align:center;font-family:'Bebas Neue';font-size:44px;line-height:1;letter-spacing:.05em;margin:4px 0 4px">Receipt</h1>
+        <p style="text-align:center;color:var(--muted);font-size:.95rem;margin:0 0 20px">
+            <span th:if="${payment != null && payment.paymentMethod == 'cash'}">Thank you for booking — see you soon!</span>
+            <span th:if="${payment == null || payment.paymentMethod != 'cash'}">Thank you for your payment!</span>
+        </p>
 
-            <hr class="mb-4">
+        <div aria-hidden="true" style="border-top:2px dashed var(--line);margin:0 -30px"></div>
 
-            <p class="text-sm text-center text-gray-600 mt-4">This receipt is generated automatically and does not
-                require a signature.</p>
+        <h2 style="font-family:'Bebas Neue';font-size:21px;letter-spacing:.08em;color:var(--oxblood);margin:20px 0 10px">Payment details</h2>
+        <dl style="margin:0;display:grid;grid-template-columns:auto 1fr;gap:7px 20px;font-size:.95rem">
+            <dt style="color:var(--muted)">Payment ID</dt><dd style="margin:0;font-weight:600" th:text="${payment != null ? payment.paymentId : 'N/A'}">N/A</dd>
+            <dt style="color:var(--muted)">Method</dt><dd style="margin:0;font-weight:600;text-transform:capitalize" th:text="${payment != null ? payment.paymentMethod : 'N/A'}">N/A</dd>
+            <th:block th:if="${payment != null && payment.paymentMethod == 'cash'}">
+                <dt style="color:var(--muted)">Amount to pay</dt>
+                <dd style="margin:0;font-weight:700;font-size:1.15rem;color:var(--oxblood)">RM <span th:text="${#numbers.formatDecimal(payment.amount, 1, 2)}"></span></dd>
+                <dt style="color:var(--muted)">Date of booking</dt><dd style="margin:0;font-weight:600" th:text="${appointment != null ? appointment.appointmentDate : 'N/A'}"></dd>
+            </th:block>
+            <th:block th:if="${payment == null || payment.paymentMethod != 'cash'}">
+                <dt style="color:var(--muted)">Amount paid</dt>
+                <dd style="margin:0;font-weight:700;font-size:1.15rem;color:#2e7d32">RM <span th:text="${payment != null ? #numbers.formatDecimal(payment.amount, 1, 2) : '0.00'}"></span></dd>
+                <dt style="color:var(--muted)">Date of payment</dt><dd style="margin:0;font-weight:600" th:text="${payment != null ? #temporals.format(payment.paymentDate, 'yyyy-MM-dd') : 'N/A'}"></dd>
+            </th:block>
+        </dl>
 
-            <div class="flex justify-center mt-6">
-                <a th:href="@{'/' + ${source}}"
-                    class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded">
-                    <span th:if="${source == 'appointment-history'}">Back to Appointment History</span>
-                    <span th:if="${source != 'appointment-history'}">
-                        Back to Appointment Page
-                    </span>
-                </a>
-            </div>
-        </div>
-    </main>
-    <footer th:replace="~{fragments/footer :: footer}"></footer>
+        <div aria-hidden="true" style="border-top:2px dashed var(--line);margin:22px -30px"></div>
+
+        <h2 style="font-family:'Bebas Neue';font-size:21px;letter-spacing:.08em;color:var(--oxblood);margin:20px 0 10px">Customer</h2>
+        <dl style="margin:0;display:grid;grid-template-columns:auto 1fr;gap:7px 20px;font-size:.95rem">
+            <dt style="color:var(--muted)">Name</dt><dd style="margin:0;font-weight:600" th:text="${customer?.custName}"></dd>
+            <dt style="color:var(--muted)">Email</dt><dd style="margin:0;font-weight:600" th:text="${customer?.custEmail}"></dd>
+            <dt style="color:var(--muted)">Phone</dt><dd style="margin:0;font-weight:600" th:text="${customer?.custPhoneNumber}"></dd>
+        </dl>
+
+        <p style="text-align:center;color:var(--muted);font-size:.82rem;margin:26px 0 0;border-top:1px solid var(--line);padding-top:16px">
+            This receipt is generated automatically and does not require a signature.
+        </p>
+    </section>
+
+    <div style="text-align:center;margin-top:26px">
+        <a th:href="@{'/' + ${source}}"
+           style="display:inline-block;background:var(--oxblood);color:#fff;text-decoration:none;border-radius:5px;padding:14px 30px;font-family:'Bebas Neue';font-size:21px;letter-spacing:.09em"
+           onmouseover="this.style.filter='brightness(1.12)'" onmouseout="this.style.filter=''">
+            <span th:if="${source == 'appointment-history'}">Back to Appointment History</span>
+            <span th:if="${source != 'appointment-history'}">Back to Appointment Page</span>
+        </a>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/footer :: footer}"></footer>
 </body>
 
 </html>
