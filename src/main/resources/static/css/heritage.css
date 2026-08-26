@@ -20,7 +20,7 @@
 .hb-display{font-family:'Bebas Neue',Impact,sans-serif;font-weight:400;letter-spacing:.04em;line-height:.95;text-transform:uppercase}
 
 /* ---------- buttons ---------- */
-.hb-btn{display:inline-block;text-decoration:none;text-align:center;font-family:'Bebas Neue',Impact,sans-serif;font-size:20px;letter-spacing:.1em;padding:10px 26px;border-radius:4px;transition:all .2s ease;cursor:pointer;border:2px solid transparent;background:none}
+.hb-btn{display:inline-flex;align-items:center;justify-content:center;text-align:center;text-decoration:none;font-family:'Bebas Neue',Impact,sans-serif;font-size:20px;letter-spacing:.1em;padding:10px 26px;border-radius:4px;transition:all .2s ease;cursor:pointer;border:2px solid transparent;background:none}
 .hb-btn-brass{background:var(--brass);color:var(--ink)}
 .hb-btn-brass:hover{background:var(--cream)}
 .hb-btn-outline{border-color:var(--brass);color:var(--brass)}
