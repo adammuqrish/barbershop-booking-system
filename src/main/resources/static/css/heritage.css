@@ -98,6 +98,51 @@
 .hb-strip b{font-family:'Bebas Neue';font-size:22px;letter-spacing:.06em;color:var(--brass);font-weight:400}
 .hb-strip span{font-size:.85rem;letter-spacing:.12em;text-transform:uppercase;opacity:.85}
 
+/* ---------- mobile & small-tablet tuning (landing) ---------- */
+@media(max-width:760px){
+  /* hero */
+  .hb-hero{min-height:auto;padding-bottom:150px}          /* room for wrapped strip */
+  .hb-hero-inner{padding:72px 20px 0}
+  .hb-hero h1{font-size:clamp(52px,15vw,84px)}
+  .hb-hero .sub{font-size:1.02rem;margin-top:16px}
+  .hb-kicker{font-size:.74rem;letter-spacing:.2em;gap:8px;margin-bottom:16px}
+  .hb-kicker::before,.hb-kicker::after{width:22px}
+  .hb-hero-actions{margin-top:26px;gap:12px}
+  .hb-hero-actions .hb-btn{flex:1 1 100%;font-size:21px;padding:13px 24px}
+  /* stats strip becomes a 2x2 grid pinned at the bottom of the hero */
+  .hb-strip-inner{display:grid;grid-template-columns:1fr 1fr;gap:10px 18px;padding:14px 20px;justify-items:start}
+  .hb-strip span{display:inline-flex;align-items:center;gap:8px;font-size:.78rem;letter-spacing:.08em}
+  .hb-strip b{font-size:19px}
+
+  /* sections breathe on small screens */
+  .hb-section{padding:60px 0}
+  .hb-section-inner{padding:0 20px}
+  .hb-sec-head{margin-bottom:30px}
+  .hb-tag{letter-spacing:.18em;font-size:.76rem}
+
+  /* menu rows keep name+price on one line, dots shrink */
+  .hb-menu-item .name{font-size:22px}
+  .hb-menu-item .price{font-size:24px}
+
+  /* barber cards: cap image height so one card doesn't eat the screen */
+  .hb-barber-grid{gap:20px}
+  .hb-barber-card img,.hb-barber-card .fallback{aspect-ratio:4/3;max-height:320px;width:100%}
+
+  /* visit grid stacks (860px rule) + signboard padding tightens */
+  .hb-signboard{padding:22px 20px;box-shadow:5px 5px 0 rgba(201,162,39,.25)}
+  .hb-hours td{padding:11px 2px;font-size:.95rem}
+  .hb-hours td:last-child{font-size:18px}
+
+  /* CTA band + footer tighten */
+  .hb-cta-band{padding:56px 0}
+  .hb-cta-band .hb-btn{font-size:21px;padding:13px 34px;width:min(100%,340px)}
+  .hb-footer{padding:36px 0}
+}
+@media(max-width:400px){
+  .hb-hero h1{font-size:46px}
+  .hb-strip-inner{grid-template-columns:1fr;justify-items:center;text-align:center}
+}
+
 /* ---------- sections ---------- */
 .hb-section{padding:88px 0}
 .hb-section-inner{max-width:1120px;margin:0 auto;padding:0 24px}
