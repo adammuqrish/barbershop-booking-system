@@ -70,6 +70,7 @@
                        th:href="@{/edit-appointment(appointmentId=${appt.appointmentId})}"
                        class="btn-sm btn-edit">Edit</a>
                     <button type="button" class="btn-sm btn-cancel"
+                            th:if="${#strings.toLowerCase(appt.serviceStatus) == 'pending'}"
                             th:onclick="'showCancelModal(' + ${appt.appointmentId} + ')'">Cancel</button>
                     <form th:id="'cancelForm-' + ${appt.appointmentId}" th:action="@{/cancel-appointment}"
                           method="post" style="display:none;">

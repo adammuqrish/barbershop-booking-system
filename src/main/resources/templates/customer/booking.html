@@ -17,6 +17,17 @@
     .bk-step.active{color:var(--oxblood)}
     .bk-step.active .n{background:var(--brass);border-color:var(--brass);color:var(--ink)}
     .bk-sep{flex:1;border-top:2px dotted var(--line)}
+    @media(max-width:640px){
+        /* compact steps: circles only, labels hidden, dots centered between */
+        .bk-steps{padding:0 8px}
+        .bk-step{font-size:0;gap:0}          /* hide text, keep circle */
+        .bk-step .n{width:32px;height:32px;font-size:17px}
+        .bk-card{padding:22px 18px}
+        /* submit button fits the screen */
+        .bk-submit-row{display:block}
+        .bk-submit-row .hb-btn{width:100%}
+        .bk-summary{padding:14px 16px}
+    }
 
     .bk-card{background:#fff;border:1px solid var(--line);border-radius:6px;padding:32px;box-shadow:4px 4px 0 var(--cream-2)}
     .bk-card + .bk-card{margin-top:28px}
@@ -94,7 +105,12 @@
     input.cat-radio:focus-visible + .cat-pill{outline:3px solid var(--brass);outline-offset:2px}
 
     .bk-submit-row{margin-top:36px;display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+    .bk-submit-row .hb-btn{min-width:220px}
+    @media(max-width:640px){
+        .bk-submit-row .hb-btn{width:100%;min-width:0}
+    }
     .hb-btn-blood{font-size:26px !important;padding:14px 48px !important}
+    @media(max-width:640px){.hb-btn-blood{font-size:21px !important;padding:13px 20px !important}}
     .bk-note{font-size:.88rem;color:var(--muted);max-width:44ch}
 </style>
 

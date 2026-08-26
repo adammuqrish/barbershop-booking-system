@@ -63,7 +63,7 @@ public class ProfileController {
             @RequestParam String email,
             @RequestParam String phone,
             @RequestParam(required = false) String password,
-            @RequestParam("image") org.springframework.web.multipart.MultipartFile image,
+            @RequestParam(value = "image", required = false) org.springframework.web.multipart.MultipartFile image,
             HttpSession session,
             RedirectAttributes redirectAttributes) {
 
@@ -91,6 +91,18 @@ public class ProfileController {
                 }
             }
             // ------------------------------------------
+
+            // ✅ NO-CHANGE GUARD: nothing modified -> skip save & success message
+            boolean detailsUnchanged = customer.getCustName().equals(name)
+                    && customer.getCustEmail().equals(email)
+                    && customer.getCustPhoneNumber().equals(phone);
+            boolean noNewPassword = password == null || password.isEmpty();
+            boolean noNewImage = image == null || image.isEmpty();
+            if (detailsUnchanged && noNewPassword && noNewImage) {
+                redirectAttributes.addFlashAttribute("success",
+                        "No changes were made to your profile.");
+                return "redirect:/profile";
+            }
 
             // --- LOGIK CHECK PASSWORD (KOD ASAL) ---
             if (password != null && !password.isEmpty()) {

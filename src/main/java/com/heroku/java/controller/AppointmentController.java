@@ -259,6 +259,17 @@ public class AppointmentController {
         }
         // ------------------------------------------
 
+        // ✅ NO-CHANGE GUARD: nothing actually modified -> skip save & message
+        boolean unchanged = appt.getAppointmentDate().equals(date)
+                && appt.getAppointmentTime().equals(slot)
+                && appt.getCustType().equals(custType)
+                && appt.getBarberId().equals(barber);
+        if (unchanged) {
+            redirectAttributes.addFlashAttribute("success",
+                    "No changes were made to this appointment.");
+            return "redirect:/view-appointment";
+        }
+
         // Simpan jika ok
         appt.setAppointmentDate(date);
         appt.setAppointmentTime(slot);

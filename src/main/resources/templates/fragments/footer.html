@@ -1,12 +1,35 @@
 <footer xmlns:th="http://www.thymeleaf.org" th:fragment="footer" class="hb-footer">
-    <div class="hb-footer-inner">
-        <span class="hb-brand-name">Hugi<em style="color:var(--brass);font-style:normal">.</em> Barbershop</span>
-        <span style="max-width:340px" th:text="${barbershop.address}">LOT-A-G9, Palm Garden, Bandar Baru Klang, 41150 Klang, Selangor.</span>
-        <span style="white-space:nowrap">
-            <a th:href="${'tel:' + barbershop.phone}" th:text="${barbershop.phone}">012-7865132</a>
-            &nbsp;&middot;&nbsp;
-            Tue&ndash;Sun, 10am&ndash;10pm
-        </span>
-        <span>&copy; 2026 Hugi Barbershop. All Rights Reserved.</span>
+    <div class="hb-footer-grid">
+        <!-- Brand + tagline -->
+        <div class="hb-f-col hb-f-brand">
+            <span class="hb-brand-name">Hugi<em style="color:var(--brass);font-style:normal">.</em></span>
+            <p>Classic cuts. Modern standards.<br/>Est. Klang &middot; Gents' grooming.</p>
+        </div>
+
+        <!-- Contact -->
+        <div class="hb-f-col">
+            <h4>Contact</h4>
+            <p th:text="${barbershop.address}">LOT-A-G9, Palm Garden, Bandar Baru Klang, 41150 Klang, Selangor.</p>
+            <p><a th:href="${'tel:' + barbershop.phone}" th:text="${barbershop.phone}">012-7865132</a></p>
+            <p><a th:href="${'mailto:' + barbershop.email}" th:text="${barbershop.email}">hugibarbershop@gmail.com</a></p>
+        </div>
+
+        <!-- Hours -->
+        <div class="hb-f-col">
+            <h4>Hours</h4>
+            <p>Tue &ndash; Sun<br/>10:00 am &ndash; 10:00 pm</p>
+            <p style="color:var(--muted)">Monday closed</p>
+        </div>
+
+        <!-- Quick links -->
+        <div class="hb-f-col">
+            <h4>Quick links</h4>
+            <p><a th:href="@{/booking}">Book Appointment</a></p>
+            <p><a th:href="@{/view-appointment}">My Appointments</a></p>
+            <p><a th:href="@{/appointment-history}">History</a></p>
+        </div>
+    </div>
+    <div class="hb-footer-base">
+        &copy; 2026 Hugi Barbershop. All Rights Reserved.
     </div>
 </footer>
