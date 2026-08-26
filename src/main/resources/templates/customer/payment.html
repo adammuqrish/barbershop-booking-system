@@ -148,6 +148,13 @@
     }
 
     document.getElementById('paymentForm').addEventListener('submit', function (e) {
+        // Guard against double-submission (slow network + impatient clicks)
+        const btn = document.getElementById('payButton');
+        if (btn.dataset.submitting === '1') {
+            e.preventDefault();
+            return;
+        }
+
         const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked');
         if (!paymentMethod) {
             e.preventDefault();
@@ -156,16 +163,32 @@
         }
 
         if (price === 0) {
+            btn.dataset.submitting = '1';
+            btn.innerText = 'Processing...';
+            btn.disabled = true;
             return;
         }
 
         if (document.getElementById('online').checked) {
             e.preventDefault();
             document.getElementById('bankModal').style.display = 'flex';
+            return;
         }
+
+        // Cash: mark submitting so repeated clicks can't double-charge
+        btn.dataset.submitting = '1';
+        btn.innerText = 'Processing...';
+        btn.disabled = true;
     });
 
     document.getElementById('confirmBank').addEventListener('click', function () {
+        const btn = document.getElementById('payButton');
+        if (btn.dataset.submitting === '1') return;
+        btn.dataset.submitting = '1';
+        btn.innerText = 'Processing...';
+        btn.disabled = true;
+        this.disabled = true;
+        this.innerText = 'Processing...';
         document.getElementById('hiddenBankName').value = document.getElementById('bankSelect').value;
         document.getElementById('paymentForm').submit();
     });
