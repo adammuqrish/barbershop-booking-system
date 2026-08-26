@@ -112,7 +112,7 @@
             <div class="bk-step"><span class="n">3</span> Confirm &amp; Pay</div>
         </div>
 
-        <form th:action="@{/booking}" method="post" novalidate>
+        <form id="bookingForm" th:action="@{/booking}" method="post" novalidate>
             <!-- Server-side validation error -->
             <div th:if="${bookingError}" role="alert"
                  style="background:#fdeaea;border:2px solid var(--oxblood);color:var(--oxblood);border-radius:5px;padding:14px 18px;margin-bottom:24px;font-weight:600">
@@ -391,7 +391,7 @@
         ['err-date', 'err-summary', 'err-barber'].forEach(id => setFieldError(id, ''));
     }
 
-    document.querySelector('form').addEventListener('submit', function (e) {
+    document.getElementById('bookingForm').addEventListener('submit', function (e) {
         clearAllFieldErrors();
         const dateVal = document.getElementById('date').value;
         const slotRadio = document.querySelector('input.slot-radio:checked');
