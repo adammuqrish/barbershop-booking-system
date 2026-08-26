@@ -11,12 +11,12 @@
 
 <style>
     .bk-wrap{max-width:960px;margin:0 auto;padding:48px 24px 80px;width:100%}
-    .bk-steps{display:flex;gap:8px;margin-bottom:36px;flex-wrap:wrap}
-    .bk-step{display:flex;align-items:center;gap:10px;font-size:.85rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
-    .bk-step .n{width:28px;height:28px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;font-family:'Bebas Neue';font-size:16px;color:var(--muted)}
+    .bk-steps{display:flex;align-items:center;gap:8px;margin-bottom:36px}
+    .bk-step{display:flex;align-items:center;gap:10px;font-size:.85rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+    .bk-step .n{width:28px;height:28px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;font-family:'Bebas Neue';font-size:16px;color:var(--muted);flex-shrink:0}
     .bk-step.active{color:var(--oxblood)}
     .bk-step.active .n{background:var(--brass);border-color:var(--brass);color:var(--ink)}
-    .bk-sep{flex:1;min-width:20px;border-top:2px dotted var(--line);transform:translateY(2px)}
+    .bk-sep{flex:1;border-top:2px dotted var(--line)}
 
     .bk-card{background:#fff;border:1px solid var(--line);border-radius:6px;padding:32px;box-shadow:4px 4px 0 var(--cream-2)}
     .bk-card + .bk-card{margin-top:28px}
