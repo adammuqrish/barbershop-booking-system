@@ -6,8 +6,10 @@
   "scripts": {
     "build:css": "tailwindcss -i ./src/main/resources/static/css/tailwind-input.css -o ./src/main/resources/static/css/main.css --minify",
     "watch:css": "tailwindcss -i ./src/main/resources/static/css/tailwind-input.css -o ./src/main/resources/static/css/main.css --watch",
-    "dev": "cmd /c \"mvnw.cmd spring-boot:run -Dspring-boot.run.profiles=local\"",
-    "dev:ps": "powershell -ExecutionPolicy Bypass -File dev.ps1"
+    "dev": "dev.bat",
+    "dev:fast": "dev-fast.bat",
+    "dev:ps": "powershell -ExecutionPolicy Bypass -File dev.ps1",
+    "dev:kill": "powershell -Command \"try { $p=netstat -ano | Select-String ':8080' | Select-String 'LISTENING'; if($p){ $p | ForEach-Object { if($_ -match '\\s(\\d+)\\s*$'){ taskkill /PID $Matches[1] /F } } } } catch {}\""
   },
   "devDependencies": {
     "@tailwindcss/cli": "^4.1.0"
