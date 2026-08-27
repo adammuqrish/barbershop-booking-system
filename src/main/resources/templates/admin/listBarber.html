@@ -68,8 +68,13 @@
                 </div>
                 <div class="col-lg-4">
                     <div th:if="${barber}" class="card">
-                        <div class="card-inner text-center">
-                            <div class="user-avatar lg bg-light mx-auto mb-3" style="width:88px;height:88px;">
+                        <div class="card-inner">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h6 class="title mb-0">Staff Details</h6>
+                                <a th:href="@{/listBarber}" class="btn btn-icon btn-sm btn-outline-light" title="Back to list" aria-label="Back to list"><em class="icon ni ni-cross"></em></a>
+                            </div>
+                            <div class="text-center">
+                            <div class="user-avatar lg mx-auto mb-3" style="width:88px;height:88px;">
                                 <img th:if="${barber.staffPicture != null}" th:src="@{'/resources/uploads/' + ${barber.staffPicture}}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;"/>
                                 <span th:if="${barber.staffPicture == null}" style="display:grid;place-items:center;width:100%;height:100%;border-radius:50%;background:#eef2f7;color:#526484;font-size:12px;">No<br/>Picture</span>
                             </div>
@@ -86,6 +91,7 @@
                                     <input type="hidden" name="staffId" th:value="${barber.staffId}"/>
                                     <button type="submit" class="btn btn-danger btn-sm"><em class="icon ni ni-trash me-1"></em>Delete</button>
                                 </form>
+                            </div>
                             </div>
                         </div>
                     </div>

@@ -11,8 +11,9 @@
 
 /* ——— Sidebar ——— */
 .nk-sidebar.is-theme { background: #1a1714; border-right: 3px solid #c9a227; }
-.nk-sidebar-brand .logo-img { width: 140px; height: auto; max-height: 56px; object-fit: contain; }
-.nk-sidebar-brand { padding: 16px 12px; }
+.nk-sidebar-brand .logo-img { width: 110px; height: auto; max-height: 36px; object-fit: contain; display:block; }
+.nk-sidebar-brand { padding: 10px 16px; height: 60px; display:flex; align-items:center; }
+.nk-sidebar-element.nk-sidebar-head { height: 60px; min-height:60px; display:flex; align-items:center; border-bottom:1px solid rgba(255,255,255,.08); }
 .nk-menu-heading .overline-title { color: rgba(255,255,255,.45); letter-spacing:.14em; font-size:.72rem; }
 .nk-menu-link { gap: 10px; font-weight:500; }
 .nk-menu-link .nki { width: 18px; text-align:center; opacity:.9; }
@@ -21,9 +22,18 @@
 .nk-menu-link:hover { color:#fff; }
 
 /* ——— Header ——— */
-.nk-header { backdrop-filter: blur(6px); }
-.nk-header-wrap { gap: 12px; }
-.nk-header-tools .user-avatar img { border:2px solid #e5e9f2; }
+.nk-header { backdrop-filter: blur(6px); background:#fff; border-bottom:1px solid #e5e9f2; height:60px; box-shadow:0 1px 3px rgba(0,0,0,.04); }
+.nk-header-wrap { gap: 16px; padding:0 24px; height:60px; align-items:center; display:flex; justify-content:space-between; }
+.nk-header-tools { margin-left:auto; }
+.nk-header-tools .nk-quick-nav { gap:16px; }
+.nk-header .nk-quick-nav-icon { position:relative; }
+.nk-header-tools .user-avatar { border:2px solid #fff; box-shadow:0 0 0 2px #e5e9f2; overflow:hidden; }
+.nk-header-tools .user-avatar img { border:none; width:100%; height:100%; object-fit:cover; display:block; }
+.user-avatar.lg { border:3px solid #fff; box-shadow:0 0 0 2px #e5e9f2; overflow:hidden; }
+@media (min-width: 992px) {
+  .nk-header-wrap { padding:0 32px; }
+  .nk-content .container-fluid { padding-left:32px; padding-right:32px; }
+}
 
 /* ——— Cards & Blocks ——— */
 .nk-block-head { margin-bottom: 18px; }
@@ -49,10 +59,22 @@
 .skeleton { background: linear-gradient(90deg,#eef2f7 25%,#e5e9f2 37%,#eef2f7 63%); background-size:400% 100%; animation: shimmer 1.2s ease-in-out infinite; }
 @keyframes shimmer { 0%{background-position:100% 0} 100%{background-position:-100% 0} }
 
+/* ——— Pagination ——— */
+.pagination { gap:6px; justify-content:center; }
+.pagination .page-link { border-radius:6px; padding:8px 14px; font-size:.84rem; font-weight:600; border:1px solid #e5e9f2; color:#364a63; background:#fff; min-width:42px; text-align:center; transition:all .15s ease; }
+.pagination .page-link:hover { background:#f5f6fa; border-color:#c9a227; color:#1a1714; }
+.pagination .page-item.active .page-link { background:#1a1714; border-color:#1a1714; color:#fff; box-shadow:0 2px 6px rgba(26,23,20,.15); }
+.pagination .page-item.disabled .page-link { opacity:.4; pointer-events:none; background:#f8f8f9; }
+.pagination .page-item:first-child .page-link,
+.pagination .page-item:last-child .page-link { min-width:88px; font-weight:600; }
+
 /* ——— Responsive ——— */
 @media (max-width: 991.98px) {
   .nk-content .container, .nk-content .container-fluid { padding-left:16px; padding-right:16px; }
 }
 @media (max-width: 576px) {
   .nk-block-head .nk-block-title { font-size:1.25rem; }
+  .pagination .page-link { padding:7px 10px; font-size:.8rem; min-width:36px; }
+  .pagination .page-item:first-child .page-link,
+  .pagination .page-item:last-child .page-link { min-width:72px; }
 }

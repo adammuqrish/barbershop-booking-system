@@ -33,7 +33,7 @@
           </li>
 
           <li th:if="${staffRole == 'ADMIN'}" class="nk-menu-item" th:classappend="${#httpServletRequest != null and #strings.contains(#httpServletRequest.requestURI,'listBarber')} ? 'active'">
-            <a th:href="@{/listBarber}" class="nk-menu-link"><em class="icon ni ni-users-alt nki"></em><span>Staff</span></a>
+            <a th:href="@{/listBarber}" class="nk-menu-link"><em class="icon ni ni-users nki"></em><span>Staff</span></a>
           </li>
 
           <li class="nk-menu-item" th:classappend="${#httpServletRequest != null and (#strings.contains(#httpServletRequest.requestURI,'listAppointment') or #strings.contains(#httpServletRequest.requestURI,'barber/appointments'))} ? 'active'">
@@ -85,9 +85,10 @@
             <span class="badge bg-light text-dark border" style="font-weight:500"><em class="icon ni ni-info me-1"></em>Viewing your data only</span>
           </li>
           <li>
-            <a th:href="${staffRole == 'ADMIN' ? '/listAppointment' : '/barber/appointments'}" class="position-relative d-flex align-items-center justify-content-center" style="width:36px; height:36px; border-radius:50%; background:#eef2f7; color:#526484; text-decoration:none;" title="Pending appointments">
+            <a th:href="${staffRole == 'ADMIN' ? '/listAppointment' : '/barber/appointments'}" class="position-relative d-flex align-items-center justify-content-center" style="width:38px; height:38px; border-radius:50%; background:#eef2f7; color:#364a63; text-decoration:none; border:1px solid #e5e9f2;" title="Pending appointments">
               <em class="icon ni ni-bell" style="font-size:18px;"></em>
-              <span th:if="${pendingCount != null and pendingCount > 0}" th:text="${pendingCount > 9 ? '9+' : pendingCount}" class="badge bg-danger" style="position:absolute; top:-4px; right:-4px; font-size:.65rem; padding:2px 5px; border-radius:10px; min-width:18px; text-align:center;">0</span>
+              <span th:if="${pendingCount != null}" th:text="${pendingCount > 9 ? '9+' : pendingCount}" th:classappend="${pendingCount > 0} ? 'bg-danger' : 'bg-gray'" class="badge" style="position:absolute; top:-6px; right:-6px; font-size:.68rem; padding:3px 6px; border-radius:10px; min-width:20px; text-align:center; border:2px solid #fff; box-shadow:0 1px 3px rgba(0,0,0,.15); color:#fff;">0</span>
+              <span th:if="${pendingCount == null}" class="badge bg-danger" style="position:absolute; top:-6px; right:-6px; width:10px; height:10px; border-radius:50%; border:2px solid #fff; padding:0;"></span>
             </a>
           </li>
           <li>

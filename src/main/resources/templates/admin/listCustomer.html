@@ -24,9 +24,7 @@
                         <div class="nk-block-head-content">
                             <div class="search-wrap" style="min-width:240px">
                                 <div class="search-content">
-                                    <a href="#" class="search-back btn btn-icon toggle-search" data-target="search"><em class="icon ni ni-arrow-left"></em></a>
-                                    <input type="text" id="customerSearch" class="form-control border-transparent form-focus-none" placeholder="Search by name or phone…"/>
-                                    <button class="search-submit btn btn-icon"><em class="icon ni ni-search"></em></button>
+                                    <input type="text" id="customerSearch" class="form-control form-control-sm" placeholder="Search by name or phone…"/>
                                 </div>
                             </div>
                         </div>
@@ -52,7 +50,7 @@
                                                 <tr th:each="cust : ${customerList}" class="nk-tb-item" th:classappend="${customer != null and customer.custId == cust.custId} ? 'table-active'">
                                                     <td class="nk-tb-col"><span class="tb-amount" th:text="${cust.custName}">Name</span></td>
                                                     <td class="nk-tb-col"><span class="tb-amount small" th:text="${cust.custPhoneNumber}">Phone</span></td>
-                                                    <td class="nk-tb-col"><span class="badge badge-dot bg-outline-gray" th:text="${cust.custLoyaltyPoints} + ' pts'">0 pts</span></td>
+                                                    <td class="nk-tb-col"><span class="badge badge-dot bg-light border text-dark" th:text="${cust.custLoyaltyPoints} + ' pts'" style="background:#fff; border-color:#e5e9f2; color:#364a63; font-weight:600;">0 pts</span></td>
                                                     <td class="nk-tb-col nk-tb-col-tools text-end">
                                                         <a th:if="${staffRole == 'ADMIN'}" th:href="@{/listCustomer(custId=${cust.custId})}" class="btn btn-sm btn-outline-light">View</a>
                                                         <a th:if="${staffRole == 'BARBER'}" th:href="@{/barber/customers(custId=${cust.custId})}" class="btn btn-sm btn-outline-light">View</a>
@@ -71,11 +69,15 @@
                     <div class="col-lg-4">
                         <div th:if="${customer}" class="card">
                             <div class="card-inner">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h6 class="title mb-0">Customer Details</h6>
+                                    <a th:href="${staffRole == 'BARBER' ? '/barber/customers' : '/listCustomer'}" class="btn btn-icon btn-sm btn-outline-light" title="Back to list" aria-label="Back to list"><em class="icon ni ni-cross"></em></a>
+                                </div>
                                 <div class="text-center">
                                     <div class="user-card">
-                                        <div class="user-avatar lg bg-light mx-auto mb-2" style="width:88px;height:88px;font-size:32px;">
-                                            <img th:if="${customer.custPicture != null}" th:src="@{'/resources/uploads/' + ${customer.custPicture}}" alt="Customer photo" style="width:100%;height:100%;object-fit:cover;border-radius:50%;"/>
-                                            <span th:if="${customer.custPicture == null}" style="display:grid;place-items:center;width:100%;height:100%;border-radius:50%;background:#eef2f7;color:#526484;">—</span>
+                                        <div class="user-avatar lg mx-auto mb-2" style="width:88px;height:88px;font-size:28px; border:3px solid #fff; box-shadow:0 0 0 2px #e5e9f2; border-radius:50%; overflow:hidden; display:grid; place-items:center; background:#1a1714;">
+                                            <img th:if="${customer.custPicture != null}" th:src="@{'/resources/uploads/' + ${customer.custPicture}}" alt="Customer photo" style="width:100%;height:100%;object-fit:cover;"/>
+                                            <span th:if="${customer.custPicture == null}" th:text="${customer.custName != null ? #strings.substring(customer.custName,0,1).toUpperCase() : '?'}" style="display:grid;place-items:center;width:100%;height:100%;border-radius:50%;background:#c9a227;color:#1a1714;font-weight:700;font-family:'Manrope',sans-serif; font-size:32px;">A</span>
                                         </div>
                                         <div class="user-info">
                                             <span class="tb-lead" th:text="${customer.custName}">Name</span>

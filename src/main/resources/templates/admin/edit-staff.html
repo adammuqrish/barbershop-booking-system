@@ -49,13 +49,13 @@
                         </div>
 
                         <!-- Form Card (Only show if staff exists) -->
-                        <div th:if="${staff}" class="nk-block">
+                        <div th:if="${editStaff != null}" class="nk-block">
                             <div class="card">
                                 <div class="card-inner">
 
                                     <form th:action="@{/admin/update-staff}" method="post">
 
-                                        <input type="hidden" name="staffId" th:value="${staff.staffId}" />
+                                        <input type="hidden" name="staffId" th:value="${editStaff.staffId}" />
 
                                         <div class="row g-4">
 
@@ -63,30 +63,30 @@
                                             <div class="col-md-6">
                                                 <label class="form-label">Full Name</label>
                                                 <input type="text" name="name" class="form-control"
-                                                    th:value="${staff.staffName}" required>
+                                                    th:value="${editStaff.staffName}" required>
                                             </div>
 
                                             <!-- Email -->
                                             <div class="col-md-6">
                                                 <label class="form-label">Email Address</label>
                                                 <input type="email" name="email" class="form-control"
-                                                    th:value="${staff.staffEmail}" required>
+                                                    th:value="${editStaff.staffEmail}" required>
                                             </div>
 
                                             <!-- Phone -->
                                             <div class="col-md-6">
                                                 <label class="form-label">Phone Number</label>
                                                 <input type="text" name="phone" class="form-control"
-                                                    th:value="${staff.staffPhoneNumber}" required>
+                                                    th:value="${editStaff.staffPhoneNumber}" required>
                                             </div>
 
                                             <!-- Role (Disabled - Display Only) -->
                                             <div class="col-md-6">
                                                 <label class="form-label">Role</label>
                                                 <input type="text" class="form-control" disabled
-                                                    th:value="${staff.staffRole == 'ADMIN' ? 'Administrator' : 'Barber'}">
+                                                    th:value="${editStaff.staffRole == 'ADMIN' ? 'Administrator' : 'Barber'}">
                                                 <!-- Hidden input to submit the role value -->
-                                                <input type="hidden" name="role" th:value="${staff.staffRole}">
+                                                <input type="hidden" name="role" th:value="${editStaff.staffRole}">
                                                 <small class="form-text text-muted d-block mt-1">
                                                     <i class="fas fa-lock me-1"></i>Role cannot be changed
                                                 </small>
@@ -97,7 +97,7 @@
                                                 <label class="form-label">Description (Optional)</label>
                                                 <textarea name="description" class="form-control" rows="4"
                                                     placeholder="Add any additional information about this staff member..."
-                                                    th:inline="text">${staff.description}</textarea>
+                                                    th:text="${editStaff.description}"></textarea>
                                             </div>
 
                                         </div>
@@ -120,7 +120,7 @@
                         </div>
 
                         <!-- No Staff Message -->
-                        <div th:if="${!staff}" class="alert alert-info">
+                        <div th:if="${editStaff == null}" class="alert alert-info">
                             <i class="fas fa-info-circle me-2"></i>
                             <a th:href="@{/listBarber}" class="alert-link">Go back to staff list</a> to select a staff
                             member to edit.

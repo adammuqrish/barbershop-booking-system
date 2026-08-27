@@ -74,15 +74,15 @@
                                             <td class="nk-tb-col"><span class="small" th:text="${a.appointmentDate}">2026-01-01</span> <span class="text-soft small" th:text="${a.appointmentTime}">10:00 am</span></td>
                                             <td class="nk-tb-col"><span class="badge bg-outline-gray" th:text="${a.custType}">Adult</span></td>
                                             <td class="nk-tb-col">
-                                                <div th:if="${a.paymentMethod == 'ONLINE'}"><span class="badge badge-dot bg-success">Completed</span> <span class="text-soft small ms-1">Online</span></div>
-                                                <div th:if="${a.paymentMethod == 'CASH' and staffRole == 'ADMIN'}">
-                                                    <form th:action="@{/admin/update-payment-status}" method="post" class="d-inline">
+                                                <div th:if="${#strings.equalsIgnoreCase(a.paymentMethod, 'ONLINE')}"><span class="badge badge-dot bg-success">Completed</span> <span class="text-soft small ms-1">Online</span></div>
+                                                <div th:if="${#strings.equalsIgnoreCase(a.paymentMethod, 'CASH') and staffRole == 'ADMIN'}">
+                                                    <form th:action="@{/admin/update-payment-status}" method="post" class="d-inline ajax-payment-form">
                                                         <input type="hidden" name="appointmentId" th:value="${a.appointmentId}"/>
                                                         <button th:if="${a.paymentStatus == 'completed'}" type="button" class="badge badge-dot bg-success border-0" disabled>Completed</button>
                                                         <button th:if="${a.paymentStatus == 'pending'}" type="submit" name="status" value="completed" class="badge badge-dot bg-warning border-0" style="cursor:pointer">Pending → Complete</button>
                                                     </form>
                                                 </div>
-                                                <div th:if="${a.paymentMethod == 'CASH' and staffRole == 'BARBER'}">
+                                                <div th:if="${#strings.equalsIgnoreCase(a.paymentMethod, 'CASH') and staffRole == 'BARBER'}">
                                                     <span th:if="${a.paymentStatus == 'completed'}" class="badge badge-dot bg-success">Completed</span>
                                                     <span th:if="${a.paymentStatus == 'pending'}" class="badge badge-dot bg-warning">Pending</span>
                                                 </div>
@@ -90,7 +90,7 @@
                                             </td>
                                             <td class="nk-tb-col">
                                                 <div th:if="${staffRole == 'ADMIN'}">
-                                                    <form th:action="@{/admin/update-service-status}" method="post" class="d-inline">
+                                                    <form th:action="@{/admin/update-service-status}" method="post" class="d-inline ajax-service-form">
                                                         <input type="hidden" name="appointmentId" th:value="${a.appointmentId}"/>
                                                         <button th:if="${a.serviceStatus == 'done'}" type="submit" name="status" value="cancelled" class="badge badge-dot bg-success border-0" style="cursor:pointer" title="Click to cancel">Done</button>
                                                         <button th:if="${a.serviceStatus == 'pending'}" type="submit" name="status" value="done" class="badge badge-dot bg-warning border-0" style="cursor:pointer" title="Mark as done">Pending → Done</button>
@@ -235,6 +235,89 @@
       if(window.adminToast) window.adminToast('Failed to load available times.','error');
     }).finally(function(){ if(spinner) spinner.style.display='none'; });
   }
+  // --- Past appointment guard: block edits for past slots ---
+  (function(){
+    var dateEl=document.getElementById('editDate');
+    var timeEl=document.getElementById('originalTime');
+    if(dateEl && timeEl && timeEl.value){
+      if(isTimeInPast(dateEl.value, timeEl.value)){
+        var form=document.getElementById('editAppointmentForm');
+        if(form){
+          Array.from(form.elements).forEach(function(el){ el.disabled=true; });
+          // keep cancel link enabled
+          var cancel=form.querySelector('a.btn-light');
+          if(cancel){ cancel.style.pointerEvents='auto'; cancel.classList.remove('disabled'); }
+          var alertDiv=document.createElement('div');
+          alertDiv.className='alert alert-warning small mt-2';
+          alertDiv.innerHTML='<em class="icon ni ni-alert-circle me-1"></em> This appointment is in the past and cannot be modified.';
+          form.parentNode.insertBefore(alertDiv, form);
+        }
+      }
+    }
+    var table=document.getElementById('appointmentTable');
+    if(table){
+      Array.from(table.tBodies[0].rows).forEach(function(tr){
+        var cell=tr.cells[1];
+        if(!cell) return;
+        var txt=cell.innerText.trim();
+        // expected "YYYY-MM-DD hh:mm am/pm" — split date and time
+        var m=txt.match(/(\d{4}-\d{2}-\d{2})\s+(.+)/);
+        if(!m) return;
+        if(isTimeInPast(m[1], m[2].trim())){
+          var editBtn=tr.querySelector('a[href*="appointmentId="]');
+          if(editBtn){
+            editBtn.classList.add('disabled');
+            editBtn.style.pointerEvents='none';
+            editBtn.style.opacity='.35';
+            editBtn.title='Past appointment cannot be edited';
+            editBtn.setAttribute('aria-disabled','true');
+          }
+        }
+      });
+    }
+  })();
 </script>
+
+<script>
+document.addEventListener('submit', function(e){
+  var form = e.target;
+  if(form.matches('.ajax-payment-form, .ajax-service-form')){
+    e.preventDefault();
+    var btn = form.querySelector('button[type="submit"]:focus') || form.querySelector('button[type="submit"]');
+    var originalHTML = form.innerHTML;
+    var fd = new FormData(form);
+    // Keep scroll position
+    var scrollY = window.scrollY;
+    fetch(form.action, {method:'POST', body: new URLSearchParams(fd), headers:{'X-Requested-With':'XMLHttpRequest'}})
+      .then(function(r){
+        if(r.ok){
+          // Optimistic UI update without reload
+          if(form.classList.contains('ajax-payment-form')){
+            var status = fd.get('status');
+            if(status === 'completed'){
+              form.innerHTML = '<span class="badge badge-dot bg-success">Completed</span>';
+            }
+          } else if(form.classList.contains('ajax-service-form')){
+            var s = fd.get('status');
+            var badge = '';
+            if(s === 'done') badge = '<span class="badge badge-dot bg-success">Done</span>';
+            else if(s === 'cancelled') badge = '<span class="badge badge-dot bg-danger">Cancelled</span>';
+            else if(s === 'pending') badge = '<span class="badge badge-dot bg-warning">Pending</span>';
+            if(badge) form.innerHTML = badge;
+          }
+          if(window.adminToast) window.adminToast('Updated successfully','success');
+          // Keep scroll
+          window.scrollTo(0, scrollY);
+        } else {
+          if(window.adminToast) window.adminToast('Update failed','error');
+          form.innerHTML = originalHTML;
+        }
+      }).catch(function(){
+        if(window.adminToast) window.adminToast('Network error','error');
+      });
+  }
+});
+</script>
+
 </body>
 </html>

@@ -21,7 +21,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card">
+            <div class="card mb-3">
                 <div class="card-inner-group">
                     <div class="card-inner position-relative">
                         <div class="card-title-group">
@@ -65,6 +65,7 @@
                             </table>
                         </div>
                     </div>
+                    <div th:replace="~{fragments/adminComponents :: pagination(currentPage=${currentPage}, totalPages=${totalPages}, baseUrl=${staffRole == 'BARBER' ? '/barber/feedbacks' : '/admin/list-feedback'})}"></div>
                 </div>
             </div>
         </div></div>

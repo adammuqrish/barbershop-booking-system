@@ -244,28 +244,19 @@ public class AdminController {
 
     // 4. BARBER TRANSACTION LIST
     @GetMapping("/barber/transactions")
-    public String barberTransactionList(Model model) {
+    public String barberTransactionList(
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size,
+            Model model) {
         Staff barber = getLoggedInStaff();
         if (barber == null)
-            
             return "redirect:/adminLogin";
+        adminHeaderService.populate(model);
 
-        model.addAttribute("staffName", barber.getStaffName());
-        model.addAttribute("staffRole", barber.getStaffRole());
-        model.addAttribute("staff", barber);
-
-        // --- LOGIK BARU: BARBER HANYA LIHAT MILIK SENDIRI ---
-
-        // 1. Dapatkan SEMUA payment (atau kita boleh terus filter appointment,
-        // tapi struktur anda join melalui Payment. Kita guna Payment)
         Iterable<Payment> barberPayments = paymentRepository.findAllByStaffId(barber.getStaffId());
 
-        List<TransactionDTO> transactions = new ArrayList<>();
+        List<TransactionDTO> allTransactions = new ArrayList<>();
         for (Payment p : barberPayments) {
-            // Kita sudah filter di repository (findAllByStaffId),
-            // jadi kesemua 'p' di sini adalah untuk barber ini sahaja.
-            // Tiada perlu check lagi di sini.
-
             appointmentRepository.findById(p.getAppointmentId()).ifPresent(appt -> {
                 customerRepository.findById(appt.getCustId()).ifPresent(cust -> {
                     TransactionDTO dto = new TransactionDTO();
@@ -275,12 +266,18 @@ public class AdminController {
                     dto.setPaymentMethod(p.getPaymentMethod());
                     dto.setPaymentDate(p.getPaymentDate());
                     dto.setPaymentStatus(appt.getPaymentStatus());
-                    transactions.add(dto);
+                    allTransactions.add(dto);
                 });
             });
         }
-
+        // Manual pagination (custom query returns List)
+        int total = allTransactions.size();
+        int from = Math.min(page * size, total);
+        int to = Math.min(from + size, total);
+        List<TransactionDTO> transactions = allTransactions.subList(from, to);
         model.addAttribute("transactions", transactions);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", (int) Math.ceil((double) total / size));
         return "admin/listTransactions";
     }
 
@@ -340,17 +337,25 @@ public class AdminController {
 
     // 5. BARBER FEEDBACK LIST
     @GetMapping("/barber/feedbacks")
-    public String barberFeedbackList(Model model) {
+    public String barberFeedbackList(
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size,
+            Model model) {
         Staff barber = getLoggedInStaff();
         if (barber == null)
             return "redirect:/adminLogin";
-
-        model.addAttribute("staffName", barber.getStaffName());
-        model.addAttribute("staffRole", barber.getStaffRole());
-        model.addAttribute("staff", barber);
+        adminHeaderService.populate(model);
 
         // Filter feedbacks (melalui appointment -> barberId)
-        List<Feedback> feedbacks = feedbackRepository.findByStaffId(barber.getStaffId());
+        List<Feedback> allFeedbacks = feedbackRepository.findByStaffId(barber.getStaffId());
+
+        // Manual pagination (custom query returns List)
+        int total = allFeedbacks.size();
+        int from = Math.min(page * size, total);
+        int to = Math.min(from + size, total);
+        List<Feedback> feedbacks = allFeedbacks.subList(from, to);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", (int) Math.ceil((double) total / size));
 
         List<FeedbackDTO> feedbackList = new ArrayList<>();
         for (Feedback f : feedbacks) {
@@ -377,10 +382,7 @@ public class AdminController {
         Staff barber = getLoggedInStaff();
         if (barber == null)
             return "redirect:/adminLogin";
-
-        model.addAttribute("staffName", barber.getStaffName());
-        model.addAttribute("staffRole", barber.getStaffRole());
-        model.addAttribute("staff", barber);
+        adminHeaderService.populate(model);
 
         return "admin/profile"; // Guna template admin/profile
     }
@@ -456,10 +458,7 @@ public class AdminController {
         Staff barber = getLoggedInStaff();
         if (barber == null)
             return "redirect:/adminLogin";
-
-        model.addAttribute("staffName", barber.getStaffName());
-        model.addAttribute("staffRole", barber.getStaffRole());
-        model.addAttribute("staff", barber);
+        adminHeaderService.populate(model);
 
         model.addAttribute("barberList", staffRepository.findAll());
 
@@ -480,24 +479,7 @@ public class AdminController {
     @GetMapping("/adminIndex")
     @PreAuthorize("hasRole('ADMIN')")
     public String adminIndex(Model model) {
-        // Load staff from authentication
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth != null && !auth.getName().equals("anonymousUser")) {
-            String email = auth.getName();
-            Optional<Staff> staffOpt = staffRepository.findByStaffEmail(email);
-            if (staffOpt.isPresent()) {
-                Staff staff = staffOpt.get();
-                model.addAttribute("staffName", staff.getStaffName());
-                model.addAttribute("staffRole", staff.getStaffRole());
-                model.addAttribute("staff", staff);
-            } else {
-                model.addAttribute("staffName", "Staff");
-                model.addAttribute("staffRole", null);
-            }
-        } else {
-            model.addAttribute("staffName", "Staff");
-            model.addAttribute("staffRole", null);
-        }
+        adminHeaderService.populate(model);
 
         // 1. Total Sales
         java.math.BigDecimal totalSales = paymentRepository.getTotalSales();
@@ -838,10 +820,17 @@ public class AdminController {
     // 14. ADMIN LIST TRANSACTIONS
     @GetMapping("/admin/list-transactions")
     @PreAuthorize("hasRole('ADMIN')")
-    public String listTransactions(Model model) {
+    public String listTransactions(
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size,
+            Model model) {
         adminHeaderService.populate(model);
 
-        Iterable<Payment> payments = paymentRepository.findAll();
+        org.springframework.data.domain.Page<Payment> paymentPage = paymentRepository.findAll(org.springframework.data.domain.PageRequest.of(page, size, org.springframework.data.domain.Sort.by("paymentDate").descending()));
+        List<Payment> payments = paymentPage.getContent();
+        model.addAttribute("paymentPage", paymentPage);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", paymentPage.getTotalPages());
 
         List<TransactionDTO> transactions = new ArrayList<>();
         for (Payment p : payments) {
@@ -866,10 +855,16 @@ public class AdminController {
     // 15. ADMIN LIST FEEDBACK
     @GetMapping("/admin/list-feedback")
     @PreAuthorize("hasRole('ADMIN')")
-    public String listFeedback(Model model) {
+    public String listFeedback(
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size,
+            Model model) {
         adminHeaderService.populate(model);
 
-        Iterable<com.heroku.java.model.Feedback> feedbacks = feedbackRepository.findAll();
+        org.springframework.data.domain.Page<com.heroku.java.model.Feedback> feedbackPage = feedbackRepository.findAll(org.springframework.data.domain.PageRequest.of(page, size, org.springframework.data.domain.Sort.by("feedbackId").descending()));
+        List<com.heroku.java.model.Feedback> feedbacks = feedbackPage.getContent();
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", feedbackPage.getTotalPages());
 
         // Join with appointment and customer for display
         List<FeedbackDTO> feedbackList = new ArrayList<>();
@@ -1172,25 +1167,15 @@ public class AdminController {
     @GetMapping("/admin/edit-staff")
     @PreAuthorize("hasRole('ADMIN')")
     public String editStaff(@RequestParam(required = false) Long staffId, Model model) {
-        
-        // Get logged-in admin info for header
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth != null && !auth.getName().equals("anonymousUser")) {
-            staffRepository.findByStaffEmail(auth.getName()).ifPresent(admin -> {
-                model.addAttribute("staffName", admin.getStaffName());
-                model.addAttribute("staffRole", admin.getStaffRole());
-            });
-        }
-
+        adminHeaderService.populate(model);
         if (staffId != null) {
             staffRepository.findById(staffId).ifPresentOrElse(
-                staff -> model.addAttribute("staff", staff),
+                staff -> model.addAttribute("editStaff", staff),
                 () -> model.addAttribute("error", "Staff not found.")
             );
         } else {
             model.addAttribute("error", "Invalid staff ID provided.");
         }
-
         return "admin/edit-staff";
     }
 
@@ -1297,6 +1282,20 @@ public class AdminController {
 
         Appointment a = appointmentRepository.findById(appointmentId)
                 .orElseThrow(() -> new RuntimeException("Appointment not found"));
+
+        // --- FIX 0: BLOCK PAST APPOINTMENT EDITS (original date already passed) ---
+        try {
+            String origTime24 = convertTimeTo24Hour(a.getAppointmentTime());
+            java.time.LocalDateTime origDateTime = java.time.LocalDateTime.parse(
+                    a.getAppointmentDate() + " " + origTime24,
+                    java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+            if (origDateTime.isBefore(java.time.LocalDateTime.now())) {
+                redirectAttributes.addFlashAttribute("error", "Cannot update past appointments. This appointment has already passed.");
+                return "redirect:/listAppointment?appointmentId=" + appointmentId;
+            }
+        } catch (Exception e) {
+            // ignore parse errors, fall through to new date validation
+        }
 
         // --- FIX 1: VALIDASI TARIKH & MASA ---
         if (appointmentDate != null && !appointmentDate.isEmpty() &&
