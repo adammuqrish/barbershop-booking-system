@@ -17,7 +17,7 @@
                 <div class="nk-block-between">
                     <div class="nk-block-head-content">
                         <h3 class="nk-block-title page-title" th:text="${staffRole == 'BARBER' ? 'My Transactions' : 'Transactions'}">Transactions</h3>
-                        <div class="nk-block-des text-soft"><p th:text="${staffRole == 'BARBER' ? 'Payments for your appointments only.' : 'All payments — filter or search to narrow.'}">Subtitle</p></div>
+                        <div class="nk-block-des text-soft"><p th:text="${staffRole == 'BARBER' ? 'Payments for your appointments only.' : 'All payments â€” filter or search to narrow.'}">Subtitle</p></div>
                     </div>
                 </div>
             </div>
@@ -32,7 +32,7 @@
                             <div class="card-tools">
                                 <div class="form-inline flex-nowrap gx-3 align-items-center">
                                     <div class="form-wrap w-200px">
-                                        <input type="text" id="txSearch" class="form-control form-control-sm" placeholder="Search customer or method…"/>
+                                        <input type="text" id="txSearch" class="form-control form-control-sm" placeholder="Search customer or methodâ€¦"/>
                                     </div>
                                     <a th:href="${staffRole == 'BARBER' ? '/barber/export-transactions' : '/admin/export-transactions'}" class="btn btn-outline-primary btn-sm">
                                         <em class="icon ni ni-download me-1"></em> Export CSV
@@ -58,7 +58,7 @@
                                         <td class="nk-tb-col"><span class="tb-lead" th:text="${transaction.customerName}">Name</span></td>
                                         <td class="nk-tb-col text-end"><span class="tb-amount" th:text="${'RM ' + #numbers.formatDecimal(transaction.amount,1,2)}">RM 0.00</span></td>
                                         <td class="nk-tb-col"><span class="badge badge-dot" th:classappend="${transaction.paymentMethod == 'ONLINE' ? 'bg-success' : 'bg-gray'}" th:text="${transaction.paymentMethod}">CASH</span></td>
-                                        <td class="nk-tb-col"><span th:text="${transaction.paymentDate != null ? #temporals.format(transaction.paymentDate, 'dd MMM yyyy') : '—'}">01 Jan 2026</span></td>
+                                        <td class="nk-tb-col"><span th:text="${transaction.paymentDate != null ? #temporals.format(transaction.paymentDate, 'dd MMM yyyy') : 'â€”'}">01 Jan 2026</span></td>
                                         <td class="nk-tb-col"><span class="badge badge-dot" th:classappend="${transaction.paymentStatus == 'completed' ? 'bg-success' : (transaction.paymentStatus == 'pending' ? 'bg-warning' : 'bg-gray')}" th:text="${transaction.paymentStatus}">completed</span></td>
                                     </tr>
                                     <tr th:if="${transactions == null or #lists.isEmpty(transactions)}"><td colspan="6" class="text-center text-soft py-4">No transactions yet.</td></tr>
@@ -70,7 +70,7 @@
                 </div>
             </div>
         </div></div>
-        <div class="nk-footer"><div class="container-fluid"><div class="nk-footer-wrap"><div class="nk-footer-copyright">© 2026 Hugi Barbershop.</div></div></div></div>
+        <div class="nk-footer"><div class="container-fluid"><div class="nk-footer-wrap"><div class="nk-footer-copyright">Â© 2026 Hugi Barbershop.</div></div></div></div>
     </div>
 </div></div>
 <div th:replace="~{fragments/adminScripts :: adminJs}"></div>

@@ -74,9 +74,9 @@
                                 <a th:href="@{/listBarber}" class="btn btn-icon btn-sm btn-outline-light" title="Back to list" aria-label="Back to list"><em class="icon ni ni-cross"></em></a>
                             </div>
                             <div class="text-center">
-                            <div class="user-avatar lg mx-auto mb-3" style="width:88px;height:88px; border:3px solid #fff; box-shadow:0 0 0 2px #e5e9f2; border-radius:50%; overflow:hidden; display:grid; place-items:center; background:#1a1714;">
-                                <img th:if="${barber.staffPicture != null}" th:src="@{'/resources/uploads/' + ${barber.staffPicture}}" style="width:100%;height:100%;object-fit:cover;"/>
-                                <span th:if="${barber.staffPicture == null}" th:text="${barber.staffName != null ? #strings.substring(barber.staffName,0,1).toUpperCase() : '?'}" style="display:grid;place-items:center;width:100%;height:100%;border-radius:50%;background:#c9a227;color:#1a1714;font-weight:700;font-size:32px; font-family:'Manrope',sans-serif;">S</span>
+                            <div class="user-avatar lg mx-auto mb-3">
+                                <img th:if="${barber.staffPicture != null}" th:src="@{'/resources/uploads/' + ${barber.staffPicture}}" alt="Staff picture"/>
+                                <img th:if="${barber.staffPicture == null}" th:src="@{/resources/uploads/avatar/avatar-placeholder.jpg}" alt="Default avatar"/>
                             </div>
                             <h6 class="title" th:text="${barber.staffName}">Name</h6>
                             <span class="badge badge-dot mt-1" th:classappend="${barber.staffRole == 'ADMIN' ? 'bg-primary' : 'bg-gray'}" th:text="${barber.staffRole}">ROLE</span>

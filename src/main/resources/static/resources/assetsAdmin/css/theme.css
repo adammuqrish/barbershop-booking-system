@@ -40,6 +40,17 @@
 .card { border: 1px solid #e5e9f2; }
 .card-inner { padding: 18px; }
 .nk-tb-list .nk-tb-item { vertical-align: middle; }
+.card-tools { margin-top: 8px; }
+.card-tools .form-inline.gx-2,
+.card-tools .form-inline.gx-3 { gap: 8px; }
+.card-tools .form-inline.gx-3.align-items-center { gap: 8px; }
+
+/* ——— Avatars (admin) — mirror customer brass-circle fallback ——— */
+.user-avatar { display: inline-grid; place-items: center; border-radius: 50%; overflow: hidden; background: var(--brass, #c9a227); color: var(--ink, #1a1714); font-family: 'Manrope', sans-serif; font-weight: 700; }
+.user-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.user-avatar.sm { width: 36px; height: 36px; font-size: 14px; border: 2px solid #fff; box-shadow: 0 0 0 2px #e5e9f2; }
+.user-avatar.lg { width: 88px; height: 88px; font-size: 32px; border: 3px solid #fff; box-shadow: 0 0 0 2px #e5e9f2; }
+.user-avatar.xl { width: 110px; height: 110px; font-size: 40px; border: 4px solid #fff; box-shadow: 0 0 0 2px #e5e9f2; }
 
 /* ——— KPI ——— */
 .kpi-card .kpi-icon { width:44px; height:44px; border-radius:10px; display:grid; place-items:center; font-size:18px; }

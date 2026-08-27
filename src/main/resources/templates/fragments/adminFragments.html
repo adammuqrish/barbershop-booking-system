@@ -95,9 +95,9 @@
             <a th:href="${staffRole == 'ADMIN' ? '/admin/profile' : '/barber/profile'}" class="d-flex align-items-center gap-2 text-decoration-none">
               <span class="d-none d-sm-inline" th:text="${staffName}" style="font-weight:600; color:#364a63; font-size:13px;"></span>
               <span class="badge bg-outline-gray d-sm-none" th:text="${staffRole}" style="font-size:.65rem"></span>
-              <span class="user-avatar sm" style="width:36px; height:36px; border-radius:50%; overflow:hidden; display:grid; place-items:center; background:#1a1714; border:2px solid #fff; box-shadow:0 0 0 2px #e5e9f2;">
-                <img th:if="${staff != null && staff.staffPicture != null}" th:src="@{'/resources/uploads/' + ${staff.staffPicture}}" alt="Staff avatar" style="width:100%; height:100%; object-fit:cover;"/>
-                <span th:unless="${staff != null && staff.staffPicture != null}" th:text="${staffName != null ? #strings.substring(staffName,0,1).toUpperCase() : '?'}" style="display:grid;place-items:center;width:100%;height:100%;background:#c9a227;color:#1a1714;font-weight:700;font-size:14px;font-family:'Manrope',sans-serif;">?</span>
+              <span class="user-avatar sm">
+                <img th:if="${staff != null && staff.staffPicture != null}" th:src="@{'/resources/uploads/' + ${staff.staffPicture}}" alt="Staff avatar"/>
+                <img th:unless="${staff != null && staff.staffPicture != null}" th:src="@{/resources/uploads/avatar/avatar-placeholder.jpg}" alt="Default avatar"/>
               </span>
             </a>
           </li>
