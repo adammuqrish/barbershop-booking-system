@@ -56,10 +56,9 @@
                         <img th:if="${session.customer.custPicture != null}"
                              th:src="@{'/resources/uploads/' + ${session.customer.custPicture}}"
                              alt="" class="hb-avatar" />
-                        <th:block th:unless="${session.customer.custPicture != null}">
-                            <span class="hb-avatar hb-avatar-fallback"
-                                  th:text="${#strings.substring(session.customer.custName, 0, 1)}">U</span>
-                        </th:block>
+                        <img th:unless="${session.customer.custPicture != null}"
+                             th:src="@{/resources/uploads/avatar/avatar-placeholder.jpg}"
+                             alt="" class="hb-avatar" />
                         <span class="hb-username" th:text="${session.customer.custName}">User</span>
                         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
                     </button>

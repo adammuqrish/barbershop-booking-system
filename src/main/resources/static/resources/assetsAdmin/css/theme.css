@@ -79,6 +79,10 @@
 .pagination .page-item:first-child .page-link,
 .pagination .page-item:last-child .page-link { min-width:88px; font-weight:600; }
 
+.pager-summary { display:flex; justify-content:center; gap:4px; align-items:center; color:#526484; font-size:.84rem; }
+.pager-summary .pager-lbl { font-weight:600; }
+.pager-summary .pager-num { font-weight:500; }
+
 /* ——— Responsive ——— */
 @media (max-width: 991.98px) {
   .nk-content .container, .nk-content .container-fluid { padding-left:16px; padding-right:16px; }

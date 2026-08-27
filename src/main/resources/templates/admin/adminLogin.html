@@ -1,213 +1,853 @@
-<!DOCTYPE html>
+<!doctype html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Staff Portal — Hugi Barbershop</title>
-    <link rel="stylesheet" th:href="@{/resources/assetsAdmin/css/style.css}"/>
-    <link rel="stylesheet" th:href="@{/resources/assetsAdmin/css/theme.css}"/>
-    <link rel="stylesheet" th:href="@{/resources/assetsAdmin/css/fontawesome/css/all.min.css}"/>
-    <link rel="preconnect" href="https://fonts.googleapis.com"/>
-    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&family=Manrope:wght@500;600;700&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" th:href="@{/resources/assetsAdmin/css/style.css}" />
+    <link rel="stylesheet" th:href="@{/resources/assetsAdmin/css/theme.css}" />
+    <link
+      rel="stylesheet"
+      th:href="@{/resources/assetsAdmin/css/fontawesome/css/all.min.css}"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&family=Manrope:wght@500;600;700&display=swap"
+      rel="stylesheet"
+    />
     <style>
-        :root{ --ink:#1a1714; --cream:#f5efe4; --cream-2:#ece3d2; --brass:#c9a227; --oxblood:#7a2e2e; --line:rgba(26,23,20,.14); --muted:#8a8073; }
-        *{ box-sizing:border-box; }
-        body{ margin:0; font-family:'Inter',system-ui,sans-serif; background:var(--cream); color:var(--ink); }
-        .staff-login{ min-height:100vh; display:grid; grid-template-columns: 1.05fr .95fr; }
-        .staff-brand{ background:var(--ink); color:var(--cream); position:relative; overflow:hidden; display:flex; flex-direction:column; }
-        .staff-brand::before{ content:""; position:absolute; inset:0; background:
-            radial-gradient(600px 400px at 20% 15%, rgba(201,162,39,.18), transparent 60%),
-            linear-gradient(180deg, rgba(26,23,20,.2), rgba(26,23,20,.85)); z-index:0; }
-        .staff-brand-inner{ position:relative; z-index:1; padding:40px 40px 32px; flex:1; display:flex; flex-direction:column; }
-        .staff-brand-top{ display:flex; align-items:center; gap:12px; text-decoration:none; color:var(--cream); }
-        .staff-mark{ width:44px; height:44px; border-radius:50%; background:var(--brass); color:var(--ink); display:grid; place-items:center; font-family:'Bebas Neue'; font-size:24px; border:2px solid var(--cream); flex-shrink:0; }
-        .staff-brand-name{ font-family:'Bebas Neue'; font-size:26px; letter-spacing:.08em; color:var(--cream); }
-        .staff-brand-name em{ color:var(--brass); font-style:normal; }
-        .staff-hero{ margin-top:56px; }
-        .staff-kicker{ display:inline-flex; align-items:center; gap:10px; font-size:.72rem; font-weight:700; letter-spacing:.18em; text-transform:uppercase; color:var(--brass); }
-        .staff-kicker::before{ content:""; width:28px; height:2px; background:var(--brass); }
-        .staff-hero h1{ font-family:'Bebas Neue'; font-weight:400; font-size:clamp(38px, 4vw, 54px); line-height:.95; margin:14px 0 12px; letter-spacing:.02em; }
-        .staff-hero h1 span{ color:var(--brass); }
-        .staff-hero p{ color:rgba(245,239,228,.72); font-size:.95rem; line-height:1.6; max-width:36ch; }
-        .staff-points{ margin-top:auto; display:grid; grid-template-columns:1fr 1fr; gap:12px; padding-top:32px; border-top:1px solid rgba(245,239,228,.14); }
-        .staff-point{ display:flex; gap:10px; align-items:flex-start; }
-        .staff-point i{ width:36px; height:36px; border-radius:8px; background:rgba(245,239,228,.08); border:1px solid rgba(245,239,228,.14); display:grid; place-items:center; color:var(--brass); flex-shrink:0; }
-        .staff-point b{ display:block; font-size:.88rem; font-weight:600; color:var(--cream); }
-        .staff-point span{ display:block; font-size:.78rem; color:rgba(245,239,228,.6); margin-top:2px; }
-        .staff-form-wrap{ background:var(--cream); display:flex; align-items:center; justify-content:center; padding:32px 24px; }
-        .staff-card{ width:100%; max-width:420px; background:#fff; border:1px solid var(--line); border-radius:12px; box-shadow:0 18px 40px rgba(26,23,20,.12); overflow:hidden; }
-        .staff-card-head{ padding:28px 28px 0; }
-        .staff-card-head h2{ font-family:'Manrope',sans-serif; font-weight:700; font-size:22px; margin:0; color:var(--ink); }
-        .staff-card-head p{ margin:6px 0 0; color:var(--muted); font-size:.88rem; }
-        .staff-card-body{ padding:22px 28px 28px; }
-        .staff-input{ position:relative; }
-        .staff-input .form-control{ padding-left:40px; height:46px; border-radius:8px; border:1px solid #e5e9f2; background:#fff; font-size:.92rem; }
-        .staff-input .form-control:focus{ border-color:var(--brass); box-shadow:0 0 0 3px rgba(201,162,39,.15); }
-        .staff-input .input-icon{ position:absolute; left:12px; top:50%; transform:translateY(-50%); color:#9aa0b8; font-size:14px; pointer-events:none; }
-        .staff-actions{ display:flex; align-items:center; justify-content:space-between; margin:4px 0 18px; }
-        .staff-actions a{ font-size:.82rem; color:var(--muted); text-decoration:none; }
-        .staff-actions a:hover{ color:var(--ink); text-decoration:underline; }
-        .btn-staff{ width:100%; height:46px; border-radius:8px; background:var(--ink); color:#fff; border:1px solid var(--ink); font-weight:600; font-size:.92rem; letter-spacing:.02em; transition:all .15s ease; }
-        .btn-staff:hover{ background:#241f1b; border-color:#241f1b; color:#fff; transform:translateY(-1px); box-shadow:0 6px 16px rgba(26,23,20,.18); }
-        .btn-staff:active{ transform:none; box-shadow:none; }
-        .staff-foot{ padding:16px 28px; background:#faf8f6; border-top:1px solid var(--line); display:flex; align-items:center; justify-content:space-between; font-size:.82rem; color:var(--muted); }
-        .staff-foot a{ color:var(--ink); font-weight:600; text-decoration:none; }
-        .staff-foot a:hover{ color:var(--oxblood); text-decoration:underline; }
-        .staff-alert{ border-radius:8px; font-size:.88rem; }
-        @media (max-width: 860px){
-            .staff-login{ grid-template-columns:1fr; }
-            .staff-brand{ min-height:280px; }
-            .staff-brand-inner{ padding:28px 24px; }
-            .staff-hero{ margin-top:28px; }
-            .staff-points{ grid-template-columns:1fr; gap:14px; }
-            .staff-form-wrap{ padding:24px 16px; align-items:flex-start; }
-            .staff-card{ max-width:100%; }
+      :root {
+        --ink: #1a1714;
+        --cream: #f5efe4;
+        --cream-2: #ece3d2;
+        --brass: #c9a227;
+        --oxblood: #7a2e2e;
+        --line: rgba(26, 23, 20, 0.14);
+        --muted: #8a8073;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        height: 100%;
+      }
+      body {
+        margin: 0;
+        font-family: "Inter", system-ui, sans-serif;
+        background: var(--cream);
+        color: var(--ink);
+      }
+
+      /* ---- Desktop split layout ---- */
+      .staff-login {
+        min-height: 100svh;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      }
+      .staff-brand,
+      .staff-form-wrap {
+        min-width: 0;
+      }
+      .staff-brand {
+        background: var(--ink);
+        color: var(--cream);
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+      }
+      .staff-brand::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background:
+          radial-gradient(
+            600px 400px at 20% 15%,
+            rgba(201, 162, 39, 0.18),
+            transparent 60%
+          ),
+          linear-gradient(180deg, rgba(26, 23, 20, 0.2), rgba(26, 23, 20, 0.85));
+        z-index: 0;
+      }
+      .staff-brand-inner {
+        position: relative;
+        z-index: 1;
+        padding: 40px 44px 32px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+      }
+      .staff-brand-top {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        text-decoration: none;
+        color: var(--cream);
+      }
+      .staff-mark {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        background: var(--brass);
+        color: var(--ink);
+        display: grid;
+        place-items: center;
+        font-family: "Bebas Neue";
+        font-size: 24px;
+        border: 2px solid var(--cream);
+        flex-shrink: 0;
+      }
+      .staff-brand-name {
+        font-family: "Bebas Neue";
+        font-size: 26px;
+        letter-spacing: 0.08em;
+        color: var(--cream);
+      }
+      .staff-brand-name em {
+        color: var(--brass);
+        font-style: normal;
+      }
+      .staff-hero {
+        margin-top: auto;
+        padding-top: 48px;
+      }
+      .staff-kicker {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--brass);
+      }
+      .staff-kicker::before {
+        content: "";
+        width: 28px;
+        height: 2px;
+        background: var(--brass);
+      }
+      .staff-hero h1 {
+        font-family: "Bebas Neue";
+        font-weight: 400;
+        font-size: clamp(38px, 3.8vw, 54px);
+        line-height: 1;
+        margin: 16px 0 14px;
+        letter-spacing: 0.02em;
+      }
+      .staff-hero h1 span {
+        color: var(--brass);
+      }
+      .staff-hero p {
+        color: rgba(245, 239, 228, 0.72);
+        font-size: 0.95rem;
+        line-height: 1.6;
+        max-width: 38ch;
+      }
+      .staff-points {
+        margin-top: auto;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+        padding-top: 28px;
+        border-top: 1px solid rgba(245, 239, 228, 0.14);
+      }
+      .staff-point {
+        display: flex;
+        gap: 10px;
+        align-items: flex-start;
+      }
+      .staff-point i {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        background: rgba(245, 239, 228, 0.08);
+        border: 1px solid rgba(245, 239, 228, 0.14);
+        display: grid;
+        place-items: center;
+        color: var(--brass);
+        flex-shrink: 0;
+        font-size: 15px;
+      }
+      .staff-point b {
+        display: block;
+        font-size: 0.88rem;
+        font-weight: 600;
+        color: var(--cream);
+      }
+      .staff-point span {
+        display: block;
+        font-size: 0.78rem;
+        color: rgba(245, 239, 228, 0.6);
+        margin-top: 2px;
+      }
+
+      /* ---- Form side ---- */
+      .staff-form-wrap {
+        background: var(--cream);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 40px;
+      }
+      .staff-card {
+        width: 100%;
+        max-width: 460px;
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        box-shadow: 0 20px 50px rgba(26, 23, 20, 0.12);
+        overflow: hidden;
+      }
+      .staff-card-head {
+        padding: 32px 32px 0;
+      }
+      .staff-card-head h2 {
+        font-family: "Manrope", sans-serif;
+        font-weight: 700;
+        font-size: 22px;
+        margin: 0;
+        color: var(--ink);
+      }
+      .staff-card-head p {
+        margin: 8px 0 0;
+        color: var(--muted);
+        font-size: 0.9rem;
+        line-height: 1.5;
+      }
+      .staff-card-body {
+        padding: 26px 32px 32px;
+      }
+      .staff-input {
+        position: relative;
+        margin-bottom: 14px;
+      }
+      .staff-input .form-control {
+        padding-left: 44px;
+        height: 50px;
+        border-radius: 10px;
+        border: 1px solid #e5e9f2;
+        background: #fff;
+        font-size: 0.95rem;
+        width: 100%;
+      }
+      .staff-input .form-control:focus {
+        border-color: var(--brass);
+        box-shadow: 0 0 0 3px rgba(201, 162, 39, 0.15);
+      }
+      .staff-input .input-icon {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #9aa0b8;
+        font-size: 15px;
+        pointer-events: none;
+      }
+      .staff-actions {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin: 8px 0 20px;
+      }
+      .staff-actions a {
+        font-size: 0.84rem;
+        color: var(--muted);
+        text-decoration: none;
+      }
+      .staff-actions a:hover {
+        color: var(--ink);
+        text-decoration: underline;
+      }
+      .btn-staff {
+        width: 100%;
+        height: 50px;
+        border-radius: 10px;
+        background: var(--ink);
+        color: #fff;
+        border: 1px solid var(--ink);
+        font-weight: 600;
+        font-size: 1rem;
+        letter-spacing: 0.02em;
+        transition: all 0.15s ease;
+      }
+      .btn-staff:hover {
+        background: #241f1b;
+        border-color: #241f1b;
+        color: #fff;
+        transform: translateY(-1px);
+        box-shadow: 0 6px 16px rgba(26, 23, 20, 0.18);
+      }
+      .btn-staff:active {
+        transform: none;
+        box-shadow: none;
+      }
+      .staff-foot {
+        padding: 16px 32px;
+        background: #faf8f6;
+        border-top: 1px solid var(--line);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 0.82rem;
+        color: var(--muted);
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .staff-foot a {
+        color: var(--ink);
+        font-weight: 600;
+        text-decoration: none;
+      }
+      .staff-foot a:hover {
+        color: var(--oxblood);
+        text-decoration: underline;
+      }
+      .staff-alert {
+        border-radius: 10px;
+        font-size: 0.9rem;
+      }
+      .staff-back {
+        margin-left: auto;
+        font-size: 0.78rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        opacity: 0.75;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        text-decoration: none;
+        color: inherit;
+      }
+      .staff-back:hover {
+        opacity: 1;
+      }
+      .staff-protected {
+        width: 100%;
+        max-width: 460px;
+        text-align: center;
+        font-size: 0.78rem;
+        color: var(--muted);
+        line-height: 1.5;
+        margin: 16px auto 0;
+      }
+
+      /* ---- Desktop (>760px): keep protected text below the card ---- */
+      @media (min-width: 761px) {
+        .staff-card {
+          transform: translateX(-44px);
         }
+        .staff-protected {
+          transform: translateX(-44px);
+        }
+      }
+
+      /* ---- Tablet: preserve the split layout with roomier text wrapping ---- */
+      @media (min-width: 761px) and (max-width: 1020px) {
+        .staff-brand-inner {
+          padding: 32px 28px 26px;
+        }
+        .staff-form-wrap {
+          padding: 28px 24px;
+        }
+        .staff-points {
+          grid-template-columns: 1fr;
+          gap: 10px;
+        }
+        .staff-hero h1 {
+          font-size: clamp(38px, 5vw, 48px);
+        }
+        .staff-protected {
+          display: none;
+        }
+        .staff-card {
+          transform: none;
+        }
+      }
+
+      /* ---- Mobile (≤760px): compact brand header and single-column form ---- */
+      @media (max-width: 760px) {
+        .staff-login {
+          display: block;
+          min-height: 100svh;
+          padding: 0;
+          background: var(--cream);
+        }
+        .staff-brand {
+          display: block;
+          min-height: 0;
+        }
+        .staff-brand-inner {
+          padding: 18px 20px;
+        }
+        .staff-mark {
+          width: 38px;
+          height: 38px;
+          font-size: 21px;
+        }
+        .staff-brand-name {
+          font-size: 23px;
+        }
+        .staff-back {
+          font-size: 0.7rem;
+          letter-spacing: 0.1em;
+        }
+        .staff-hero,
+        .staff-points {
+          display: none;
+        }
+        .staff-form-wrap {
+          display: flex;
+          flex-direction: column;
+          width: 100%;
+          align-items: stretch;
+          justify-content: flex-start;
+          padding: 28px 16px 34px;
+        }
+        .staff-card {
+          width: 100%;
+          max-width: 100%;
+          box-shadow: 0 10px 30px rgba(26, 23, 20, 0.1);
+        }
+        .staff-card-head {
+          padding: 25px 22px 0;
+        }
+        .staff-card-head h2 {
+          font-size: 21px;
+        }
+        .staff-card-head p {
+          font-size: 0.9rem;
+        }
+        .staff-card-body {
+          padding: 23px 22px 27px;
+        }
+        .staff-input .form-control {
+          height: 52px;
+          font-size: 1rem;
+        }
+        .staff-actions {
+          align-items: flex-start;
+          gap: 14px;
+          flex-wrap: wrap;
+          margin-top: 10px;
+        }
+        .staff-actions a {
+          margin-left: auto;
+        }
+        .btn-staff {
+          height: 52px;
+          font-size: 1rem;
+        }
+        .staff-foot {
+          padding: 14px 22px;
+          flex-direction: column;
+          gap: 8px;
+          text-align: center;
+        }
+        .staff-protected {
+          margin-top: 20px;
+          max-width: 460px;
+          transform: none;
+        }
+      }
+
+      /* ---- Very small phones (≤380px) ---- */
+      @media (max-width: 380px) {
+        .staff-brand-inner {
+          padding-left: 16px;
+          padding-right: 16px;
+        }
+        .staff-back {
+          font-size: 0;
+          letter-spacing: 0;
+        }
+        .staff-back i {
+          font-size: 14px;
+        }
+        .staff-form-wrap {
+          padding: 20px 10px;
+        }
+        .staff-card-head {
+          padding: 22px 18px 0;
+        }
+        .staff-card-body {
+          padding: 20px 18px 24px;
+        }
+        .staff-foot {
+          padding-left: 18px;
+          padding-right: 18px;
+        }
+        .staff-actions {
+          display: block;
+        }
+        .staff-actions label,
+        .staff-actions a {
+          display: flex;
+          margin: 0 0 12px;
+        }
+        .staff-actions a {
+          margin-left: 0;
+        }
+      }
     </style>
-</head>
-<body>
-<div class="staff-login">
-    <!-- Left: Brand / Context -->
-    <div class="staff-brand">
+  </head>
+
+  <body>
+    <div class="staff-login">
+      <!-- Left: Brand / Context -->
+      <div class="staff-brand">
         <div class="staff-brand-inner">
-            <a th:href="@{/index}" class="staff-brand-top" aria-label="Back to Hugi Barbershop">
-                <span class="staff-mark">H</span>
-                <span class="staff-brand-name">Hugi<em>.</em></span>
-                <span style="margin-left:auto; font-size:.78rem; letter-spacing:.12em; text-transform:uppercase; opacity:.65; font-weight:600; display:inline-flex; align-items:center; gap:6px;"><i class="fas fa-arrow-left" style="font-size:.7rem"></i> Back to site</span>
-            </a>
-            <div class="staff-hero">
-                <span class="staff-kicker">Staff portal • Admin & Barber</span>
-                <h1>Manage your <span>craft.</span></h1>
-                <p>Sign in to handle appointments, clients and daily sales — barbers see only their own schedule, admins see everything.</p>
+          <a
+            th:href="@{/index}"
+            class="staff-brand-top"
+            aria-label="Back to Hugi Barbershop"
+          >
+            <span class="staff-mark">H</span>
+            <span class="staff-brand-name">Hugi<em>.</em></span>
+            <span style="margin-left: auto" class="staff-back"
+              ><i class="fas fa-arrow-left"></i> Back to site</span
+            >
+          </a>
+          <div class="staff-hero">
+            <span class="staff-kicker">Staff portal • Admin & Barber</span>
+            <h1>Manage your <span>craft.</span></h1>
+            <p>
+              Sign in to handle appointments, clients and daily sales — barbers
+              see only their own schedule, admins see everything.
+            </p>
+          </div>
+          <div class="staff-points">
+            <div class="staff-point">
+              <i class="fas fa-calendar-check"></i>
+              <div>
+                <b>Your schedule</b
+                ><span>Pending, done &amp; cancelled at a glance.</span>
+              </div>
             </div>
-            <div class="staff-points">
-                <div class="staff-point">
-                    <i class="fas fa-calendar-check"></i>
-                    <div><b>Your schedule</b><span>Pending, done &amp; cancelled at a glance.</span></div>
-                </div>
-                <div class="staff-point">
-                    <i class="fas fa-users"></i>
-                    <div><b>Your clients</b><span>Barbers see only assigned clients.</span></div>
-                </div>
-                <div class="staff-point">
-                    <i class="fas fa-chart-line"></i>
-                    <div><b>Your earnings</b><span>Personal sales &amp; weekly chart.</span></div>
-                </div>
-                <div class="staff-point">
-                    <i class="fas fa-shield-alt"></i>
-                    <div><b>Secure access</b><span>Role-based — ADMIN vs BARBER.</span></div>
-                </div>
+            <div class="staff-point">
+              <i class="fas fa-users"></i>
+              <div>
+                <b>Your clients</b
+                ><span>Barbers see only assigned clients.</span>
+              </div>
             </div>
+            <div class="staff-point">
+              <i class="fas fa-chart-line"></i>
+              <div>
+                <b>Your earnings</b
+                ><span>Personal sales &amp; weekly chart.</span>
+              </div>
+            </div>
+            <div class="staff-point">
+              <i class="fas fa-shield-alt"></i>
+              <div>
+                <b>Secure access</b><span>Role-based — ADMIN vs BARBER.</span>
+              </div>
+            </div>
+          </div>
         </div>
-    </div>
+      </div>
 
-    <!-- Right: Form -->
-    <div class="staff-form-wrap">
+      <!-- Right: Form -->
+      <div class="staff-form-wrap">
         <div class="staff-card">
-            <div class="staff-card-head">
-                <h2>Staff login</h2>
-                <p>Use your barbershop email and password. Contact an admin if you need access.</p>
+          <div class="staff-card-head">
+            <h2>Staff login</h2>
+            <p>
+              Use your barbershop email and password. Contact an admin if you
+              need access.
+            </p>
+          </div>
+          <div class="staff-card-body">
+            <div
+              th:if="${loginError}"
+              class="alert alert-danger staff-alert d-flex align-items-start gap-2"
+              role="alert"
+            >
+              <i
+                class="fas fa-exclamation-circle mt-1"
+                style="color: #b3122f"
+              ></i>
+              <div>
+                <strong style="display: block; font-size: 0.88rem"
+                  >Sign-in failed</strong
+                >
+                <span th:text="${loginError}" style="font-size: 0.86rem"
+                  >Invalid email or password</span
+                >
+              </div>
             </div>
-            <div class="staff-card-body">
-                <div th:if="${loginError}" class="alert alert-danger staff-alert d-flex align-items-start gap-2" role="alert">
-                    <i class="fas fa-exclamation-circle mt-1" style="color:#b3122f"></i>
-                    <div>
-                        <strong style="display:block; font-size:.88rem">Sign-in failed</strong>
-                        <span th:text="${loginError}" style="font-size:.86rem">Invalid email or password</span>
-                    </div>
+
+            <form th:action="@{/staffAuth}" method="post" novalidate>
+              <div class="form-group mb-3">
+                <label
+                  class="form-label"
+                  for="staffEmail"
+                  style="
+                    font-weight: 600;
+                    font-size: 0.84rem;
+                    color: var(--ink);
+                  "
+                  >Work email <span class="text-danger">*</span></label
+                >
+                <div class="staff-input">
+                  <i class="fas fa-envelope input-icon"></i>
+                  <input
+                    type="email"
+                    class="form-control"
+                    id="staffEmail"
+                    name="email"
+                    placeholder="name@hugibarbershop.com"
+                    required
+                    autocomplete="email"
+                    autofocus
+                  />
                 </div>
-
-                <form th:action="@{/staffAuth}" method="post" novalidate>
-                    <div class="form-group mb-3">
-                        <label class="form-label" for="staffEmail" style="font-weight:600; font-size:.84rem; color:var(--ink)">Work email <span class="text-danger">*</span></label>
-                        <div class="staff-input">
-                            <i class="fas fa-envelope input-icon"></i>
-                            <input type="email" class="form-control" id="staffEmail" name="email" placeholder="name@hugibarbershop.com" required autocomplete="email" autofocus/>
-                        </div>
-                    </div>
-                    <div class="form-group mb-2">
-                        <div class="d-flex justify-content-between align-items-center mb-1">
-                            <label class="form-label mb-0" for="adminLoginPassword" style="font-weight:600; font-size:.84rem; color:var(--ink)">Password <span class="text-danger">*</span></label>
-                            <span style="font-size:.76rem; color:var(--muted)"><i class="fas fa-lock me-1"></i>Secure</span>
-                        </div>
-                        <div class="staff-input">
-                            <i class="fas fa-lock input-icon"></i>
-                            <input type="password" class="form-control" name="password" id="adminLoginPassword" placeholder="Enter your password" required autocomplete="current-password" style="padding-right:42px;"/>
-                            <button type="button" data-target="adminLoginPassword" class="btn btn-link password-toggle" tabindex="-1" aria-label="Show password" style="position:absolute;top:50%;right:4px;transform:translateY(-50%);width:36px;height:36px;display:grid;place-items:center;border:none;background:transparent;color:#8a94ad;">
-                                <i class="fas fa-eye eye-icon" style="font-size:14px"></i>
-                                <i class="fas fa-eye-slash eye-off-icon" style="display:none; font-size:14px"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="staff-actions">
-                        <label style="display:flex; align-items:center; gap:8px; font-size:.84rem; color:var(--muted); cursor:pointer;">
-                            <input type="checkbox" style="accent-color:var(--ink)"/> Remember me
-                        </label>
-                        <a href="#" onclick="event.preventDefault(); window.adminToast && window.adminToast('Contact an admin to reset your password.','warning')" style="font-weight:500">Forgot password?</a>
-                    </div>
-                    <button type="submit" class="btn-staff"><i class="fas fa-sign-in-alt me-2"></i> Sign in</button>
-                    <div class="text-center mt-3" style="font-size:.82rem; color:var(--muted)">
-                        Customer? <a th:href="@{/register}" style="color:var(--ink); font-weight:600; text-decoration:none; border-bottom:1px dotted var(--line)">Go to customer login</a>
-                    </div>
-                </form>
-            </div>
-            <div class="staff-foot">
-                <span><i class="fas fa-circle" style="font-size:6px; color:#2e7d32; vertical-align:middle; margin-right:6px;"></i> System status: Operational</span>
-                <span style="font-size:.78rem">© 2026 Hugi</span>
-            </div>
-        </div>
-        <p class="text-center mt-3" style="font-size:.78rem; color:var(--muted)">Protected by role-based access — ADMIN sees all, BARBER sees own data only.</p>
-    </div>
-</div>
-
-<!-- Force logout modal (email changed) -->
-<div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true" th:classappend="${forceLogoutModal} ? 'show d-block' : ''">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="border-radius:12px; overflow:hidden;">
-            <div class="modal-header" style="border-bottom:1px solid var(--line)">
-                <h5 class="modal-title" id="logoutModalLabel" style="font-weight:700">Session ended</h5>
-                <button type="button" class="btn-close" onclick="forceCloseModal()" aria-label="Close"></button>
-            </div>
-            <div class="modal-body" style="padding:22px;">
-                <div class="d-flex gap-3">
-                    <span style="width:40px; height:40px; border-radius:50%; background:#fdeaea; color:#b3122f; display:grid; place-items:center; flex-shrink:0;"><i class="fas fa-exclamation"></i></span>
-                    <div>
-                        <p class="mb-1" style="font-weight:600">Your email was changed.</p>
-                        <p class="mb-0 small text-muted">You have been logged out for security. Please sign in again with your new email.</p>
-                    </div>
+              </div>
+              <div class="form-group mb-2">
+                <div
+                  class="d-flex justify-content-between align-items-center mb-1"
+                >
+                  <label
+                    class="form-label mb-0"
+                    for="adminLoginPassword"
+                    style="
+                      font-weight: 600;
+                      font-size: 0.84rem;
+                      color: var(--ink);
+                    "
+                    >Password <span class="text-danger">*</span></label
+                  >
+                  <span style="font-size: 0.76rem; color: var(--muted)"
+                    ><i class="fas fa-lock me-1"></i>Secure</span
+                  >
                 </div>
-            </div>
-            <div class="modal-footer" style="border-top:1px solid var(--line)"><button type="button" class="btn btn-primary" onclick="forceCloseModal()" style="background:var(--ink); border-color:var(--ink)">OK</button></div>
+                <div class="staff-input">
+                  <i class="fas fa-lock input-icon"></i>
+                  <input
+                    type="password"
+                    class="form-control"
+                    name="password"
+                    id="adminLoginPassword"
+                    placeholder="Enter your password"
+                    required
+                    autocomplete="current-password"
+                    style="padding-right: 42px"
+                  />
+                  <button
+                    type="button"
+                    data-target="adminLoginPassword"
+                    class="btn btn-link password-toggle"
+                    tabindex="-1"
+                    aria-label="Show password"
+                    style="
+                      position: absolute;
+                      top: 50%;
+                      right: 4px;
+                      transform: translateY(-50%);
+                      width: 36px;
+                      height: 36px;
+                      display: grid;
+                      place-items: center;
+                      border: none;
+                      background: transparent;
+                      color: #8a94ad;
+                    "
+                  >
+                    <i class="fas fa-eye eye-icon" style="font-size: 14px"></i>
+                    <i
+                      class="fas fa-eye-slash eye-off-icon"
+                      style="display: none; font-size: 14px"
+                    ></i>
+                  </button>
+                </div>
+              </div>
+              <div class="staff-actions">
+                <label
+                  style="
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    font-size: 0.84rem;
+                    color: var(--muted);
+                    cursor: pointer;
+                  "
+                >
+                  <input type="checkbox" style="accent-color: var(--ink)" />
+                  Remember me
+                </label>
+                <a
+                  href="#"
+                  onclick="
+                    event.preventDefault();
+                    window.adminToast &&
+                      window.adminToast(
+                        'Contact an admin to reset your password.',
+                        'warning',
+                      );
+                  "
+                  style="font-weight: 500"
+                  >Forgot password?</a
+                >
+              </div>
+              <button type="submit" class="btn-staff">
+                <i class="fas fa-sign-in-alt me-2"></i> Sign in
+              </button>
+              <div
+                class="text-center mt-3"
+                style="font-size: 0.82rem; color: var(--muted)"
+              >
+                Customer?
+                <a
+                  th:href="@{/register}"
+                  style="
+                    color: var(--ink);
+                    font-weight: 600;
+                    text-decoration: none;
+                    border-bottom: 1px dotted var(--line);
+                  "
+                  >Go to customer login</a
+                >
+              </div>
+            </form>
+          </div>
+          <div class="staff-foot">
+            <span
+              ><i
+                class="fas fa-circle"
+                style="
+                  font-size: 6px;
+                  color: #2e7d32;
+                  vertical-align: middle;
+                  margin-right: 6px;
+                "
+              ></i>
+              System status: Operational</span
+            >
+            <span style="font-size: 0.78rem">© 2026 Hugi</span>
+          </div>
         </div>
+        <div class="staff-protected">
+          Protected by role-based access — ADMIN sees all, BARBER sees own data
+          only.
+        </div>
+      </div>
     </div>
-</div>
-<div th:if="${forceLogoutModal}" class="modal-backdrop fade show"></div>
-<script th:if="${forceLogoutModal}">
-    function forceCloseModal(){
-        var m=document.getElementById('logoutModal');
-        if(m){ m.classList.remove('show'); m.classList.remove('d-block'); }
-        var b=document.querySelector('.modal-backdrop'); if(b) b.remove();
-        document.body.classList.remove('modal-open'); document.body.style.overflow='';
-    }
-</script>
 
-<div th:replace="~{fragments/adminScripts :: adminJs}"></div>
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        document.querySelectorAll('.password-toggle').forEach(function (button) {
-            button.addEventListener('click', function () {
-                var input = document.getElementById(button.getAttribute('data-target'));
-                if (!input) return;
-                var isPassword = input.type === 'password';
-                input.type = isPassword ? 'text' : 'password';
-                var eye = button.querySelector('.eye-icon');
-                var eyeOff = button.querySelector('.eye-off-icon');
-                if (eye) eye.style.display = isPassword ? 'none' : 'inline-block';
-                if (eyeOff) eyeOff.style.display = isPassword ? 'inline-block' : 'none';
-                button.setAttribute('aria-label', isPassword ? 'Hide password' : 'Show password');
+    <!-- Force logout modal (email changed) -->
+    <div
+      class="modal fade"
+      id="logoutModal"
+      tabindex="-1"
+      aria-labelledby="logoutModalLabel"
+      aria-hidden="true"
+      th:classappend="${forceLogoutModal} ? 'show d-block' : ''"
+    >
+      <div class="modal-dialog modal-dialog-centered">
+        <div
+          class="modal-content"
+          style="border-radius: 12px; overflow: hidden"
+        >
+          <div
+            class="modal-header"
+            style="border-bottom: 1px solid var(--line)"
+          >
+            <h5
+              class="modal-title"
+              id="logoutModalLabel"
+              style="font-weight: 700"
+            >
+              Session ended
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              onclick="forceCloseModal()"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body" style="padding: 22px">
+            <div class="d-flex gap-3">
+              <span
+                style="
+                  width: 40px;
+                  height: 40px;
+                  border-radius: 50%;
+                  background: #fdeaea;
+                  color: #b3122f;
+                  display: grid;
+                  place-items: center;
+                  flex-shrink: 0;
+                "
+                ><i class="fas fa-exclamation"></i
+              ></span>
+              <div>
+                <p class="mb-1" style="font-weight: 600">
+                  Your email was changed.
+                </p>
+                <p class="mb-0 small text-muted">
+                  You have been logged out for security. Please sign in again
+                  with your new email.
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer" style="border-top: 1px solid var(--line)">
+            <button
+              type="button"
+              class="btn btn-primary"
+              onclick="forceCloseModal()"
+              style="background: var(--ink); border-color: var(--ink)"
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div th:if="${forceLogoutModal}" class="modal-backdrop fade show"></div>
+    <script th:if="${forceLogoutModal}">
+      function forceCloseModal() {
+        var m = document.getElementById("logoutModal");
+        if (m) {
+          m.classList.remove("show");
+          m.classList.remove("d-block");
+        }
+        var b = document.querySelector(".modal-backdrop");
+        if (b) b.remove();
+        document.body.classList.remove("modal-open");
+        document.body.style.overflow = "";
+      }
+    </script>
+
+    <div th:replace="~{fragments/adminScripts :: adminJs}"></div>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        document
+          .querySelectorAll(".password-toggle")
+          .forEach(function (button) {
+            button.addEventListener("click", function () {
+              var input = document.getElementById(
+                button.getAttribute("data-target"),
+              );
+              if (!input) return;
+              var isPassword = input.type === "password";
+              input.type = isPassword ? "text" : "password";
+              var eye = button.querySelector(".eye-icon");
+              var eyeOff = button.querySelector(".eye-off-icon");
+              if (eye) eye.style.display = isPassword ? "none" : "inline-block";
+              if (eyeOff)
+                eyeOff.style.display = isPassword ? "inline-block" : "none";
+              button.setAttribute(
+                "aria-label",
+                isPassword ? "Hide password" : "Show password",
+              );
             });
-        });
-    });
-</script>
-</body>
+          });
+      });
+    </script>
+  </body>
 </html>

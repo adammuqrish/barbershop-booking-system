@@ -47,8 +47,9 @@
                 <img th:if="${customer.custPicture != null}"
                      th:src="@{'/resources/uploads/' + ${customer.custPicture}}"
                      alt="Profile picture" class="hb-avatar-lg" />
-                <span th:unless="${customer.custPicture != null}" class="pf-initial"
-                      th:text="${#strings.substring(customer.custName, 0, 1)}">U</span>
+                <img th:unless="${customer.custPicture != null}"
+                     th:src="@{/resources/uploads/avatar/avatar-placeholder.jpg}"
+                     alt="Default avatar" class="hb-avatar-lg" />
                 <div>
                     <p class="pf-head-name" th:text="${customer.custName}">Name</p>
                     <p class="pf-head-sub">VALUED CUSTOMER</p>

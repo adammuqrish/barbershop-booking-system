@@ -211,10 +211,11 @@
                         <label th:for="'bpick-' + ${barber.staffId}">
                             <span class="barber-opt">
                                 <img th:if="${barber.staffPicture != null}"
-                                     th:src="@{'/resources/uploads/barber-images/' + ${barber.staffPicture}}"
+                                     th:src="@{'/resources/uploads/' + ${barber.staffPicture}}"
                                      th:alt="'Portrait of ' + ${barber.staffName}" />
-                                <span th:unless="${barber.staffPicture != null}" class="fallback"
-                                      th:text="${#strings.substring(barber.staffName, 0, 1)}">H</span>
+                                <img th:unless="${barber.staffPicture != null}"
+                                     th:src="@{/resources/uploads/avatar/avatar-placeholder.jpg}"
+                                     th:alt="'Portrait of ' + ${barber.staffName}" />
                                 <span class="bname" th:text="${barber.staffName}">Barber</span>
                                 <span class="bspec" th:text="${#strings.abbreviate(barber.description != null ? barber.description : 'Professional barber', 60)}">Specialty</span>
                             </span>

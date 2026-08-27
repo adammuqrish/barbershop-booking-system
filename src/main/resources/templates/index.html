@@ -134,11 +134,12 @@
             <div class="hb-barber-grid">
                 <th:block th:each="barber : ${barbers}">
                     <article class="hb-barber-card">
-                        <img th:if="${barber.staffPicture != null}"
-                             th:src="@{'/resources/uploads/barber-images/' + ${barber.staffPicture}}"
+                         <img th:if="${barber.staffPicture != null}"
+                              th:src="@{'/resources/uploads/' + ${barber.staffPicture}}"
+                              th:alt="'Portrait of ' + ${barber.staffName}" />
+                        <img th:unless="${barber.staffPicture != null}"
+                             th:src="@{/resources/uploads/avatar/avatar-placeholder.jpg}"
                              th:alt="'Portrait of ' + ${barber.staffName}" />
-                        <div th:unless="${barber.staffPicture != null}" class="fallback"
-                             th:text="${#strings.substring(barber.staffName, 0, 1)}">H</div>
                         <div class="hb-barber-info">
                             <h3 th:text="${barber.staffName}">Barber name</h3>
                             <span class="spec" th:text="${barber.description}">Professional barber</span>
