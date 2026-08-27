@@ -1,141 +1,213 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-
 <head>
-    <meta charset="UTF-8">
-    <title>Hugi Barbershop System - Staff Login</title>
-    <link rel="stylesheet" th:href="@{/resources/assetsAdmin/css/style.css}">
-    <link rel="stylesheet" th:href="@{/resources/assetsAdmin/css/fontawesome/css/all.min.css}">
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Staff Portal — Hugi Barbershop</title>
+    <link rel="stylesheet" th:href="@{/resources/assetsAdmin/css/style.css}"/>
+    <link rel="stylesheet" th:href="@{/resources/assetsAdmin/css/theme.css}"/>
+    <link rel="stylesheet" th:href="@{/resources/assetsAdmin/css/fontawesome/css/all.min.css}"/>
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&family=Manrope:wght@500;600;700&display=swap" rel="stylesheet"/>
+    <style>
+        :root{ --ink:#1a1714; --cream:#f5efe4; --cream-2:#ece3d2; --brass:#c9a227; --oxblood:#7a2e2e; --line:rgba(26,23,20,.14); --muted:#8a8073; }
+        *{ box-sizing:border-box; }
+        body{ margin:0; font-family:'Inter',system-ui,sans-serif; background:var(--cream); color:var(--ink); }
+        .staff-login{ min-height:100vh; display:grid; grid-template-columns: 1.05fr .95fr; }
+        .staff-brand{ background:var(--ink); color:var(--cream); position:relative; overflow:hidden; display:flex; flex-direction:column; }
+        .staff-brand::before{ content:""; position:absolute; inset:0; background:
+            radial-gradient(600px 400px at 20% 15%, rgba(201,162,39,.18), transparent 60%),
+            linear-gradient(180deg, rgba(26,23,20,.2), rgba(26,23,20,.85)); z-index:0; }
+        .staff-brand-inner{ position:relative; z-index:1; padding:40px 40px 32px; flex:1; display:flex; flex-direction:column; }
+        .staff-brand-top{ display:flex; align-items:center; gap:12px; text-decoration:none; color:var(--cream); }
+        .staff-mark{ width:44px; height:44px; border-radius:50%; background:var(--brass); color:var(--ink); display:grid; place-items:center; font-family:'Bebas Neue'; font-size:24px; border:2px solid var(--cream); flex-shrink:0; }
+        .staff-brand-name{ font-family:'Bebas Neue'; font-size:26px; letter-spacing:.08em; color:var(--cream); }
+        .staff-brand-name em{ color:var(--brass); font-style:normal; }
+        .staff-hero{ margin-top:56px; }
+        .staff-kicker{ display:inline-flex; align-items:center; gap:10px; font-size:.72rem; font-weight:700; letter-spacing:.18em; text-transform:uppercase; color:var(--brass); }
+        .staff-kicker::before{ content:""; width:28px; height:2px; background:var(--brass); }
+        .staff-hero h1{ font-family:'Bebas Neue'; font-weight:400; font-size:clamp(38px, 4vw, 54px); line-height:.95; margin:14px 0 12px; letter-spacing:.02em; }
+        .staff-hero h1 span{ color:var(--brass); }
+        .staff-hero p{ color:rgba(245,239,228,.72); font-size:.95rem; line-height:1.6; max-width:36ch; }
+        .staff-points{ margin-top:auto; display:grid; grid-template-columns:1fr 1fr; gap:12px; padding-top:32px; border-top:1px solid rgba(245,239,228,.14); }
+        .staff-point{ display:flex; gap:10px; align-items:flex-start; }
+        .staff-point i{ width:36px; height:36px; border-radius:8px; background:rgba(245,239,228,.08); border:1px solid rgba(245,239,228,.14); display:grid; place-items:center; color:var(--brass); flex-shrink:0; }
+        .staff-point b{ display:block; font-size:.88rem; font-weight:600; color:var(--cream); }
+        .staff-point span{ display:block; font-size:.78rem; color:rgba(245,239,228,.6); margin-top:2px; }
+        .staff-form-wrap{ background:var(--cream); display:flex; align-items:center; justify-content:center; padding:32px 24px; }
+        .staff-card{ width:100%; max-width:420px; background:#fff; border:1px solid var(--line); border-radius:12px; box-shadow:0 18px 40px rgba(26,23,20,.12); overflow:hidden; }
+        .staff-card-head{ padding:28px 28px 0; }
+        .staff-card-head h2{ font-family:'Manrope',sans-serif; font-weight:700; font-size:22px; margin:0; color:var(--ink); }
+        .staff-card-head p{ margin:6px 0 0; color:var(--muted); font-size:.88rem; }
+        .staff-card-body{ padding:22px 28px 28px; }
+        .staff-input{ position:relative; }
+        .staff-input .form-control{ padding-left:40px; height:46px; border-radius:8px; border:1px solid #e5e9f2; background:#fff; font-size:.92rem; }
+        .staff-input .form-control:focus{ border-color:var(--brass); box-shadow:0 0 0 3px rgba(201,162,39,.15); }
+        .staff-input .input-icon{ position:absolute; left:12px; top:50%; transform:translateY(-50%); color:#9aa0b8; font-size:14px; pointer-events:none; }
+        .staff-actions{ display:flex; align-items:center; justify-content:space-between; margin:4px 0 18px; }
+        .staff-actions a{ font-size:.82rem; color:var(--muted); text-decoration:none; }
+        .staff-actions a:hover{ color:var(--ink); text-decoration:underline; }
+        .btn-staff{ width:100%; height:46px; border-radius:8px; background:var(--ink); color:#fff; border:1px solid var(--ink); font-weight:600; font-size:.92rem; letter-spacing:.02em; transition:all .15s ease; }
+        .btn-staff:hover{ background:#241f1b; border-color:#241f1b; color:#fff; transform:translateY(-1px); box-shadow:0 6px 16px rgba(26,23,20,.18); }
+        .btn-staff:active{ transform:none; box-shadow:none; }
+        .staff-foot{ padding:16px 28px; background:#faf8f6; border-top:1px solid var(--line); display:flex; align-items:center; justify-content:space-between; font-size:.82rem; color:var(--muted); }
+        .staff-foot a{ color:var(--ink); font-weight:600; text-decoration:none; }
+        .staff-foot a:hover{ color:var(--oxblood); text-decoration:underline; }
+        .staff-alert{ border-radius:8px; font-size:.88rem; }
+        @media (max-width: 860px){
+            .staff-login{ grid-template-columns:1fr; }
+            .staff-brand{ min-height:280px; }
+            .staff-brand-inner{ padding:28px 24px; }
+            .staff-hero{ margin-top:28px; }
+            .staff-points{ grid-template-columns:1fr; gap:14px; }
+            .staff-form-wrap{ padding:24px 16px; align-items:flex-start; }
+            .staff-card{ max-width:100%; }
+        }
+    </style>
 </head>
+<body>
+<div class="staff-login">
+    <!-- Left: Brand / Context -->
+    <div class="staff-brand">
+        <div class="staff-brand-inner">
+            <a th:href="@{/index}" class="staff-brand-top" aria-label="Back to Hugi Barbershop">
+                <span class="staff-mark">H</span>
+                <span class="staff-brand-name">Hugi<em>.</em></span>
+                <span style="margin-left:auto; font-size:.78rem; letter-spacing:.12em; text-transform:uppercase; opacity:.65; font-weight:600; display:inline-flex; align-items:center; gap:6px;"><i class="fas fa-arrow-left" style="font-size:.7rem"></i> Back to site</span>
+            </a>
+            <div class="staff-hero">
+                <span class="staff-kicker">Staff portal • Admin & Barber</span>
+                <h1>Manage your <span>craft.</span></h1>
+                <p>Sign in to handle appointments, clients and daily sales — barbers see only their own schedule, admins see everything.</p>
+            </div>
+            <div class="staff-points">
+                <div class="staff-point">
+                    <i class="fas fa-calendar-check"></i>
+                    <div><b>Your schedule</b><span>Pending, done &amp; cancelled at a glance.</span></div>
+                </div>
+                <div class="staff-point">
+                    <i class="fas fa-users"></i>
+                    <div><b>Your clients</b><span>Barbers see only assigned clients.</span></div>
+                </div>
+                <div class="staff-point">
+                    <i class="fas fa-chart-line"></i>
+                    <div><b>Your earnings</b><span>Personal sales &amp; weekly chart.</span></div>
+                </div>
+                <div class="staff-point">
+                    <i class="fas fa-shield-alt"></i>
+                    <div><b>Secure access</b><span>Role-based — ADMIN vs BARBER.</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-<body class="nk-body" style="background-color: #f4f7f6;">
-    <div class="nk-app-root">
-        <div class="nk-main">
-            <div class="nk-wrap align-items-center justify-content-center" style="min-height: 100vh; display: flex;">
-                <div class="container p-2 p-sm-4">
-                    <div class="wide-xs mx-auto">
-                        <div class="card card-gutter-lg rounded-4 shadow-sm">
-                            <div class="card-body">
-                                <div class="nk-block-head text-center">
-                                    <div class="nk-block-head-content">
-                                        <h3 class="nk-block-title mb-1">Staff Login</h3>
-                                        <p class="small text-muted">Please sign-in to your account.</p>
-                                    </div>
-                                </div>
-                                <form th:action="@{/staffAuth}" method="post">
-                                    <div class="row gy-3">
-                                        <div th:if="${loginError}" class="col-12">
-                                            <div class="alert alert-danger" th:text="${loginError}"></div>
-                                        </div>
-                                        <div class="col-12">
-                                            <div class="form-group">
-                                                <label class="form-label">Email</label>
-                                                <div class="form-control-wrap">
-                                                    <input type="email" class="form-control" name="email"
-                                                        placeholder="Enter your email" required>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="col-12">
-                                            <div class="form-group">
-                                                <label class="form-label">Password</label>
-                                                <div class="form-control-wrap" style="position:relative;">
-                                                    <input type="password" class="form-control" name="password" id="adminLoginPassword"
-                                                        placeholder="Enter your password" required style="padding-right:2.5rem;">
-                                                    <button type="button" data-target="adminLoginPassword"
-                                                        class="btn btn-link password-toggle"
-                                                        tabindex="-1" aria-label="Show password"
-                                                        style="position:absolute;top:50%;right:0;transform:translateY(-50%);padding:0.3rem 0.5rem;text-decoration:none;color:#6c757d;">
-                                                        <i class="fas fa-eye eye-icon"></i>
-                                                        <i class="fas fa-eye-slash eye-off-icon" style="display:none;"></i>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="col-12 mt-4">
-                                            <div class="d-grid">
-                                                <button type="submit" class="btn btn-primary">Login</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </form>
-                            </div>
+    <!-- Right: Form -->
+    <div class="staff-form-wrap">
+        <div class="staff-card">
+            <div class="staff-card-head">
+                <h2>Staff login</h2>
+                <p>Use your barbershop email and password. Contact an admin if you need access.</p>
+            </div>
+            <div class="staff-card-body">
+                <div th:if="${loginError}" class="alert alert-danger staff-alert d-flex align-items-start gap-2" role="alert">
+                    <i class="fas fa-exclamation-circle mt-1" style="color:#b3122f"></i>
+                    <div>
+                        <strong style="display:block; font-size:.88rem">Sign-in failed</strong>
+                        <span th:text="${loginError}" style="font-size:.86rem">Invalid email or password</span>
+                    </div>
+                </div>
+
+                <form th:action="@{/staffAuth}" method="post" novalidate>
+                    <div class="form-group mb-3">
+                        <label class="form-label" for="staffEmail" style="font-weight:600; font-size:.84rem; color:var(--ink)">Work email <span class="text-danger">*</span></label>
+                        <div class="staff-input">
+                            <i class="fas fa-envelope input-icon"></i>
+                            <input type="email" class="form-control" id="staffEmail" name="email" placeholder="name@hugibarbershop.com" required autocomplete="email" autofocus/>
                         </div>
                     </div>
-                </div>
+                    <div class="form-group mb-2">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <label class="form-label mb-0" for="adminLoginPassword" style="font-weight:600; font-size:.84rem; color:var(--ink)">Password <span class="text-danger">*</span></label>
+                            <span style="font-size:.76rem; color:var(--muted)"><i class="fas fa-lock me-1"></i>Secure</span>
+                        </div>
+                        <div class="staff-input">
+                            <i class="fas fa-lock input-icon"></i>
+                            <input type="password" class="form-control" name="password" id="adminLoginPassword" placeholder="Enter your password" required autocomplete="current-password" style="padding-right:42px;"/>
+                            <button type="button" data-target="adminLoginPassword" class="btn btn-link password-toggle" tabindex="-1" aria-label="Show password" style="position:absolute;top:50%;right:4px;transform:translateY(-50%);width:36px;height:36px;display:grid;place-items:center;border:none;background:transparent;color:#8a94ad;">
+                                <i class="fas fa-eye eye-icon" style="font-size:14px"></i>
+                                <i class="fas fa-eye-slash eye-off-icon" style="display:none; font-size:14px"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="staff-actions">
+                        <label style="display:flex; align-items:center; gap:8px; font-size:.84rem; color:var(--muted); cursor:pointer;">
+                            <input type="checkbox" style="accent-color:var(--ink)"/> Remember me
+                        </label>
+                        <a href="#" onclick="event.preventDefault(); window.adminToast && window.adminToast('Contact an admin to reset your password.','warning')" style="font-weight:500">Forgot password?</a>
+                    </div>
+                    <button type="submit" class="btn-staff"><i class="fas fa-sign-in-alt me-2"></i> Sign in</button>
+                    <div class="text-center mt-3" style="font-size:.82rem; color:var(--muted)">
+                        Customer? <a th:href="@{/register}" style="color:var(--ink); font-weight:600; text-decoration:none; border-bottom:1px dotted var(--line)">Go to customer login</a>
+                    </div>
+                </form>
+            </div>
+            <div class="staff-foot">
+                <span><i class="fas fa-circle" style="font-size:6px; color:#2e7d32; vertical-align:middle; margin-right:6px;"></i> System status: Operational</span>
+                <span style="font-size:.78rem">© 2026 Hugi</span>
             </div>
         </div>
-        <!-- ✅ MODAL DIALOG -->
-        <div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true"
-            th:classappend="${forceLogoutModal} ? 'show d-block' : ''">
+        <p class="text-center mt-3" style="font-size:.78rem; color:var(--muted)">Protected by role-based access — ADMIN sees all, BARBER sees own data only.</p>
+    </div>
+</div>
 
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="logoutModalLabel">Session Ended</h5>
-                        <!-- ✅ BUTANG X: Tambah onclick="forceCloseModal()" -->
-                        <button type="button" class="btn-close" onclick="forceCloseModal()" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <p><strong>Your email has been changed.</strong></p>
-                        <p>You have been logged out. Please login again.</p>
-                    </div>
-                    <div class="modal-footer">
-                        <!-- ✅ BUTANG OK: Tambah onclick="forceCloseModal()" -->
-                        <button type="button" class="btn btn-primary" onclick="forceCloseModal()">OK</button>
+<!-- Force logout modal (email changed) -->
+<div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true" th:classappend="${forceLogoutModal} ? 'show d-block' : ''">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius:12px; overflow:hidden;">
+            <div class="modal-header" style="border-bottom:1px solid var(--line)">
+                <h5 class="modal-title" id="logoutModalLabel" style="font-weight:700">Session ended</h5>
+                <button type="button" class="btn-close" onclick="forceCloseModal()" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" style="padding:22px;">
+                <div class="d-flex gap-3">
+                    <span style="width:40px; height:40px; border-radius:50%; background:#fdeaea; color:#b3122f; display:grid; place-items:center; flex-shrink:0;"><i class="fas fa-exclamation"></i></span>
+                    <div>
+                        <p class="mb-1" style="font-weight:600">Your email was changed.</p>
+                        <p class="mb-0 small text-muted">You have been logged out for security. Please sign in again with your new email.</p>
                     </div>
                 </div>
             </div>
+            <div class="modal-footer" style="border-top:1px solid var(--line)"><button type="button" class="btn btn-primary" onclick="forceCloseModal()" style="background:var(--ink); border-color:var(--ink)">OK</button></div>
         </div>
+    </div>
+</div>
+<div th:if="${forceLogoutModal}" class="modal-backdrop fade show"></div>
+<script th:if="${forceLogoutModal}">
+    function forceCloseModal(){
+        var m=document.getElementById('logoutModal');
+        if(m){ m.classList.remove('show'); m.classList.remove('d-block'); }
+        var b=document.querySelector('.modal-backdrop'); if(b) b.remove();
+        document.body.classList.remove('modal-open'); document.body.style.overflow='';
+    }
+</script>
 
-        <!-- ✅ BACKGROUND OVERLAY (LAYER HITAM) -->
-        <div th:if="${forceLogoutModal}" class="modal-backdrop fade show"></div>
-
-        <!-- ✅ JAVASCRIPT: Fungsi Khas Tutup Modal -->
-        <script th:if="${forceLogoutModal}">
-            function forceCloseModal() {
-                // 1. Dapatkan elemen modal
-                var modalElement = document.getElementById('logoutModal');
-
-                // 2. Buang class 'show' dan 'd-block' untuk sembunyikan modal
-                modalElement.classList.remove('show');
-                modalElement.classList.remove('d-block');
-
-                // 3. Cari dan buang background gelap (modal-backdrop)
-                var backdrop = document.querySelector('.modal-backdrop');
-                if (backdrop) {
-                    backdrop.remove();
-                }
-
-                // 4. Enable scroll balik pada body (selalunya modal disable scroll)
-                document.body.classList.remove('modal-open');
-                document.body.style.overflow = '';
-            }
-        </script>
-    <div th:replace="~{fragments/adminScripts :: adminJs}"></div>
-
-    <script>
-        // Password visibility toggle
-        document.addEventListener('DOMContentLoaded', function () {
-            document.querySelectorAll('.password-toggle').forEach(function (button) {
-                button.addEventListener('click', function () {
-                    var input = document.getElementById(button.getAttribute('data-target'));
-                    if (!input) return;
-
-                    var isPassword = input.type === 'password';
-                    input.type = isPassword ? 'text' : 'password';
-
-                    var eyeIcon = button.querySelector('.eye-icon');
-                    var eyeOffIcon = button.querySelector('.eye-off-icon');
-                    if (eyeIcon) eyeIcon.style.display = isPassword ? 'none' : 'inline-block';
-                    if (eyeOffIcon) eyeOffIcon.style.display = isPassword ? 'inline-block' : 'none';
-
-                    button.setAttribute('aria-label', isPassword ? 'Hide password' : 'Show password');
-                });
+<div th:replace="~{fragments/adminScripts :: adminJs}"></div>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.password-toggle').forEach(function (button) {
+            button.addEventListener('click', function () {
+                var input = document.getElementById(button.getAttribute('data-target'));
+                if (!input) return;
+                var isPassword = input.type === 'password';
+                input.type = isPassword ? 'text' : 'password';
+                var eye = button.querySelector('.eye-icon');
+                var eyeOff = button.querySelector('.eye-off-icon');
+                if (eye) eye.style.display = isPassword ? 'none' : 'inline-block';
+                if (eyeOff) eyeOff.style.display = isPassword ? 'inline-block' : 'none';
+                button.setAttribute('aria-label', isPassword ? 'Hide password' : 'Show password');
             });
         });
-    </script>
-
+    });
+</script>
 </body>
-
 </html>

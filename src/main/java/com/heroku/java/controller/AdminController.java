@@ -1031,25 +1031,8 @@ public class AdminController {
     @GetMapping("/admin/profile")
     @PreAuthorize("hasRole('ADMIN')")
     public String adminProfile(Model model) {
-        // Load staff details
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth != null && !auth.getName().equals("anonymousUser")) {
-            String email = auth.getName();
-            Optional<Staff> staffOpt = staffRepository.findByStaffEmail(email);
-            if (staffOpt.isPresent()) {
-                Staff staff = staffOpt.get();
-                model.addAttribute("staff", staff);
-                model.addAttribute("staffName", staff.getStaffName());
-                model.addAttribute("staffRole", staff.getStaffRole());
-            } else {
-                model.addAttribute("staffName", "Staff");
-                model.addAttribute("staffRole", null);
-            }
-        } else {
-            model.addAttribute("staffName", "Staff");
-            model.addAttribute("staffRole", null);
-        }
-
+        adminHeaderService.populate(model);
+        // Ensure profile detail uses the same logged-in staff (already set as 'staff' by service)
         return "admin/profile";
     }
 

@@ -23,7 +23,7 @@ WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
 [INFO] --- frontend-maven-plugin:1.15.1:npm (npm-install) @ java-getting-started ---
 [INFO] Running 'npm install' in C:\Users\Adam\Documents\Degree\Sem 4\ancient-plains-60976
 [INFO] 
-[INFO] up to date, audited 34 packages in 1s
+[INFO] up to date, audited 34 packages in 2s
 [INFO] 
 [INFO] 6 packages are looking for funding
 [INFO]   run `npm fund` for details
@@ -38,7 +38,7 @@ WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
 [INFO] 
 [INFO] ≈ tailwindcss v4.3.3
 [INFO] 
-[INFO] Done in 448ms
+[INFO] Done in 247ms
 [INFO] 
 [INFO] --- maven-resources-plugin:3.5.0:resources (default-resources) @ java-getting-started ---
 [INFO] Copying 2 resources from src\main\resources to target\classes
@@ -67,25 +67,25 @@ WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
 
 :: Built with Spring Boot :: 4.1.0
 
-2026-08-27T12:54:14.538+08:00  INFO 20876 --- [  restartedMain] c.heroku.java.GettingStartedApplication  : Starting GettingStartedApplication using Java 24 with PID 20876 (C:\Users\Adam\Documents\Degree\Sem 4\ancient-plains-60976\target\classes started by Adam in C:\Users\Adam\Documents\Degree\Sem 4\ancient-plains-60976)
-2026-08-27T12:54:14.540+08:00 DEBUG 20876 --- [  restartedMain] c.heroku.java.GettingStartedApplication  : Running with Spring Boot v4.1.0, Spring v7.0.8
-2026-08-27T12:54:14.540+08:00  INFO 20876 --- [  restartedMain] c.heroku.java.GettingStartedApplication  : The following 1 profile is active: "local"
-2026-08-27T12:54:14.587+08:00  INFO 20876 --- [  restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
-2026-08-27T12:54:14.587+08:00  INFO 20876 --- [  restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
-2026-08-27T12:54:15.316+08:00  INFO 20876 --- [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
-2026-08-27T12:54:15.419+08:00  INFO 20876 --- [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 89 ms. Found 6 JPA repository interfaces.
-2026-08-27T12:54:16.234+08:00  INFO 20876 --- [  restartedMain] o.s.boot.tomcat.TomcatWebServer          : Tomcat initialized with port 8080 (http)
-2026-08-27T12:54:16.254+08:00  INFO 20876 --- [  restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
-2026-08-27T12:54:16.255+08:00  INFO 20876 --- [  restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/11.0.22]
-2026-08-27T12:54:16.310+08:00  INFO 20876 --- [  restartedMain] b.w.c.s.WebApplicationContextInitializer : Root WebApplicationContext: initialization completed in 1722 ms
-2026-08-27T12:54:16.600+08:00  INFO 20876 --- [  restartedMain] org.hibernate.orm.jpa                    : HHH008540: Processing PersistenceUnitInfo [name: default]
-2026-08-27T12:54:16.683+08:00  INFO 20876 --- [  restartedMain] org.hibernate.orm.core                   : HHH000001: Hibernate ORM core version 7.4.1.Final
-2026-08-27T12:54:17.288+08:00  INFO 20876 --- [  restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
-2026-08-27T12:54:17.325+08:00  INFO 20876 --- [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
-2026-08-27T12:54:17.591+08:00  INFO 20876 --- [  restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@2a9dec90
-2026-08-27T12:54:17.592+08:00  INFO 20876 --- [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
-2026-08-27T12:54:17.631+08:00  WARN 20876 --- [  restartedMain] org.hibernate.orm.deprecation            : HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
-2026-08-27T12:54:17.654+08:00  INFO 20876 --- [  restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+2026-08-27T13:18:34.902+08:00  INFO 21344 --- [  restartedMain] c.heroku.java.GettingStartedApplication  : Starting GettingStartedApplication using Java 24 with PID 21344 (C:\Users\Adam\Documents\Degree\Sem 4\ancient-plains-60976\target\classes started by Adam in C:\Users\Adam\Documents\Degree\Sem 4\ancient-plains-60976)
+2026-08-27T13:18:34.909+08:00 DEBUG 21344 --- [  restartedMain] c.heroku.java.GettingStartedApplication  : Running with Spring Boot v4.1.0, Spring v7.0.8
+2026-08-27T13:18:34.910+08:00  INFO 21344 --- [  restartedMain] c.heroku.java.GettingStartedApplication  : The following 1 profile is active: "local"
+2026-08-27T13:18:35.040+08:00  INFO 21344 --- [  restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2026-08-27T13:18:35.040+08:00  INFO 21344 --- [  restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2026-08-27T13:18:36.061+08:00  INFO 21344 --- [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-08-27T13:18:36.140+08:00  INFO 21344 --- [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 70 ms. Found 6 JPA repository interfaces.
+2026-08-27T13:18:36.812+08:00  INFO 21344 --- [  restartedMain] o.s.boot.tomcat.TomcatWebServer          : Tomcat initialized with port 8080 (http)
+2026-08-27T13:18:36.826+08:00  INFO 21344 --- [  restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-08-27T13:18:36.826+08:00  INFO 21344 --- [  restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/11.0.22]
+2026-08-27T13:18:36.867+08:00  INFO 21344 --- [  restartedMain] b.w.c.s.WebApplicationContextInitializer : Root WebApplicationContext: initialization completed in 1825 ms
+2026-08-27T13:18:37.075+08:00  INFO 21344 --- [  restartedMain] org.hibernate.orm.jpa                    : HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-08-27T13:18:37.154+08:00  INFO 21344 --- [  restartedMain] org.hibernate.orm.core                   : HHH000001: Hibernate ORM core version 7.4.1.Final
+2026-08-27T13:18:37.644+08:00  INFO 21344 --- [  restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-08-27T13:18:37.680+08:00  INFO 21344 --- [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-08-27T13:18:37.841+08:00  INFO 21344 --- [  restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@1635ba66
+2026-08-27T13:18:37.845+08:00  INFO 21344 --- [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-08-27T13:18:37.895+08:00  WARN 21344 --- [  restartedMain] org.hibernate.orm.deprecation            : HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-08-27T13:18:37.924+08:00  INFO 21344 --- [  restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
 	Database JDBC URL [jdbc:postgresql://localhost:5432/barbershop]
 	Database driver: PostgreSQL JDBC Driver
 	Database dialect: PostgreSQLDialect
@@ -97,14 +97,69 @@ WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
 	Pool: DataSourceConnectionProvider
 	Minimum pool size: undefined/unknown
 	Maximum pool size: undefined/unknown
-2026-08-27T12:54:18.607+08:00  INFO 20876 --- [  restartedMain] org.hibernate.orm.core                   : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
-2026-08-27T12:54:18.708+08:00  INFO 20876 --- [  restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
-2026-08-27T12:54:18.785+08:00  INFO 20876 --- [  restartedMain] o.s.d.j.r.query.QueryEnhancerFactories   : Hibernate is in classpath; If applicable, HQL parser will be used.
-2026-08-27T12:54:19.767+08:00  WARN 20876 --- [  restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
-2026-08-27T12:54:19.832+08:00  INFO 20876 --- [  restartedMain] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name customUserDetailsService
-2026-08-27T12:54:19.970+08:00  INFO 20876 --- [  restartedMain] o.s.b.w.a.WelcomePageHandlerMapping      : Adding welcome page template: index
-2026-08-27T12:54:20.314+08:00  INFO 20876 --- [  restartedMain] o.s.boot.tomcat.TomcatWebServer          : Tomcat started on port 8080 (http) with context path '/'
-2026-08-27T12:54:20.318+08:00  INFO 20876 --- [  restartedMain] c.heroku.java.GettingStartedApplication  : Started GettingStartedApplication in 6.174 seconds (process running for 6.6)
-2026-08-27T12:55:05.586+08:00  INFO 20876 --- [nio-8080-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
-2026-08-27T12:55:05.586+08:00  INFO 20876 --- [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
-2026-08-27T12:55:05.587+08:00  INFO 20876 --- [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
+2026-08-27T13:18:38.952+08:00  INFO 21344 --- [  restartedMain] org.hibernate.orm.core                   : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-08-27T13:18:39.043+08:00  INFO 21344 --- [  restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-08-27T13:18:39.124+08:00  INFO 21344 --- [  restartedMain] o.s.d.j.r.query.QueryEnhancerFactories   : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-08-27T13:18:41.013+08:00  WARN 21344 --- [  restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-08-27T13:18:41.104+08:00  INFO 21344 --- [  restartedMain] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name customUserDetailsService
+2026-08-27T13:18:41.270+08:00  INFO 21344 --- [  restartedMain] o.s.b.w.a.WelcomePageHandlerMapping      : Adding welcome page template: index
+2026-08-27T13:18:41.594+08:00  INFO 21344 --- [  restartedMain] o.s.boot.tomcat.TomcatWebServer          : Tomcat started on port 8080 (http) with context path '/'
+2026-08-27T13:18:41.599+08:00  INFO 21344 --- [  restartedMain] c.heroku.java.GettingStartedApplication  : Started GettingStartedApplication in 7.608 seconds (process running for 8.641)
+2026-08-27T13:18:55.954+08:00  INFO 21344 --- [nio-8080-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-08-27T13:18:55.954+08:00  INFO 21344 --- [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-08-27T13:18:55.955+08:00  INFO 21344 --- [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
+STAFF AUTH HIT - Role: ADMIN
+STAFF AUTH HIT - Role: ADMIN
+2026-08-27T13:21:25.193+08:00  INFO 21344 --- [   File Watcher] rtingClassPathChangeChangedEventListener : Restarting due to 1 class path change (0 additions, 0 deletions, 1 modification)
+2026-08-27T13:21:25.196+08:00  INFO 21344 --- [       Thread-1] o.s.boot.tomcat.GracefulShutdown         : Commencing graceful shutdown. Waiting for active requests to complete
+2026-08-27T13:21:25.210+08:00  INFO 21344 --- [tomcat-shutdown] o.s.boot.tomcat.GracefulShutdown         : Graceful shutdown complete
+2026-08-27T13:21:25.213+08:00  INFO 21344 --- [       Thread-1] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-08-27T13:21:25.217+08:00  INFO 21344 --- [       Thread-1] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2026-08-27T13:21:25.218+08:00  INFO 21344 --- [       Thread-1] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+  _    _                _
+ | |  | |              | |
+ | |__| | ___ _ __ ___ | | ___   _
+ |  __  |/ _ \ '__/ _ \| |/ / | | |
+ | |  | |  __/ | | (_) |   <| |_| |
+ |_|  |_|\___|_|  \___/|_|\_\\__,_|
+
+:: Built with Spring Boot :: 4.1.0
+
+2026-08-27T13:21:25.305+08:00  INFO 21344 --- [  restartedMain] c.heroku.java.GettingStartedApplication  : Starting GettingStartedApplication using Java 24 with PID 21344 (C:\Users\Adam\Documents\Degree\Sem 4\ancient-plains-60976\target\classes started by Adam in C:\Users\Adam\Documents\Degree\Sem 4\ancient-plains-60976)
+2026-08-27T13:21:25.305+08:00 DEBUG 21344 --- [  restartedMain] c.heroku.java.GettingStartedApplication  : Running with Spring Boot v4.1.0, Spring v7.0.8
+2026-08-27T13:21:25.305+08:00  INFO 21344 --- [  restartedMain] c.heroku.java.GettingStartedApplication  : The following 1 profile is active: "local"
+2026-08-27T13:21:25.466+08:00  INFO 21344 --- [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-08-27T13:21:25.482+08:00  INFO 21344 --- [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 15 ms. Found 6 JPA repository interfaces.
+2026-08-27T13:21:25.569+08:00  INFO 21344 --- [  restartedMain] o.s.boot.tomcat.TomcatWebServer          : Tomcat initialized with port 8080 (http)
+2026-08-27T13:21:25.571+08:00  INFO 21344 --- [  restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-08-27T13:21:25.571+08:00  INFO 21344 --- [  restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/11.0.22]
+2026-08-27T13:21:25.591+08:00  INFO 21344 --- [  restartedMain] b.w.c.s.WebApplicationContextInitializer : Root WebApplicationContext: initialization completed in 284 ms
+2026-08-27T13:21:25.631+08:00  INFO 21344 --- [  restartedMain] org.hibernate.orm.jpa                    : HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-08-27T13:21:25.662+08:00  INFO 21344 --- [  restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-08-27T13:21:25.664+08:00  INFO 21344 --- [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-2 - Starting...
+2026-08-27T13:21:25.700+08:00  INFO 21344 --- [  restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-2 - Added connection org.postgresql.jdbc.PgConnection@25a18963
+2026-08-27T13:21:25.701+08:00  INFO 21344 --- [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-2 - Start completed.
+2026-08-27T13:21:25.708+08:00  WARN 21344 --- [  restartedMain] org.hibernate.orm.deprecation            : HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-08-27T13:21:25.715+08:00  INFO 21344 --- [  restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [jdbc:postgresql://localhost:5432/barbershop]
+	Database driver: PostgreSQL JDBC Driver
+	Database dialect: PostgreSQLDialect
+	Database version: 17.5
+	Default catalog/schema: barbershop/public
+	Autocommit mode: undefined/unknown
+	Isolation level: READ_COMMITTED [default READ_COMMITTED]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-08-27T13:21:25.834+08:00  INFO 21344 --- [  restartedMain] org.hibernate.orm.core                   : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-08-27T13:21:25.878+08:00  INFO 21344 --- [  restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-08-27T13:21:26.009+08:00  WARN 21344 --- [  restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-08-27T13:21:26.035+08:00  INFO 21344 --- [  restartedMain] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name customUserDetailsService
+2026-08-27T13:21:26.091+08:00  INFO 21344 --- [  restartedMain] o.s.b.w.a.WelcomePageHandlerMapping      : Adding welcome page template: index
+2026-08-27T13:21:26.159+08:00  INFO 21344 --- [  restartedMain] o.s.boot.tomcat.TomcatWebServer          : Tomcat started on port 8080 (http) with context path '/'
+2026-08-27T13:21:26.162+08:00  INFO 21344 --- [  restartedMain] c.heroku.java.GettingStartedApplication  : Started GettingStartedApplication in 0.88 seconds (process running for 173.204)
+2026-08-27T13:21:26.163+08:00  INFO 21344 --- [  restartedMain] .ConditionEvaluationDeltaLoggingListener : Condition evaluation unchanged
+2026-08-27T13:29:59.272+08:00  INFO 21344 --- [nio-8080-exec-2] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-08-27T13:29:59.272+08:00  INFO 21344 --- [nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-08-27T13:29:59.275+08:00  INFO 21344 --- [nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : Completed initialization in 3 ms

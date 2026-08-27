@@ -281,41 +281,64 @@
 <script>
 document.addEventListener('submit', function(e){
   var form = e.target;
-  if(form.matches('.ajax-payment-form, .ajax-service-form')){
-    e.preventDefault();
-    var btn = form.querySelector('button[type="submit"]:focus') || form.querySelector('button[type="submit"]');
-    var originalHTML = form.innerHTML;
-    var fd = new FormData(form);
-    // Keep scroll position
-    var scrollY = window.scrollY;
-    fetch(form.action, {method:'POST', body: new URLSearchParams(fd), headers:{'X-Requested-With':'XMLHttpRequest'}})
-      .then(function(r){
-        if(r.ok){
-          // Optimistic UI update without reload
-          if(form.classList.contains('ajax-payment-form')){
-            var status = fd.get('status');
-            if(status === 'completed'){
-              form.innerHTML = '<span class="badge badge-dot bg-success">Completed</span>';
-            }
-          } else if(form.classList.contains('ajax-service-form')){
-            var s = fd.get('status');
-            var badge = '';
-            if(s === 'done') badge = '<span class="badge badge-dot bg-success">Done</span>';
-            else if(s === 'cancelled') badge = '<span class="badge badge-dot bg-danger">Cancelled</span>';
-            else if(s === 'pending') badge = '<span class="badge badge-dot bg-warning">Pending</span>';
-            if(badge) form.innerHTML = badge;
-          }
-          if(window.adminToast) window.adminToast('Updated successfully','success');
-          // Keep scroll
-          window.scrollTo(0, scrollY);
-        } else {
-          if(window.adminToast) window.adminToast('Update failed','error');
-          form.innerHTML = originalHTML;
-        }
-      }).catch(function(){
-        if(window.adminToast) window.adminToast('Network error','error');
-      });
+  if(!form.matches('.ajax-payment-form, .ajax-service-form')) return;
+  e.preventDefault();
+  var submitter = e.submitter || document.activeElement;
+  if(submitter && submitter.form !== form) submitter = form.querySelector('button[type="submit"]');
+  var appointmentIdEl = form.querySelector('input[name="appointmentId"]');
+  var appointmentId = appointmentIdEl ? appointmentIdEl.value : '';
+  var status = submitter && submitter.name === 'status' ? submitter.value : null;
+  // Fallback: try FormData if status still null (for non-button submits)
+  if(!status){
+    try { var fdTmp = new FormData(form); status = fdTmp.get('status'); } catch(e){}
   }
+  var params = new URLSearchParams();
+  if(appointmentId) params.append('appointmentId', appointmentId);
+  if(status) params.append('status', status);
+  var scrollY = window.scrollY;
+  var row = form.closest('tr');
+  var originalHTML = form.innerHTML;
+  // Disable to prevent double submit
+  Array.from(form.elements).forEach(function(el){ el.disabled = true; });
+  fetch(form.action, {method:'POST', body: params, headers:{'X-Requested-With':'XMLHttpRequest'}})
+    .then(function(r){
+      if(r.ok){
+        if(form.classList.contains('ajax-payment-form')){
+          if(status === 'completed'){
+            form.innerHTML = '<span class="badge badge-dot bg-success">Completed</span>';
+            if(row) row.setAttribute('data-payment','completed');
+          }
+        } else if(form.classList.contains('ajax-service-form')){
+          var badge = '';
+          if(status === 'done') badge = '<span class="badge badge-dot bg-success">Done</span>';
+          else if(status === 'cancelled') badge = '<span class="badge badge-dot bg-danger">Cancelled</span>';
+          else if(status === 'pending') badge = '<span class="badge badge-dot bg-warning">Pending</span>';
+          if(badge){
+            // Keep form for next toggle: rebuild button for next state
+            var nextMap = {done: {val:'cancelled', label:'Done', cls:'bg-success'}, cancelled: {val:'pending', label:'Cancelled', cls:'bg-danger'}, pending: {val:'done', label:'Pending → Done', cls:'bg-warning'}};
+            var next = nextMap[status];
+            if(next){
+              form.innerHTML = '<button type="submit" name="status" value="'+next.val+'" class="badge badge-dot '+next.cls+' border-0" style="cursor:pointer" title="Click to '+next.val+'">'+next.label+'</button>';
+              // Re-enable
+              Array.from(form.elements).forEach(function(el){ el.disabled = false; });
+            } else {
+              form.innerHTML = badge;
+            }
+            if(row) row.setAttribute('data-service', status);
+          }
+        }
+        if(window.adminToast) window.adminToast('Updated successfully','success');
+        window.scrollTo(0, scrollY);
+      } else {
+        if(window.adminToast) window.adminToast('Update failed','error');
+        form.innerHTML = originalHTML;
+        Array.from(form.elements).forEach(function(el){ el.disabled = false; });
+      }
+    }).catch(function(){
+      if(window.adminToast) window.adminToast('Network error','error');
+      form.innerHTML = originalHTML;
+      Array.from(form.elements).forEach(function(el){ el.disabled = false; });
+    });
 });
 </script>
 
